@@ -186,6 +186,41 @@ public final class CpTurnsTest {
         expect("component 0's first update: DiPO starts it empty (state 0), so the HUD is cleared",
                 "2c 0 0 0 0 0 0 0 0 0", "lanes f1", "hud f2", "hud f2");
 
+        // with a car's display: a roundabout from a real iPhone route, and the next turn by index
+        final java.util.List<String> sent = new java.util.ArrayList<String>();
+        hmgapi.mods.wireless.api.TurnDisplay.Registry reg = new hmgapi.mods.wireless.api.TurnDisplay.Registry();
+        reg.set(new hmgapi.mods.wireless.api.TurnDisplay.Factory() {
+            public hmgapi.mods.wireless.api.TurnDisplay create(android.content.Context x, Cluster y, android.os.Handler h) {
+                return new hmgapi.mods.wireless.api.TurnDisplay() {
+                    public void dump(String d) {}
+                    public void position(int m, int dest) { sent.add("position " + m + " " + dest); }
+                    public int meters(int f) { return f; }
+                    public int e3(int f) { return f; }
+                    public int unit(int f) { return f; }
+                    public int roundaboutAngle(int r) { return r; }
+                    public int roundaboutType(int r) { return (r & 0xf0) == 0x60 ? 0xc0 | (r & 15) : r; }
+                    public int destType(int r) { return r; }
+                    public void send(int type, float dir, float dist, int unit, int bar, int err) { sent.add("send " + type + " " + dir + " " + dist); }
+                    public boolean roadUnchanged(String r) { return false; }
+                    public void status(int st) { sent.add("status " + st); }
+                    public void guidanceEnded() { sent.add("ended"); }
+                };
+            }
+        });
+        CpTurns d = new CpTurns(new android.content.Context(), c, null);
+        d.displays(reg, null);
+        d.maneuver(maneuver(0, 30, 1, 1, 90, "Ring Rd", 200));
+        d.maneuver(maneuver(1, 1, 1, 0, -90, "Next Rd", 100));
+        d.routeGuidance(msg(0, U16, i(1), 1, ENUM, i(1), 11, STR, s("200"), 12, ENUM, i(2), 13, U16, i(0)));
+        check("display: a left-hand roundabout goes through the car's display", sent.contains("send 195 90.0 200.0"));
+        check("display: gets meters and status", sent.contains("position 200 -1") && sent.contains("status 2"));
+        check("display: the next turn comes from the next index", d.hudNext == 70);
+        d.routeGuidance(msg(0, U16, i(1), 1, ENUM, i(0)));
+        check("display: route over hands the cluster back", sent.contains("ended"));
+        int was = sent.size();
+        d.routeGuidance(msg(0, U16, i(1), 1, ENUM, i(0)));
+        check("display: only once", sent.size() == was);
+
         check("icons: sharp left 69, slight right 66, roundabout exit 96/97, U-turn left-hand traffic 73",
                 CpTurns.icon(1, 0, 0, -120, 1) == 69 && CpTurns.icon(2, 0, 0, 60, 1) == 66 && CpTurns.icon(2, 0, 1, 0, 1) == 96
                         && CpTurns.icon(31, 1, 1, 0, 1) == 96 && CpTurns.icon(4, 1, 0, 0, 1) == 73 && CpTurns.icon(47, 0, 0, -140, 1) == 69
@@ -202,13 +237,18 @@ public final class CpTurnsTest {
         check("left-hand traffic: start route, as an iPhone sends it",
                 CpTurns.icon(11, 1, 0, 0, 6) == 65 && CpTurns.icon(11, 1, 0, 0, 1) == 65);
         check("left-hand traffic: keep, end of road, end of directions",
-                CpTurns.icon(13, 1, 0, 0, 1) == 145 && CpTurns.icon(14, 1, 0, 0, 1) == 144 && CpTurns.icon(20, 1, 0, 0, 1) == 70
+                CpTurns.icon(13, 1, 0, 0, 1) == 174 && CpTurns.icon(14, 1, 0, 0, 1) == 173 && CpTurns.icon(20, 1, 0, 0, 1) == 70
                         && CpTurns.icon(21, 1, 0, 0, 1) == 67 && CpTurns.icon(27, 1, 0, 0, 2) == 3 && CpTurns.icon(26, 1, 0, 0, 1) == 73);
         check("left-hand traffic: slight and sharp with any angle",
                 CpTurns.icon(49, 1, 0, 0, 1) == 71 && CpTurns.icon(50, 1, 0, 0, 1) == 66 && CpTurns.icon(47, 1, 0, 0, 1) == 69
                         && CpTurns.icon(48, 1, 0, 0, 1) == 68);
         check("left-hand traffic: roundabout exits stay blank",
                 CpTurns.icon(29, 1, 1, 90, 1) == 0 && CpTurns.icon(33, 1, 1, -90, 1) == 0);
+        check("roundabout exit angles as an iPhone sends them, to eighths of a turn",
+                CpTurns.ringStep(-90) == 6 && CpTurns.ringStep(90) == 2 && CpTurns.ringStep(-37) == 7 && CpTurns.ringStep(-25) == 7
+                        && CpTurns.ringStep(122) == 3 && CpTurns.ringStep(0) == 0 && CpTurns.ringStep(180) == 4);
+        check("meters from the phone's units",
+                CpTurns.meters(0.3f, Cluster.UNIT_KM) == 300 && CpTurns.meters(150f, Cluster.UNIT_M) == 150);
         check("right-hand traffic: start route stays as it was", CpTurns.icon(11, 0, 0, 0, 1) == 0);
         check("right-hand traffic still needs the exact angle",
                 CpTurns.icon(1, 0, 0, -80, 1) == 0 && CpTurns.icon(3, 0, 0, 7, 1) == 0);

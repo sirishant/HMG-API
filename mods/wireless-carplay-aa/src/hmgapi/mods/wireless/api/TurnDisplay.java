@@ -6,13 +6,13 @@ import android.os.Handler;
 import hmgapi.hook.Cluster;
 
 /**
- * Lets a car-specific mod decide how Android Auto's turn-by-turn looks on its cluster.
- * With none registered, AaTurns behaves as it always has. All calls come on AaTurns's
- * thread. A mod that requires this one gets the Registry with use("wireless-carplay-aa",
+ * Lets a car-specific mod decide how Android Auto's and CarPlay's turn-by-turn look on its
+ * cluster. With none registered, AaTurns and CpTurns behave as they always have. All calls
+ * come on the caller's thread. A mod that requires this one gets the Registry with use("wireless-carplay-aa",
  * "turn_display") and registers a Factory.
  */
 public interface TurnDisplay {
-    /** Makes one per Android Auto connection. */
+    /** Makes one per connection, in the app that runs it (Android Auto's, or DiPO for CarPlay). */
     interface Factory {
         TurnDisplay create(Context context, Cluster cluster, Handler handler);
     }
@@ -32,6 +32,9 @@ public interface TurnDisplay {
 
     /** The library's raw navigation dump ("S ..." or "P ..."). */
     void dump(String dump);
+
+    /** CarPlay's stand-in for dump: meters to the turn and to the destination (-1: not known). */
+    void position(int meters, int destMeters);
 
     int meters(int fallback);
 

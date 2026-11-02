@@ -6,5 +6,5 @@ set -e
 cd "$(dirname "$0")"
 CP=$(mktemp -d); trap 'rm -rf "$CP"' EXIT
 javac --release 8 -Xlint:-options -nowarn -d "$CP" $(find stubs test ../aaturns/stubs -name '*.java') \
-    ../../stubs/com/tcc/iap2/Iap2NotiMsg.java ../../src/hmgapi/mods/wireless/dipo/CpTurns.java
+    ../../stubs/com/tcc/iap2/Iap2NotiMsg.java ../../src/hmgapi/mods/wireless/dipo/CpTurns.java ../../src/hmgapi/mods/wireless/api/TurnDisplay.java
 java -cp "$CP" hmgapi.mods.wireless.dipo.CpTurnsTest

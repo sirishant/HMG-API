@@ -14,15 +14,16 @@ import hmgapi.mods.wireless.api.TurnDisplay;
 
 /**
  * Registers the Creta Electric's cluster display with the Wireless mod, in Android
- * Auto's app. CRETA-SPECIFIC: mod.json's "system" keeps this mod off every other car.
+ * Auto's app and in DiPO for CarPlay. CRETA-SPECIFIC: mod.json's "system" keeps this mod off every other car.
  */
 public final class CretaMod extends ModEntry {
     static final String GPM = "com.google.android.projection.sink";
+    static final String DIPO = "com.daudio.app.dipo";
     static final String WIRELESS = "wireless-carplay-aa";
 
     @Override
     public void appLoaded(final ModContext mod, LoadedApp app) {
-        if (!GPM.equals(app.packageName)) return;
+        if (!GPM.equals(app.packageName) && !DIPO.equals(app.packageName)) return;
         Object r = mod.use(WIRELESS, "turn_display");
         if (!(r instanceof TurnDisplay.Registry)) {
             mod.log("the Wireless mod has no turn display here, nothing to do");
@@ -31,7 +32,7 @@ public final class CretaMod extends ModEntry {
         ((TurnDisplay.Registry) r).set(new TurnDisplay.Factory() {
             @Override
             public TurnDisplay create(Context context, Cluster cluster, Handler handler) {
-                mod.log("Android Auto: Creta cluster display for this connection");
+                mod.log("Creta cluster display for this connection");
                 return new CretaRhd(context, cluster, handler, trapFrame(mod, context));
             }
         });

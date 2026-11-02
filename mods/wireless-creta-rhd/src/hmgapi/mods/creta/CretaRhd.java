@@ -148,6 +148,20 @@ final class CretaRhd implements TurnDisplay {
         }
     }
 
+    /** CarPlay gives plain meters where Android Auto gives its messages. */
+    @Override
+    public void position(int meters, int destination) {
+        watchHeading();
+        long n = now();
+        e3Value = Math.max(0, meters) * 1000;
+        unitValue = meters < 1000 ? UNIT_METERS : UNIT_METERS + 1;
+        at = n;
+        if (destination >= 0) {
+            destMeters = destination;
+            destAt = n;
+        }
+    }
+
     /** 0x8007: field 1 the next turn, field 2 the destination; each {1 meters, 2 text, 3 unit}. */
     void parse(byte[] b, long nowMs) {
         byte[] step = field(b, 0, b.length, 1);

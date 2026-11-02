@@ -73,7 +73,9 @@ public final class Wireless extends ModEntry {
      */
     private void dipo(ModContext mod, LoadedApp app) {
         try {
-            mod.appPart(app, "hmgapi.mods.wireless.dipo.Dipo").getMethod("start", ModContext.class, LoadedApp.class).invoke(null, mod, app);
+            mod.publish("turn_display", turnDisplay);
+            mod.appPart(app, "hmgapi.mods.wireless.dipo.Dipo").getMethod("start", ModContext.class, LoadedApp.class, hmgapi.mods.wireless.api.TurnDisplay.Registry.class)
+                    .invoke(null, mod, app, turnDisplay);
         } catch (Throwable t) {
             mod.error("DiPO part", t instanceof java.lang.reflect.InvocationTargetException ? t.getCause() : t);
         }
