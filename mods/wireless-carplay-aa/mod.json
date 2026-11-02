@@ -1,7 +1,7 @@
 {
   "id": "wireless-carplay-aa",
   "name": "Wireless CarPlay + Android Auto",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "hmgapi": ">=1.0.0",
   "authors": [
     "VysseCodes"
@@ -50,6 +50,11 @@
       "when": "settings.audio"
     }
   ],
+  "api": {
+    "packages": [
+      "hmgapi.mods.wireless.api"
+    ]
+  },
   "feature_flags": [
     "com.hkmc.software.connectivity.carplay_wireless",
     "com.hkmc.software.connectivity.androidauto_wireless"

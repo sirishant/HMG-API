@@ -4,5 +4,5 @@
 set -e
 cd "$(dirname "$0")"
 CP=$(mktemp -d); trap 'rm -rf "$CP"' EXIT
-javac --release 8 -Xlint:-options -nowarn -d "$CP" $(find stubs test -name '*.java') ../../src/hmgapi/mods/wireless/AaTurns.java
+javac --release 8 -Xlint:-options -nowarn -d "$CP" $(find stubs test -name '*.java') ../../src/hmgapi/mods/wireless/AaTurns.java ../../src/hmgapi/mods/wireless/api/TurnDisplay.java
 java -cp "$CP" hmgapi.mods.wireless.AaTurnsTest

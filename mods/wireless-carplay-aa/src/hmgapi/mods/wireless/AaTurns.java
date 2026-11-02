@@ -9,6 +9,7 @@ import java.util.Calendar;
 
 import hmgapi.hook.Car;
 import hmgapi.hook.Cluster;
+import hmgapi.mods.wireless.api.TurnDisplay;
 
 /**
  * Android Auto turn-by-turn on the cluster and HUD, for one Android Auto connection.
@@ -43,6 +44,8 @@ final class AaTurns {
     final Context context;
     final Cluster cluster;
     final Handler handler;
+    /** a car-specific mod's display, null on every other car */
+    TurnDisplay display;
     final Runnable tick = new Runnable() {
         @Override
         public void run() {
@@ -81,6 +84,7 @@ final class AaTurns {
     void nextTurn(String str, int side, int ev, int angle, int number) {
         if (ev == EV_DUMP) {
             Log.d("NAVDUMP", String.valueOf(str));
+            if (display != null) display.dump(str);
             hmgapi.hook.ProjectionHooks.navigationDump(str);   // to mods that asked for projection events (EGMP's route data)
             return;
         }
@@ -129,25 +133,25 @@ final class AaTurns {
                     cluster.destinationName(0, road);
                     distance = -1f;
                 } else {
-                    cluster.crossroadName(road);
+                    sendRoad();
                     setTurnType(ev, turnSide);
                 }
                 break;
             case NAME_CHANGE: case SLIGHT_TURN: case TURN: case SHARP_TURN: case STRAIGHT: case MERGE:
-                cluster.crossroadName(road);
+                sendRoad();
                 setTurnType(ev, turnSide);
                 break;
             case U_TURN:
                 if (side == UNSPECIFIED) turnSide = LEFT;
-                cluster.crossroadName(road);
+                sendRoad();
                 setTurnType(ev, turnSide);
                 break;
             case ON_RAMP: case OFF_RAMP: case FORK: case FERRY_BOAT:
-                cluster.crossroadName(road);
+                sendRoad();
                 setRampType(ev, turnSide);
                 break;
             case ROUNDABOUT_EXIT: case ROUNDABOUT_ENTER_AND_EXIT:
-                cluster.crossroadName(road);
+                sendRoad();
                 setRoundaboutType(ev, turnSide, turnAngle);
                 break;
             case DESTINATION:
@@ -184,12 +188,18 @@ final class AaTurns {
             sendRemain();
             return;
         }
+        if (display != null) {
+            meters = display.meters(meters);
+            e3 = display.e3(e3);
+            unitFlags = display.unit(unitFlags);
+        }
         setDistance(meters, e3, unitFlags);
         setTurnType(event, turnSide);
         sendTurn();
     }
 
     void status(int s) {
+        if (display != null) display.status(s);
         if (s == 1 || s == 3) {   // active, rerouting
             navLive = true;
             return;
@@ -223,6 +233,10 @@ final class AaTurns {
 
     // ---- the next turn
 
+    void sendRoad() {
+        if (display == null || !display.roadUnchanged(road)) cluster.crossroadName(road);
+    }
+
     void sendTurn() {
         if (!navLive) return;
         int bar = 32, barErr = 0;
@@ -231,7 +245,16 @@ final class AaTurns {
             barErr = -2;
             if (displayType < 64) displayType = 2;
         }
-        cluster.tbtInfo(displayType, 65535, direction, distance, 0, 0, unit, bar, barErr);
+        if (display != null) {
+            int type = display.destType(displayType);
+            if (type != displayType) {
+                displayType = type;
+                direction = 0;
+            }
+            display.send(displayType, direction, distance, unit, bar, barErr);
+        } else {
+            cluster.tbtInfo(displayType, 65535, direction, distance, 0, 0, unit, bar, barErr);
+        }
         sendHudList();
         sendHudDistance();
     }
@@ -364,6 +387,12 @@ final class AaTurns {
 
     /** Roundabouts: the exit's angle picks the icon (the cluster draws them for right-hand traffic). */
     void setRoundaboutType(int ev, int side, int a) {
+        if (display != null) a = display.roundaboutAngle(a);
+        tableRoundaboutType(ev, side, a);
+        if (display != null) displayType = display.roundaboutType(displayType);
+    }
+
+    private void tableRoundaboutType(int ev, int side, int a) {
         if (ev == ROUNDABOUT_EXIT) {
             if (side == RIGHT) {
                 displayType = 32;
@@ -450,8 +479,12 @@ final class AaTurns {
         destName = "";
         sendDestName();
         destName = null;
-        cluster.tbtInfo(0, 0, 0f, 0f, -1, 0, 0, 0, -1);
-        cluster.tbtSubInfo(0f, -1, 0, 0, 0, 0, 0, 0f, -1, 0);
+        if (display != null) {
+            display.guidanceEnded();
+        } else {
+            cluster.tbtInfo(0, 0, 0f, 0f, -1, 0, 0, 0, -1);
+            cluster.tbtSubInfo(0f, -1, 0, 0, 0, 0, 0, 0f, -1, 0);
+        }
         hudBlank();
     }
 
