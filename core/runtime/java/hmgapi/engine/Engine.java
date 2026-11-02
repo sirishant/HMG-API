@@ -2105,7 +2105,8 @@ public final class Engine {
 
     static void write(File f, String s) throws IOException {
         f.getParentFile().mkdirs();
-        File tmp = new File(f.getPath() + ".tmp");
+        // its own name: the app can run two engines at once, and they'd rename each other's file
+        File tmp = new File(f.getPath() + "." + Long.toHexString(System.nanoTime()) + ".tmp");
         OutputStream o = new FileOutputStream(tmp);
         try {
             o.write(s.getBytes("UTF-8"));
