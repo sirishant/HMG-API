@@ -37,7 +37,7 @@ while :; do
     fi
     echo "log $N date $(date) uptime $(cat /proc/uptime)" > "$R/info.txt"
     getprop ro.build.product >> "$R/info.txt"
-    logcat -v threadtime -f "$R/logcat.txt" -r 102400 -n 30 HMG-API:V MicomD:D NAVDUMP:D ClusterService:D NavigationCluster:V GalReceiver:V AAProjection:D AndroidRuntime:E ActivityManager:W EvCar:V EvModelSender:V EvDriveLog:V '*:S' &
+    logcat -v threadtime -f "$R/logcat.txt" -r 102400 -n 30 HMG-API:V DiPO:D iAP2:D Iap2:D IAP2:D MicomD:D NAVDUMP:D ClusterService:D NavigationCluster:V GalReceiver:V AAProjection:D AndroidRuntime:E ActivityManager:W EvCar:V EvModelSender:V EvDriveLog:V '*:S' &
     L=$!
     sync
     toast "Drive log running"

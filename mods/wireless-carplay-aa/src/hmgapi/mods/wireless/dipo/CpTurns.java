@@ -8,8 +8,11 @@ import com.tcc.iap2.Iap2NotiMsg;
 import java.util.Calendar;
 import java.util.LinkedHashMap;
 
+import android.os.Handler;
+
 import hmgapi.hook.Car;
 import hmgapi.hook.Cluster;
+import hmgapi.mods.wireless.api.TurnDisplay;
 
 /**
  * CarPlay turn-by-turn on the cluster and HUD: a port of the turn-by-turn build's DiPO
@@ -47,6 +50,16 @@ final class CpTurns {
     /** last HUD list sent (type, next, road), so an unchanged one isn't resent */
     int hudType, hudNext;
     String hudRoad;
+    private static final int STATE_REROUTING = 5;
+    private static final int DISPLAY_GUIDING = 2, DISPLAY_REROUTING = 3;
+    private static final int DISPLAY_BAR = 32;
+    private static final int ROUNDABOUT_FAMILY = 0x60;
+    /** a roundabout icon's low digit for each eighth of a turn */
+    private static final int[] RING = {0, 1, 3, 4, 6, 7, 9, 10};
+    TurnDisplay.Registry registry;
+    TurnDisplay display;
+    Handler handler;
+    boolean guiding;
     /** last maneuver line logged */
     String lastManeuver;
     /** maneuver index -> its last line logged */
@@ -56,6 +69,20 @@ final class CpTurns {
         this.context = context;
         this.cluster = cluster;
         this.restart = restart;
+    }
+
+    /** the car's own display, if its mod registers one by the first turn */
+    void displays(TurnDisplay.Registry r, Handler h) {
+        registry = r;
+        handler = h;
+    }
+
+    private TurnDisplay display() {
+        if (display == null && registry != null) {
+            TurnDisplay.Factory f = registry.get();
+            if (f != null) display = f.create(context, cluster, handler);
+        }
+        return display;
     }
 
     /** RouteGuidanceUpdate (DiPO e/u.c) */
@@ -253,13 +280,15 @@ final class CpTurns {
     /** the iAP2 session ended (DiPO e/u.disconnected) */
     void disconnected() {
         reset();
-        hudBlank();
+        stop();
         source = null;
     }
 
     /** route guidance stopped (DiPO e/u.nS: the car's navigation took turn-by-turn back, or state 0) */
     void stop() {
         hudBlank();
+        if (guiding && display != null) display.guidanceEnded();
+        guiding = false;
     }
 
     /** forget every component's state and maneuvers (DiPO e/u.nT) */
@@ -324,17 +353,64 @@ final class CpTurns {
             case 4: unit = Cluster.UNIT_FT; break;
             default: unit = Cluster.UNIT_M; break;
         }
-        int icon = icon(x.type, x.side, x.junction, x.exit, u.state);
+        TurnDisplay d = display();
+        int icon = displayIcon(x, u.state);
         // StartRoute has no direction: clear the previous app's HUD arrow.
         if (x.type == 11 && icon == 1) hudBlank();
         logManeuver(x, u, list.length, icon);
-        cluster.crossroadName(x.afterRoad);
-        if (icon == 0) return;
-        cluster.tbtInfo(icon, 0, 0f, dist, 0, 0, unit, 0, 0);
+        if (d == null || !d.roadUnchanged(x.afterRoad)) cluster.crossroadName(x.afterRoad);
+        if (icon == 0) {
+            if (d != null) sendTrip(u);
+            return;
+        }
+        guiding = true;
+        if (d != null) {
+            d.position(meters(dist, unit), u.distLeft > 0 ? u.distLeft : -1);
+            d.status(u.state == STATE_REROUTING ? DISPLAY_REROUTING : DISPLAY_GUIDING);
+            d.send(icon, direction(x, icon), dist, unit, DISPLAY_BAR, 0);
+        } else {
+            cluster.tbtInfo(icon, 0, 0f, dist, 0, 0, unit, 0, 0);
+        }
         sendHud(icon, id, u);
         sendHudDist(dist, unit);
         sendTrip(u);
         sendAhead(id, u);
+    }
+
+    static int meters(float dist, int unit) {
+        switch (unit) {
+            case Cluster.UNIT_KM: return Math.round(dist * 1000f);
+            case Cluster.UNIT_MI: return Math.round(dist * 1609.34f);
+            case Cluster.UNIT_YD: return Math.round(dist * 0.9144f);
+            case Cluster.UNIT_FT: return Math.round(dist * 0.3048f);
+            default: return Math.round(dist);
+        }
+    }
+
+    /** The icon, as the car's display wants it when it has one. */
+    int displayIcon(Maneuver x, int state) {
+        int icon = icon(x.type, x.side, x.junction, x.exit, state);
+        if (display == null) return icon;
+        if (x.side == 1 && x.junction == 1) return display.roundaboutType(ROUNDABOUT_FAMILY | RING[ringStep(x.exit)]);
+        return icon == 144 ? 66 : icon == 145 ? 71 : icon;
+    }
+
+    /** eighths of a turn from straight on, clockwise; the exit angle is to the right of straight on */
+    static int ringStep(int exit) {
+        int a = (exit % 360 + 360) % 360;
+        return Math.round(a / 45f) % 8;
+    }
+
+    /** The arrow's angle for a near scene; the car's display sets its own for slight turns and U-turns. */
+    static float direction(Maneuver x, int icon) {
+        if (x.junction == 1) return ringStep(x.exit) * 45f;
+        switch (icon) {
+            case 67: return 90f;
+            case 68: return 135f;
+            case 69: return 225f;
+            case 70: return 270f;
+            default: return 0f;
+        }
     }
 
     /** what the phone sent for this turn, once per change: what a new car's table is built from */
@@ -434,8 +510,8 @@ final class CpTurns {
             case 4: case 18: case 26: return 73;   // U-turns
             case 10: case 27: return state == 2 ? 3 : 112;   // end of directions
             case 11: return 65;   // start route
-            case 13: return 145;   // keep left
-            case 14: return 144;   // keep right
+            case 13: return 174;   // keep left
+            case 14: return 173;   // keep right
             case 20: return 70;   // left at the end of the road
             case 21: return 67;   // right at the end of the road
             default: break;
@@ -492,6 +568,10 @@ final class CpTurns {
             if (list.length > 1) {
                 Maneuver y = m.get(list[1]);
                 if (y != null && y.distance > 0) next = aheadIcon(y.type, y.side, y.junction, y.exit);
+            } else if (display != null) {
+                // iPhones in left-hand traffic list only this turn, but send the next ones by index
+                Maneuver y = m.get(list[0] + 1);
+                if (y != null) next = displayIcon(y, 1);
             }
         }
         if (hudType == type && hudNext == next && hudRoad != null && hudRoad.equals(road)) return;

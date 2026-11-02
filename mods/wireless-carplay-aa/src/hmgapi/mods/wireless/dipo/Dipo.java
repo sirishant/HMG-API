@@ -19,6 +19,7 @@ import com.tcc.iap2.Iap2NotiMsg;
 
 import hmgapi.hook.Car;
 import hmgapi.hook.Cluster;
+import hmgapi.mods.wireless.api.TurnDisplay;
 import hmgapi.hook.LoadedApp;
 import hmgapi.hook.MethodHook;
 import hmgapi.hook.ModContext;
@@ -58,6 +59,7 @@ public final class Dipo {
     static LoadedApp app;
     static volatile IIap2Service iap2;
     static boolean tbt, bridge;
+    static TurnDisplay.Registry displays;
     static Handler turnsHandler;
     static CpTurns turns;
     static RgListener rg;
@@ -76,8 +78,9 @@ public final class Dipo {
     }
 
     /** Wireless.appLoaded, in DiPO's process */
-    public static void start(ModContext m, LoadedApp a) {
+    public static void start(ModContext m, LoadedApp a, TurnDisplay.Registry r) {
         mod = m;
+        displays = r;
         app = a;
         tbt = m.settingBoolean("tbt", true);
         bridge = m.settingBoolean("bridge", true);
@@ -129,6 +132,7 @@ public final class Dipo {
                 restartRouteGuidance();
             }
         });
+        turns.displays(displays, turnsHandler);
         rg = new RgListener();
         mod.hook(app.classLoader, "dipo.iap2_proxy.stop_route_guidance", new MethodHook() {
             @Override

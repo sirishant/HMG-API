@@ -246,6 +246,19 @@ public final class CretaRhdTest {
         // the compass: the car's heading, on its step, once the route ends
         newRoute();
         second(TURN, LEFT, 0, "Main", 900, "900", METERS, 5000);
+        // CarPlay gives meters directly
+        t.display.position(200, 900);
+        t.display.send(0x43, 90f, 200f, 0, 32, 0);
+        frame("CarPlay: right turn near", 0x0d, 0, 90, 50, 0);
+        t.display.position(200, 900);
+        t.display.send(0xc9, 270f, 200f, 0, 32, 0);
+        frame("CarPlay: left exit roundabout near", 0x21, 0, 270, 50, 0);
+        t.display.position(900, 2000);
+        t.display.send(0xc9, 270f, 900f, 0, 32, 0);
+        frame("CarPlay: left exit roundabout far", 0xc9, 0, 270, 0, -1);
+        t.display.position(1500, 2000);
+        t.display.send(0x43, 90f, 1.5f, 1, 32, 0);
+        frame("CarPlay: 1.5 km stays the card", 0x43, 65535, 90, 0, -1);
         Object d = t.display;
         java.lang.reflect.Method heading = d.getClass().getDeclaredMethod("setHeading", int.class, long.class);
         heading.setAccessible(true);

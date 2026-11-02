@@ -8,7 +8,7 @@ car, region or software version, and the mods refuse to install on them. Use at 
 |---|---|---|
 | NEMESIS 1.16.2 | [xwtk/hmg_nemesis](https://github.com/xwtk/hmg_nemesis) | Working on the car |
 | HMG-API core | This fork of [VysseCodes/HMG-API](https://github.com/VysseCodes/HMG-API): adds the Creta map, and a fix without which two mods crash Android | Working on the car |
-| `wireless-carplay-aa` 2.2.2 | This fork | Wireless Android Auto working on the car |
+| `wireless-carplay-aa` 2.3.0 | This fork | Wireless Android Auto working on the car |
 | `wireless-creta-rhd` | This fork | Cluster route working on the car |
 | `ev-routing-creta` | Source in the [egmp-aa-ev-feat fork](https://github.com/sirishant/egmp-aa-ev-feat/tree/creta-hmgapi); no download, see Stage 5 | Working on the car |
 | `drive-log-creta` | This fork | Working on the car |
@@ -95,7 +95,7 @@ If hooks stay off, make a Car Report and stop: don't add mods yet.
 
 ## Stage 4: Wireless mod and Creta display
 
-1. Put `wireless-carplay-aa-2.2.2.zip` and `wireless-creta-rhd-1.0.0.zip` in `HMGAPI/updates/` on a
+1. Put `wireless-carplay-aa-2.3.0.zip` and `wireless-creta-rhd-1.1.0.zip` in `HMGAPI/updates/` on a
    drive. The app warns that the author isn't on HMG-API's list: that's expected for these mods.
    Don't put a core update zip there: the app refuses it.
 2. HMG-API app > **Check USB updates**, install both.
