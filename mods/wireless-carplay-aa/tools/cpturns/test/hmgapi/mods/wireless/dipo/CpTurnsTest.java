@@ -190,6 +190,17 @@ public final class CpTurnsTest {
                 CpTurns.icon(1, 0, 0, -120, 1) == 69 && CpTurns.icon(2, 0, 0, 60, 1) == 66 && CpTurns.icon(2, 0, 1, 0, 1) == 96
                         && CpTurns.icon(31, 1, 1, 0, 1) == 96 && CpTurns.icon(4, 1, 0, 0, 1) == 73 && CpTurns.icon(47, 0, 0, -140, 1) == 69
                         && CpTurns.icon(99, 0, 0, 0, 1) == 0);
+        check("left-hand traffic: plain turns and straight",
+                CpTurns.icon(1, 1, 0, -90, 1) == 70 && CpTurns.icon(2, 1, 0, 90, 1) == 67 && CpTurns.icon(3, 1, 0, 0, 1) == 65
+                        && CpTurns.icon(1, 1, 0, 0, 1) == 70 && CpTurns.icon(2, 1, 0, 0, 1) == 67);
+        check("left-hand traffic: other angles go to the nearest",
+                CpTurns.icon(1, 1, 0, -80, 1) == 70 && CpTurns.icon(2, 1, 0, 110, 1) == 68 && CpTurns.icon(2, 1, 0, 40, 1) == 144
+                        && CpTurns.icon(1, 1, 0, -65, 1) == 71 && CpTurns.icon(3, 1, 0, 7, 1) == 65);
+        check("left-hand traffic: arrival, ramps, U-turn",
+                CpTurns.icon(12, 1, 0, 0, 1) == 112 && CpTurns.icon(12, 1, 0, 0, 2) == 3 && CpTurns.icon(22, 1, 0, 0, 1) == 82
+                        && CpTurns.icon(4, 1, 0, 0, 1) == 73 && CpTurns.icon(48, 1, 0, 30, 1) == 66);
+        check("right-hand traffic still needs the exact angle",
+                CpTurns.icon(1, 0, 0, -80, 1) == 0 && CpTurns.icon(3, 0, 0, 7, 1) == 0);
         check("lane angles: 0 straight, 90 right, -45 slight left, 180 back",
                 CpTurns.laneIcon(0) == 1 && CpTurns.laneIcon(90) == 3 && CpTurns.laneIcon(-45) == 8 && CpTurns.laneIcon(180) == 5
                         && CpTurns.laneIcon(270) == 7);

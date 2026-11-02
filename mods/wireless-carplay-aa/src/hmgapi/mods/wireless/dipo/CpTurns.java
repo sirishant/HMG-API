@@ -47,6 +47,8 @@ final class CpTurns {
     /** last HUD list sent (type, next, road), so an unchanged one isn't resent */
     int hudType, hudNext;
     String hudRoad;
+    /** last maneuver line logged */
+    String lastManeuver;
 
     CpTurns(Context context, Cluster cluster, Runnable restart) {
         this.context = context;
@@ -304,6 +306,7 @@ final class CpTurns {
             default: unit = Cluster.UNIT_M; break;
         }
         int icon = icon(x.type, x.side, x.junction, x.exit, u.state);
+        logManeuver(x, u, list.length, icon);
         cluster.crossroadName(x.afterRoad);
         if (icon == 0) return;
         cluster.tbtInfo(icon, 0, 0f, dist, 0, 0, unit, 0, 0);
@@ -313,12 +316,25 @@ final class CpTurns {
         sendAhead(id, u);
     }
 
+    /** what the phone sent for this turn, once per change: what a new car's table is built from */
+    void logManeuver(Maneuver x, Update u, int upcoming, int icon) {
+        String line = "type " + x.type + " side " + x.side + " junction " + x.junction + " exit " + x.exit
+                + " state " + u.state + " list " + upcoming + " icon " + icon;
+        if (line.equals(lastManeuver)) return;
+        lastManeuver = line;
+        Dipo.log("CarPlay: maneuver " + line);
+    }
+
     /**
      * The cluster icon for a maneuver: iAP2 ManeuverType, driving side (0 right-hand
      * traffic, 1 left), junction type (0 intersection, 1 roundabout) and exit angle, as
      * the turn-by-turn build maps them (0: nothing to show).
      */
     static int icon(int type, int side, int junction, int exit, int state) {
+        if (side == 1 && junction == 0) {
+            if (type == 4) return 73;
+            return icon(type, 0, 0, leftTrafficExit(type, exit), state);
+        }
         switch (type) {
             case 1:   // left turn
                 if (junction == 0 && exit == -120) return 69;
@@ -383,6 +399,19 @@ final class CpTurns {
             case 53: return side == 0 && junction == 0 && exit == 0 ? 173 : 0;
             default: return 0;
         }
+    }
+
+    /**
+     * Left-hand traffic at a junction: the table above lists these turns for right-hand traffic
+     * and exact angles only. Not seen from an iPhone yet, so the angle goes to the nearest entry
+     * and a turn with no angle counts as a plain one.
+     */
+    static int leftTrafficExit(int type, int exit) {
+        if (type >= 47 && type <= 50) return exit;
+        if (type != 1 && type != 2) return 0;
+        int a = Math.abs(exit);
+        int plain = a == 0 ? 90 : a < 52 ? 45 : a < 75 ? 60 : a < 105 ? 90 : 120;
+        return type == 1 ? -plain : plain;
     }
 
     /** an upcoming turn's small icon (HUD list and turn list): 64 none, 65 straight, 66-68 right, 69-71 left, 72/73 U-turn */
