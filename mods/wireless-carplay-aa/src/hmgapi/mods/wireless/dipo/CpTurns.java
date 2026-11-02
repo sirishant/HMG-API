@@ -49,6 +49,8 @@ final class CpTurns {
     String hudRoad;
     /** last maneuver line logged */
     String lastManeuver;
+    /** maneuver index -> its last line logged */
+    final LinkedHashMap<Integer, String> received = new LinkedHashMap<Integer, String>();
 
     CpTurns(Context context, Cluster cluster, Runnable restart) {
         this.context = context;
@@ -124,6 +126,11 @@ final class CpTurns {
             if (whole) ids = found;
         }
         if (index < 0) return;
+        maneuverStore(index, ids, msg);
+        logReceived(index);
+    }
+
+    private void maneuverStore(int index, int[] ids, Iap2NotiMsg msg) {
         if (ids == null) {
             for (Integer id : maneuvers.keySet()) {
                 LinkedHashMap<Integer, Maneuver> m = maneuvers.get(id);
@@ -146,6 +153,17 @@ final class CpTurns {
                 m.put(index, new Maneuver(index, id, msg));
                 maneuvers.put(id, m);
             }
+        }
+    }
+
+    /** each maneuver as it arrives, upcoming ones too, once until its values change */
+    void logReceived(int index) {
+        for (LinkedHashMap<Integer, Maneuver> m : maneuvers.values()) {
+            Maneuver x = m == null ? null : m.get(index);
+            if (x == null) continue;
+            String line = "type " + x.type + " side " + x.side + " junction " + x.junction + " exit " + x.exit;
+            if (line.equals(received.put(index, line))) continue;
+            Dipo.log("CarPlay: received " + index + ": " + line + " distance " + x.distance);
         }
     }
 
@@ -246,6 +264,7 @@ final class CpTurns {
 
     /** forget every component's state and maneuvers (DiPO e/u.nT) */
     void reset() {
+        received.clear();
         for (LinkedHashMap<Integer, Maneuver> m : maneuvers.values()) {
             if (m != null) m.clear();
         }
@@ -333,10 +352,7 @@ final class CpTurns {
      * the turn-by-turn build maps them (0: nothing to show).
      */
     static int icon(int type, int side, int junction, int exit, int state) {
-        if (side == 1 && junction == 0) {
-            if (type == 4) return 73;
-            return icon(type, 0, 0, leftTrafficExit(type, exit), state);
-        }
+        if (side == 1 && junction == 0) return leftTrafficIcon(type, exit, state);
         switch (type) {
             // Ordinary left/right types carry the direction even when the optional
             // exit angle is absent (the parser resets it to zero on every update).
@@ -408,10 +424,34 @@ final class CpTurns {
     }
 
     /**
-     * Left-hand traffic at a junction: the table above lists these turns for right-hand traffic
-     * and exact angles only. Not seen from an iPhone yet, so the angle goes to the nearest entry
-     * and a turn with no angle counts as a plain one.
+     * Left-hand traffic at a junction. The table below lists these turns for right-hand traffic
+     * and exact angles only, so they use its icons at the nearest listed angle. Type 11 (start
+     * route) and side 1 are seen from an iPhone; the rest follow CarPlay's maneuver list and
+     * aren't seen yet. Roundabouts stay out: the table's icons are for right-hand traffic.
      */
+    static int leftTrafficIcon(int type, int exit, int state) {
+        switch (type) {
+            case 4: case 18: case 26: return 73;   // U-turns
+            case 10: case 27: return state == 2 ? 3 : 112;   // end of directions
+            case 11: return 65;   // start route
+            case 13: return 145;   // keep left
+            case 14: return 144;   // keep right
+            case 20: return 70;   // left at the end of the road
+            case 21: return 67;   // right at the end of the road
+            default: break;
+        }
+        int icon = icon(type, 0, 0, leftTrafficExit(type, exit), state);
+        if (icon != 0) return icon;
+        switch (type) {
+            case 47: return 69;
+            case 48: return 68;
+            case 49: return 71;
+            case 50: return 66;
+            default: return 0;
+        }
+    }
+
+    /** the nearest angle the table lists; a turn with no angle is a plain one */
     static int leftTrafficExit(int type, int exit) {
         if (type >= 47 && type <= 50) return exit;
         if (type != 1 && type != 2) return 0;
