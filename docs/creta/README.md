@@ -6,13 +6,13 @@ car, region or software version, and the mods refuse to install on them. Use at 
 
 | What | Where it comes from | Status on the Creta |
 |---|---|---|
-| NEMESIS 1.16.2 | [xwtk/hmg_nemesis](https://github.com/xwtk/hmg_nemesis) | Earlier version in daily use; 1.16 not yet tried |
-| HMG-API core | This fork of [VysseCodes/HMG-API](https://github.com/VysseCodes/HMG-API), adds the Creta map | **Not yet tried on this car** |
-| `wireless-carplay-aa` 2.2.0 | This fork | Same behaviour road-tested as Leafia; this form not yet tried |
-| `wireless-creta-rhd` | This fork | Logic road-tested on the car; this form not yet tried |
-| `ev-routing-creta` | The egmp-aa-ev-feat fork | Logic road-tested on the car; this form not yet tried |
-| `drive-log-creta` | This fork | Not yet tried |
-| CarPlay | Part of `wireless-carplay-aa` | **Not tried on this car.** Leave off for now |
+| NEMESIS 1.16.2 | [xwtk/hmg_nemesis](https://github.com/xwtk/hmg_nemesis) | Working on the car |
+| HMG-API core | This fork of [VysseCodes/HMG-API](https://github.com/VysseCodes/HMG-API): adds the Creta map, and a fix without which two mods crash Android | Working on the car |
+| `wireless-carplay-aa` 2.2.0 | This fork | Wireless Android Auto working on the car |
+| `wireless-creta-rhd` | This fork | Cluster route working on the car |
+| `ev-routing-creta` | Source in the [egmp-aa-ev-feat fork](https://github.com/sirishant/egmp-aa-ev-feat/tree/creta-hmgapi); no download, see Stage 5 | Working on the car |
+| `drive-log-creta` | This fork | Working on the car |
+| CarPlay | Part of `wireless-carplay-aa` | **Not tested on this car.** Leave off for now |
 
 Work through the stages in order, parked, car in Ready. Do one stage per sitting if you like: the
 car works normally between stages. Remove the USB drive once each stage is done, because a drive
@@ -38,8 +38,7 @@ Skip a package you don't have. Uninstall the newest first.
 3. Car in Ready. NEMESIS Manager > Packages > **HMG Leafia Plus** > Uninstall.
 4. Real restart again.
 
-**Check:** only `usb-handler` is listed, Android Auto works by cable or not at all, and wireless
-Android Auto is gone. That is stock behaviour. Run the pre-flight again: the GPM, navigation, DiPO
+**Check:** only `usb-handler` is listed. Run the pre-flight again: the GPM, navigation, DiPO
 and library lines must match `mods/wireless-carplay-aa/patches/su2iev/stock`. Don't go on until
 they do: a hook map only fits stock files.
 
@@ -75,8 +74,8 @@ There is no NEMESIS recovery while it's removed, so don't stop halfway.
 2. Plug it in and confirm "HMG-API". It doesn't restart by itself: until you restart, the app says
    "Hooks not running", which is expected. Use **Restart unit** in the app, then remove the drive.
 
-The official download works too, but has no hook map for this car: in the app, use Settings > Hook
-map > **Map this car from its files**, which only works on the stock files from Stage 1, then restart.
+Use this fork's download, not the official one: the official core has no map for this car, and
+without this fork's fix two mods with hooks crash Android at every start.
 
 The bar then says "Hooks off for this car", because a new map must be checked on the car first:
 
@@ -86,13 +85,19 @@ The bar then says "Hooks off for this car", because a new map must be checked on
 
 **Check:** the bar says hooks are on, and HMG-API's tile is in the app menu.
 
-If the head unit fails to start three times, HMG-API's boot guard turns its hooks off by itself.
+**Leave Android up for 2 minutes before any restart, at every stage.** HMG-API's boot guard counts a
+start shorter than that as a failure, and after three in a row it turns hooks off. Restarting
+doesn't clear it: the app then says "Hooks not running" and its tile is gone (open it from My
+Packages). Install HMG-API again as in step 1 to clear it, which keeps your mods and settings.
+Then tap **Apply changes** and **Restart unit**.
+
 If hooks stay off, make a Car Report and stop: don't add mods yet.
 
 ## Stage 4: Wireless mod and Creta display
 
 1. Put `wireless-carplay-aa-2.2.0.zip` and `wireless-creta-rhd-1.0.0.zip` in `HMGAPI/updates/` on a
    drive. The app warns that the author isn't on HMG-API's list: that's expected for these mods.
+   Don't put a core update zip there: the app refuses it.
 2. HMG-API app > **Check USB updates**, install both.
 3. In the Wireless mod's settings, turn **off** "Wireless CarPlay" and "CarPlay music and Siri".
 4. **Apply changes**, restart.
@@ -103,7 +108,8 @@ behaviour, which is a useful test if something looks wrong.
 
 ## Stage 5: EV routing, then logging
 
-1. Add `ev-routing-creta-1.0.0.zip` the same way, Apply changes, restart.
+1. Build `ev-routing-creta` from its source (there's no download: the project it comes from has
+   no licence yet, so its build can't be shared). Add the zip the same way, Apply changes, restart.
    **Check:** Maps shows battery on arrival.
 2. Add `drive-log-creta-1.0.0.zip` if you want logs.
 
@@ -115,14 +121,19 @@ the car off before removing the drive.
 
 ## Updating
 
-Put the new mod zip in `HMGAPI/updates/` and use **Check USB updates**. Updates must be signed by
-the same key as the installed mod.
+**A mod:** put the new zip in `HMGAPI/updates/` and use **Check USB updates**. Updates must be signed
+by the same key as the installed mod.
+
+**The core:** unzip the new `hmgapi-<version>-nemesis.zip` onto a drive, plug it in and confirm the
+reinstall. NEMESIS removes HMG-API and installs it again, keeping mods and settings but undoing
+their file changes, so open the app afterwards and tap **Apply changes**, then **Restart unit**.
 
 ## If something goes wrong
 
 | Problem | What to do |
 |---|---|
 | A mod misbehaves | Turn it off in the app, Apply changes |
+| "Hooks not running", tile gone | The boot guard has tripped: see Stage 3 |
 | The app won't open | My Packages > HMG-API > Uninstall, restart |
 | NEMESIS Manager won't open | Drive with the `hmgapi-<version>-usb.zip` contents and an empty `HMGAPI/UNINSTALL`, then Engineering Mode > USB Copy > DSP > Update OTA |
 | Android won't start | The boot guard turns hooks off after three failed starts. If it still won't start, use a recovery drive with an empty `NEMESIS.emergency` at its top level |
