@@ -18,6 +18,15 @@ mod() {   # mod <id> <points json> [requires json]
     printf '{"id": "%s", "version": "1.0.0", "hooks": {"jar": "hooks.jar", "entry": "x.X", "points": %s}%s}\n' "$1" "$2" "${3:+, \"requires\": $3}" > $R/data/hmgapi/mods/$1/mod.json
     printf '{"changes": []}\n' > $R/data/hmgapi/mods/$1/patches.json
 }
+# the app can start several at once: one run at a time, or they trip over each other's files
+P=$T/parallel
+for round in 1 2 3 4 5; do
+    rm -rf $P; mkdir -p $P/data/hmgapi/mods/f $P/data/hmgapi/settings $P/data/hmgapi/state
+    printf '{"id": "f", "version": "1.0.0", "feature_flags": ["com.hkmc.software.connectivity.carplay_wireless", "com.hkmc.software.connectivity.androidauto_wireless"]}\n' > $P/data/hmgapi/mods/f/mod.json
+    printf '{"changes": []}\n' > $P/data/hmgapi/mods/f/patches.json
+    for i in 1 2 3 4 5 6; do (HMGAPI_ROOT=$P HMGAPI_HOST=1 HMGAPI_TEST_ANY_CAR=1 java -cp "$CP" hmgapi.engine.Engine plan > $T/par$round$i 2>&1) & done; wait
+done
+hasnt "six plans at once: no errors" "engine error" "$(cat $T/par??)"
 mod a '{"launcher.menu_list.load": "change"}'
 mod b '{"launcher.menu_list.load": "observe"}'
 eng plan; check "plan" 0 $rc
