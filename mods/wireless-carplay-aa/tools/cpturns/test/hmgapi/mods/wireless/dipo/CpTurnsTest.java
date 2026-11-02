@@ -199,6 +199,17 @@ public final class CpTurnsTest {
         check("left-hand traffic: arrival, ramps, U-turn",
                 CpTurns.icon(12, 1, 0, 0, 1) == 112 && CpTurns.icon(12, 1, 0, 0, 2) == 3 && CpTurns.icon(22, 1, 0, 0, 1) == 82
                         && CpTurns.icon(4, 1, 0, 0, 1) == 73 && CpTurns.icon(48, 1, 0, 30, 1) == 66);
+        check("left-hand traffic: start route, as an iPhone sends it",
+                CpTurns.icon(11, 1, 0, 0, 6) == 65 && CpTurns.icon(11, 1, 0, 0, 1) == 65);
+        check("left-hand traffic: keep, end of road, end of directions",
+                CpTurns.icon(13, 1, 0, 0, 1) == 145 && CpTurns.icon(14, 1, 0, 0, 1) == 144 && CpTurns.icon(20, 1, 0, 0, 1) == 70
+                        && CpTurns.icon(21, 1, 0, 0, 1) == 67 && CpTurns.icon(27, 1, 0, 0, 2) == 3 && CpTurns.icon(26, 1, 0, 0, 1) == 73);
+        check("left-hand traffic: slight and sharp with any angle",
+                CpTurns.icon(49, 1, 0, 0, 1) == 71 && CpTurns.icon(50, 1, 0, 0, 1) == 66 && CpTurns.icon(47, 1, 0, 0, 1) == 69
+                        && CpTurns.icon(48, 1, 0, 0, 1) == 68);
+        check("left-hand traffic: roundabout exits stay blank",
+                CpTurns.icon(29, 1, 1, 90, 1) == 0 && CpTurns.icon(33, 1, 1, -90, 1) == 0);
+        check("right-hand traffic: start route stays as it was", CpTurns.icon(11, 0, 0, 0, 1) == 0);
         check("right-hand traffic still needs the exact angle",
                 CpTurns.icon(1, 0, 0, -80, 1) == 0 && CpTurns.icon(3, 0, 0, 7, 1) == 0);
         check("lane angles: 0 straight, 90 right, -45 slight left, 180 back",
