@@ -149,6 +149,7 @@ public final class Engine {
     public static void main(String[] args) {
         Engine e = new Engine();
         int rc;
+        e.oneAtATime();
         try {
             rc = e.run(args);
         } catch (Throwable t) {
@@ -165,6 +166,26 @@ public final class Engine {
             System.err.println("after: " + t);
         }
         System.exit(rc);
+    }
+
+    /** held until the process ends: the system lets go of it however this run ends */
+    static java.nio.channels.FileLock runLock;
+    static final long RUN_LOCK_WAIT_MS = 300000;
+
+    /**
+     * One engine at a time. The app starts `engine plan` from several screens and hmgapid doesn't
+     * serialise them, and runs share stage/ and the mods' generated files. After the wait a run
+     * goes on anyway: a stuck engine mustn't lock the owner out of the app.
+     */
+    void oneAtATime() {
+        if (!stateDir.isDirectory()) return;
+        try {
+            java.nio.channels.FileChannel c = new java.io.RandomAccessFile(new File(stateDir, "engine.lock"), "rw").getChannel();
+            long end = System.currentTimeMillis() + RUN_LOCK_WAIT_MS;
+            while ((runLock = c.tryLock()) == null && System.currentTimeMillis() < end) Thread.sleep(100);
+        } catch (Exception x) {
+            System.err.println("engine lock: " + x);
+        }
     }
 
     /** Live properties and service restarts, run after the result is printed. */
