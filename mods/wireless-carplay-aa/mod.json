@@ -31,6 +31,13 @@
       "features": [
         "hmgapi.wifi"
       ]
+    },
+    {
+      "model": [
+        "SU2IEV"
+      ],
+      "region": "IND",
+      "firmware": "260430"
     }
   ],
   "parts": [
