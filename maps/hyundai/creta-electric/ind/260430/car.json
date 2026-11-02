@@ -1,0 +1,120 @@
+{
+  "make": "hyundai",
+  "model": "creta-electric",
+  "name": "Hyundai Creta Electric",
+  "region": "ind",
+  "firmware": "260430",
+  "products": [
+    "SU2IEV.IND."
+  ],
+  "status": "mapped",
+  "verified": null,
+  "files": {
+    "/system/app/HKMC_BtSettings.odex": "8531094e19fd405a7d976c7bcc29e5e0",
+    "/system/app/ButtonSettings.odex": "61914038ab617021fef76cb099ebab0f",
+    "/system/app/HKMC_DiPO.odex": "2dc0e709b3af80176bb7bbf10234f0c5",
+    "/system/framework/com.tcc.iap2.odex": "ec4f688b5e56625172dc6f9137263b62",
+    "/system/framework/com.broadcom.bt.jar": "dbf374aa8bde80fad95746a67719ce51",
+    "/system/framework/framework.odex": "b95b09a1dd1c4bae07660b5201c11c50",
+    "/system/framework/core.odex": "32356300937df9a063b09e2d03f2c6d4",
+    "/system/framework/framework2.odex": "5b7d9498d4f01137e2ca2de11e54711d",
+    "/system/framework/automotive.odex": "6ce5b26455a52f72de69ee0a7e82e861",
+    "/system/framework/com.hkmc.ext.hcan.odex": "e8f5d9d7431f4c91b7fb98d2a31740e7",
+    "/system/framework/automotive-service.odex": "5dd8b473273ade2987abe6d1d0a961ea",
+    "/system/app/HKMC_GPM.odex": "148ad2739492290f29b56f017810604d",
+    "/system/app/HKMC_HomeSetting_WP.odex": "70e1c07ea5cad91418c1fc150312f661",
+    "/system/app/Iap2ServerApp.odex": "847da970fe67622188e84b82254506f0",
+    "/system/app/Launcher_WP3.odex": "162e1c58e9fbeaa8a922ecfe20e231fe",
+    "/system/app/RightScreenHome.odex": "d75dc142e79b131d6b071750ac54ed6b",
+    "/system/app/Settings_W.odex": "ce4f9cc6b9fc188024f2d9a84e98cfb9",
+    "/system/app/ThemeSettings.odex": "538ea377526fdd34acbcb78968c94924"
+  },
+  "apps": [
+    "btsettings",
+    "buttonsettings",
+    "dipo",
+    "framework",
+    "gpm",
+    "homesetting",
+    "iap2",
+    "launcher",
+    "panel",
+    "settings",
+    "themesettings"
+  ],
+  "app_files": {
+    "btsettings": {
+      "package": "com.android.btsettings",
+      "files": [
+        "/system/app/HKMC_BtSettings.odex"
+      ]
+    },
+    "buttonsettings": {
+      "package": "com.android.buttonsettings",
+      "files": [
+        "/system/app/ButtonSettings.odex"
+      ]
+    },
+    "dipo": {
+      "package": "com.daudio.app.dipo",
+      "files": [
+        "/system/app/HKMC_DiPO.odex",
+        "/system/framework/com.tcc.iap2.odex",
+        "/system/framework/com.broadcom.bt.jar"
+      ]
+    },
+    "framework": {
+      "package": null,
+      "files": [
+        "/system/framework/framework.odex",
+        "/system/framework/core.odex",
+        "/system/framework/framework2.odex",
+        "/system/framework/automotive.odex",
+        "/system/framework/com.hkmc.ext.hcan.odex",
+        "/system/framework/automotive-service.odex"
+      ]
+    },
+    "gpm": {
+      "package": "com.google.android.projection.sink",
+      "files": [
+        "/system/app/HKMC_GPM.odex"
+      ]
+    },
+    "homesetting": {
+      "package": "com.hkmc.system.app.homesetting",
+      "files": [
+        "/system/app/HKMC_HomeSetting_WP.odex"
+      ]
+    },
+    "iap2": {
+      "package": "com.tcc.iap2server",
+      "files": [
+        "/system/app/Iap2ServerApp.odex"
+      ]
+    },
+    "launcher": {
+      "package": "com.android.launcher3",
+      "files": [
+        "/system/app/Launcher_WP3.odex"
+      ]
+    },
+    "panel": {
+      "package": "com.mobis.splitscreen.right",
+      "files": [
+        "/system/app/RightScreenHome.odex"
+      ]
+    },
+    "settings": {
+      "package": "com.android.settings",
+      "files": [
+        "/system/app/Settings_W.odex"
+      ]
+    },
+    "themesettings": {
+      "package": "com.android.themesettings",
+      "files": [
+        "/system/app/ThemeSettings.odex"
+      ]
+    }
+  }
+}
