@@ -34,6 +34,8 @@ import hmgapi.hook.Points;
  * start as before (hook point framework.context_impl.start_service).
  */
 public final class Wireless extends ModEntry {
+    /** filled by a car-specific mod that requires this one */
+    private final hmgapi.mods.wireless.api.TurnDisplay.Registry turnDisplay = new hmgapi.mods.wireless.api.TurnDisplay.Registry();
     static final String BTSETTINGS = "com.android.btsettings";
     static final String GPM = "com.google.android.projection.sink";
     static final String GAL_SERVICE = "com.google.android.projection.service.GalReceiverService";
@@ -190,6 +192,7 @@ public final class Wireless extends ModEntry {
      */
     private void gpmTurnByTurn(final ModContext mod, final LoadedApp app) {
         final ClassLoader cl = app.classLoader;
+        mod.publish("turn_display", turnDisplay);
         if (Car.stepOfSpec() >= 999) {
             mod.log("Android Auto: stepofspec is 999 or more, GPM's own turn-by-turn runs (HMG-API's stays off)");
             return;
@@ -222,6 +225,8 @@ public final class Wireless extends ModEntry {
                                     hmgapi.hook.Cluster c = hmgapi.hook.Cluster.of(app.context);
                                     if (c == null) return;
                                     turns.put(receiver, t = new AaTurns(app.context, c, handler));
+                                    hmgapi.mods.wireless.api.TurnDisplay.Factory f = turnDisplay.get();
+                                    if (f != null) t.display = f.create(app.context, c, handler);
                                     mod.log("Android Auto: turn-by-turn to the cluster for this connection");
                                 }
                             }
