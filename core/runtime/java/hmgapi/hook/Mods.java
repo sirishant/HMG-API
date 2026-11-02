@@ -64,6 +64,17 @@ final class Mods {
     static final Map<String, ClassLoader> loaders = new java.util.concurrent.ConcurrentHashMap<String, ClassLoader>();
     static final Map<String, List<String>> exportsOf = new java.util.concurrent.ConcurrentHashMap<String, List<String>>();
 
+    /**
+     * The folder for a mod's optimized jar. Dalvik names that file after the jar alone, so
+     * two mods' hooks.jar in one folder share a file: the second finds it stale and truncates
+     * it while the first still has it mapped, and the zygote dies with SIGBUS.
+     */
+    static File dexDir(File base, String id) {
+        File d = new File(base, id);
+        d.mkdirs();
+        return d;
+    }
+
     /** A mod's hook code, with the API packages of the mods it requires visible to it. */
     @SuppressWarnings("unchecked")
     static ModEntry loadEntry(String id, Map<String, Object> raw, File dir, File optDir) throws Exception {
@@ -76,7 +87,7 @@ final class Mods {
             List<String> ex = exportsOf.get(d.id);
             if (l != null && ex != null) parent.exports.add(new ApiLoader.Export(d.id, ex, l));
         }
-        DexClassLoader cl = new DexClassLoader(jar.getPath(), optDir.getPath(), null, parent);
+        DexClassLoader cl = new DexClassLoader(jar.getPath(), dexDir(optDir, id).getPath(), null, parent);
         loaders.put(id, cl);
         List<String> ex = new ArrayList<String>();
         Object api = raw.get("api");
@@ -103,7 +114,7 @@ final class Mods {
         if (cl == null) {
             Map<String, Object> hooks = (Map<String, Object>) rawOf.get(ctx.id).get("hooks");
             File jar = new File(ctx.dir, String.valueOf(hooks.containsKey("jar") ? hooks.get("jar") : "hooks.jar"));
-            cl = new DexClassLoader(jar.getPath(), app.context.getDir("hmgapi-dex", 0).getPath(), null,
+            cl = new DexClassLoader(jar.getPath(), dexDir(app.context.getDir("hmgapi-dex", 0), ctx.id).getPath(), null,
                     new AppPartLoader(pkg, main, app.classLoader));
             parts.put(key, cl);
             HmgApi.i("mods: " + ctx.id + " app part " + pkg + " loaded in " + app.processName);
