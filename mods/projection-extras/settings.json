@@ -2,6 +2,13 @@
   "version": 1,
   "settings": [
     {
+      "key": "voice_swap",
+      "type": "toggle",
+      "default": true,
+      "apply": "rebuild",
+      "title": "Voice button: press for the phone's assistant, hold for the car's (testing)"
+    },
+    {
       "key": "carplay_screen_retry",
       "type": "toggle",
       "default": true,
