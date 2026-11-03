@@ -20,4 +20,21 @@ public class HfDeviceBTCMManager {
     public boolean IbtcmSppOutPutStreamWrite(String address, byte[] buffer) {
         return false;
     }
+
+    public BluetoothDevice IbtcmGetConnectedDevice1() {
+        return null;
+    }
+
+    public BluetoothDevice IbtcmGetConnectedDevice2() {
+        return null;
+    }
+
+    /** HFP, A2DP, AVRCP */
+    public boolean[] IbtcmGetConnectedProfilesAll(BluetoothDevice device) {
+        return null;
+    }
+
+    public boolean IbtcmSppDisconnect(String address) {
+        return false;
+    }
 }
