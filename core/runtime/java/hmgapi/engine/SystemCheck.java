@@ -138,7 +138,7 @@ public final class SystemCheck {
             // once seen it's remembered (the engine, as root, writes the marker)
             String[] sdio = new File(root + "/sys/bus/sdio/devices").list();
             File seen = new File(root + WIFI_SEEN);
-            if (sdio != null && sdio.length > 0) {
+            if ((sdio != null && sdio.length > 0) || wlan(root)) {
                 features.add("hmgapi.wifi");
                 if (!seen.exists()) {
                     try {
@@ -151,6 +151,14 @@ public final class SystemCheck {
                 features.add("hmgapi.wifi");
             }
             return features;
+        }
+
+        /** a wlan network interface: the chip is up (the driver may load before SDIO lists it; after Evergreen) */
+        static boolean wlan(String root) {
+            String[] net = new File(root + "/sys/class/net").list();
+            if (net == null) return false;
+            for (String n : net) if (n.startsWith("wlan")) return true;
+            return false;
         }
 
         /** One line for logs and the app: what HMG-API thinks this unit is. */

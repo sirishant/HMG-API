@@ -49,6 +49,9 @@ printf '{"car": {"year": 2023}}\n' > $R/data/hmgapi/settings/hmgapi.json
 mod a '{"year": ">=2022 <2025", "name": "EV6"}'; ok a "owner's year and the model table's name"
 rmdir $R/sys/bus/sdio/devices/mmc1:0001:1
 mod a '{"features": ["hmgapi.wifi"]}'; no a "no Wi-Fi chip" "no Wi-Fi chip found on this unit"
+mkdir -p $R/sys/class/net/wlan0
+mod a '{"features": ["hmgapi.wifi"]}'; ok a "a wlan interface counts as the chip"
+rmdir $R/sys/class/net/wlan0
 
 # the engine: refuses the mod, leaves out a part, override at the owner's risk
 mod b '{"region": "KOR"}'
