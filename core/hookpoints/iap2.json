@@ -214,6 +214,75 @@
         "type": "int",
         "static": true
       }
+    },
+    {
+      "id": "iap2.service.send_wifi_information",
+      "kind": "method",
+      "of": "iap2.service",
+      "find": {
+        "name": "OnSendWifiInformation",
+        "params": [],
+        "ret": "void"
+      },
+      "about": "sends the hotspot's Wi-Fi details to the phone (message 12 on the service's queue; private)"
+    },
+    {
+      "id": "iap2.service.send_accessory_config",
+      "kind": "method",
+      "of": "iap2.service",
+      "find": {
+        "name": "doSendAccessoryConfigurationInformation",
+        "params": [
+          "java.lang.String",
+          "boolean",
+          "java.lang.String",
+          "boolean",
+          "int",
+          "boolean",
+          "int"
+        ],
+        "ret": "boolean"
+      },
+      "about": "iAP2 WiFiAccessoryConfigurationInformation (ssid, has psk, psk, has security, security 0 none 1 WEP 2 WPA/WPA2, has channel, channel)"
+    },
+    {
+      "id": "iap2.service.set_wireless_carplay_status",
+      "kind": "method",
+      "of": "iap2.service",
+      "find": {
+        "name": "setWirelessCarplayStatusMsg",
+        "params": [
+          "com.tcc.iap2.Iap2NotiMsg"
+        ],
+        "ret": "void",
+        "static": true
+      },
+      "about": "stores the phone's DeviceWirelessCarPlayUpdate (item 0: status, 1 available); only caller: the native callback for it"
+    },
+    {
+      "id": "iap2.service.update_wireless_carplay_status",
+      "kind": "method",
+      "of": "iap2.service",
+      "find": {
+        "name": "updateWirelessCarplayStatus",
+        "params": [
+          "java.lang.Object"
+        ],
+        "ret": "void",
+        "static": true
+      },
+      "about": "the native callback for DeviceWirelessCarPlayUpdate (a Parcel; private)"
+    },
+    {
+      "id": "iap2.service.msg_queue",
+      "kind": "field",
+      "of": "iap2.service",
+      "find": {
+        "name": "mMsgQueue",
+        "type": "java.util.concurrent.BlockingQueue",
+        "static": true
+      },
+      "about": "the service's message queue (android.os.Message; what 12: send Wi-Fi information)"
     }
   ]
 }

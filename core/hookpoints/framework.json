@@ -2206,6 +2206,55 @@
         "ret": "void"
       },
       "about": "asks the cluster for the battery info; answered through onHandleBatteryInfoResp"
+    },
+    {
+      "id": "framework.navigation_cluster.update_tbt_trap_info",
+      "kind": "method",
+      "of": "framework.navigation_cluster",
+      "find": {
+        "name": "updateTBTTrapInfo",
+        "params": [
+          "int",
+          "int",
+          "int",
+          "int",
+          "int",
+          "int",
+          "int",
+          "int",
+          "int",
+          "int",
+          "int",
+          "int",
+          "int",
+          "int",
+          "int",
+          "int",
+          "int"
+        ],
+        "ret": "void"
+      },
+      "about": "speed cameras, speed limit, tolls and the countdown bar to the cluster (one frame; index 11 the bar, 12 the speed limit)"
+    },
+    {
+      "id": "framework.context_wrapper",
+      "kind": "class",
+      "find": {
+        "name": "android.content.ContextWrapper"
+      }
+    },
+    {
+      "id": "framework.context_wrapper.send_broadcast",
+      "kind": "method",
+      "of": "framework.context_wrapper",
+      "find": {
+        "name": "sendBroadcast",
+        "params": [
+          "android.content.Intent"
+        ],
+        "ret": "void"
+      },
+      "about": "sendBroadcast(Intent) of a Service/Application; hooked in DiPO's process only, to add extras to com.daudio.app.dipo.start"
     }
   ]
 }

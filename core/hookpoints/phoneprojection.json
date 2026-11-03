@@ -1,0 +1,353 @@
+{
+  "app": "phoneprojection",
+  "package": "com.daudio.app.phoneprojection",
+  "files": [
+    "/system/app/PhoneProjection.odex"
+  ],
+  "patterns": {
+    "current_status": {
+      "in": "@phoneprojection.wireless_service",
+      "regex": "iget-object v1, p0, L[\\w/$]+;->(?P<status>\\w+):L[\\w/$]+;\\ninvoke-virtual \\{v1\\}, L[\\w/$]+;->\\w+\\(\\)I\\nmove-result v1\\nsget-object v2, L[\\w/$]+;->LOG_TAG:Ljava/lang/String;\\nnew-instance v3, Ljava/lang/StringBuilder;\\ninvoke-direct \\{v3\\}, Ljava/lang/StringBuilder;-><init>\\(\\)V\\nconst-string v4, \"connectivityDisconnectPPHandler mPPType\\[\"\\n",
+      "about": "the disconnect handler reads the transfer type of the service's current-connection status object right before logging it (the other status field of the same type is a scratch copy)"
+    }
+  },
+  "points": [
+    {
+      "id": "phoneprojection.wireless_service",
+      "kind": "class",
+      "find": {
+        "name": "com.daudio.app.phoneprojection.wireless.service.WirelessPhoneProjectionService"
+      },
+      "about": "PhoneProjection's wireless service: decides which wireless Android Auto / CarPlay device connects (readable name)"
+    },
+    {
+      "id": "phoneprojection.wireless_service.on_create",
+      "kind": "method",
+      "of": "phoneprojection.wireless_service",
+      "find": {
+        "name": "onCreate",
+        "params": [],
+        "ret": "void"
+      },
+      "about": "the service starts: after it, keep the instance (there is one per process)"
+    },
+    {
+      "id": "phoneprojection.wireless_service.on_destroy",
+      "kind": "method",
+      "of": "phoneprojection.wireless_service",
+      "find": {
+        "name": "onDestroy",
+        "params": [],
+        "ret": "void"
+      },
+      "about": "the service stops: drop the kept instance"
+    },
+    {
+      "id": "phoneprojection.status_info",
+      "kind": "class",
+      "find": {
+        "name": "com.daudio.app.phoneprojection.wireless.info.WPPDeviceStatusInfo"
+      },
+      "about": "status of the current wireless projection connection (type, name, BT address, USB serial, transfer type)"
+    },
+    {
+      "id": "phoneprojection.wireless_service.status",
+      "kind": "field",
+      "of": "phoneprojection.wireless_service",
+      "find": {
+        "pattern": "current_status",
+        "group": "status",
+        "type": "@phoneprojection.status_info",
+        "static": false
+      },
+      "about": "the service's current-connection status object (final, never null once constructed)"
+    },
+    {
+      "id": "phoneprojection.status_info.pp_type",
+      "kind": "method",
+      "of": "phoneprojection.status_info",
+      "find": {
+        "params": [],
+        "ret": "int",
+        "code": "iget v0, p0, L[\\w/$]+;->mPPType:I\\nreturn v0\\n"
+      },
+      "about": "projection type of the current connection: 0 none, 1 CarPlay, 2 Android Auto"
+    },
+    {
+      "id": "phoneprojection.status_info.transfer_type",
+      "kind": "method",
+      "of": "phoneprojection.status_info",
+      "find": {
+        "params": [],
+        "ret": "int",
+        "code": "iget v0, p0, L[\\w/$]+;->mTransferType:I\\nreturn v0\\n"
+      },
+      "about": "transfer type of the current connection (0 wired/USB, else wireless; passed to disconnectPP)"
+    },
+    {
+      "id": "phoneprojection.status_info.bt_address",
+      "kind": "method",
+      "of": "phoneprojection.status_info",
+      "find": {
+        "params": [],
+        "ret": "java.lang.String",
+        "code": "iget-object v0, p0, L[\\w/$]+;->mBtAddress:Ljava/lang/String;\\n"
+      },
+      "about": "Bluetooth address of the connected phone (synchronized getter)"
+    },
+    {
+      "id": "phoneprojection.status_info.usb_serial",
+      "kind": "method",
+      "of": "phoneprojection.status_info",
+      "find": {
+        "params": [],
+        "ret": "java.lang.String",
+        "code": "iget-object v0, p0, L[\\w/$]+;->mUsbSerialNum:Ljava/lang/String;\\n"
+      },
+      "about": "USB serial of the connected phone (synchronized getter)"
+    },
+    {
+      "id": "phoneprojection.status_info.device_name",
+      "kind": "method",
+      "of": "phoneprojection.status_info",
+      "find": {
+        "name": "getDeviceName",
+        "params": [],
+        "ret": "java.lang.String"
+      },
+      "about": "name of the connected phone"
+    },
+    {
+      "id": "phoneprojection.wireless_service.pp_manager",
+      "kind": "field",
+      "of": "phoneprojection.wireless_service",
+      "find": {
+        "type": "android.phoneprojection.PPManager",
+        "static": false
+      },
+      "about": "the service's PPManager (getCPConnectedBTAddress: the iPhone DiPO just reported)"
+    },
+    {
+      "id": "phoneprojection.wireless_service.disconnect_pp",
+      "kind": "method",
+      "of": "phoneprojection.wireless_service",
+      "find": {
+        "name": "disconnectPP",
+        "params": [
+          "int",
+          "java.lang.String",
+          "java.lang.String",
+          "int"
+        ],
+        "ret": "void",
+        "static": false
+      },
+      "about": "ends a wireless projection: (ppType, btAddress, usbSerial, transferType); private, call through reflection on the service"
+    },
+    {
+      "id": "phoneprojection.wireless_service.connect_handler",
+      "kind": "method",
+      "of": "phoneprojection.wireless_service",
+      "find": {
+        "params": [
+          "java.lang.String",
+          "java.lang.String"
+        ],
+        "ret": "void",
+        "strings": [
+          "connectivityConnectPPHandler isConnectivityActivated return true"
+        ]
+      },
+      "about": "connectivityConnectPPHandler(btAddress, usbSerial): a projection connect asked from the UI (projection button / Device Connections); stock returns at once while CarPlay or another projection is active"
+    },
+    {
+      "id": "phoneprojection.wireless_service.disconnect_handler",
+      "kind": "method",
+      "of": "phoneprojection.wireless_service",
+      "find": {
+        "params": [
+          "java.lang.String",
+          "java.lang.String",
+          "int"
+        ],
+        "ret": "void",
+        "strings": [
+          "connectivityDisconnectPPHandler mPPType["
+        ]
+      },
+      "about": "connectivityDisconnectPPHandler(btAddress, usbSerial, reason): a projection disconnect asked from the UI; stock always calls disconnectPP with the current status, even when its type is 0"
+    },
+    {
+      "id": "phoneprojection.wireless_service.connect_device",
+      "kind": "method",
+      "of": "phoneprojection.wireless_service",
+      "find": {
+        "params": [
+          "android.phoneprojection.WLDeviceInfo",
+          "int",
+          "boolean"
+        ],
+        "ret": "void",
+        "strings": [
+          "connectivityConnectPP nReady["
+        ]
+      },
+      "about": "connectivityConnectPP(device, ready, fromBT): the automatic connect when a registered phone becomes ready (Bluetooth up); wired path first, then the auto-connection rule"
+    },
+    {
+      "id": "phoneprojection.binder",
+      "kind": "class",
+      "find": {
+        "package": "com.daudio.app.phoneprojection.wireless.service",
+        "super": "android.os.Binder",
+        "methods": [
+          {
+            "name": "disconnectPP",
+            "params": [
+              "int",
+              "java.lang.String",
+              "java.lang.String",
+              "int"
+            ],
+            "ret": "void"
+          }
+        ]
+      },
+      "about": "the wireless service's local binder (what the projection UI calls)"
+    },
+    {
+      "id": "phoneprojection.binder.disconnect_pp",
+      "kind": "method",
+      "of": "phoneprojection.binder",
+      "find": {
+        "name": "disconnectPP",
+        "params": [
+          "int",
+          "java.lang.String",
+          "java.lang.String",
+          "int"
+        ],
+        "ret": "void"
+      },
+      "about": "the user ended a projection on the head unit (ppType, btAddress, usbSerial, transferType)"
+    },
+    {
+      "id": "phoneprojection.wireless_receiver",
+      "kind": "class",
+      "find": {
+        "package": "com.daudio.app.phoneprojection.wireless.service",
+        "super": "android.content.BroadcastReceiver",
+        "strings": [
+          "ACTION_WIRELESS_CHANGE_USB_PP_YES isClose["
+        ]
+      },
+      "about": "the wireless service's broadcast receiver (popup answers, timeouts, ...)"
+    },
+    {
+      "id": "phoneprojection.wireless_receiver.on_receive",
+      "kind": "method",
+      "of": "phoneprojection.wireless_receiver",
+      "find": {
+        "name": "onReceive",
+        "params": [
+          "android.content.Context",
+          "android.content.Intent"
+        ],
+        "ret": "void"
+      },
+      "about": "gets com.daudio.app.PhoneProjection.Wireless.CHANGE_USB_PP_YES (extras done, deviceAddress, deviceSerial): the device-change popup's answer; stock: done -> switch to that device"
+    },
+    {
+      "id": "phoneprojection.device_status_receiver",
+      "kind": "class",
+      "find": {
+        "name": "com.daudio.app.phoneprojection.receiver.DeviceStatusReceiver"
+      },
+      "about": "PhoneProjection's device-status receiver (USB, DiPO start/close, ...)"
+    },
+    {
+      "id": "phoneprojection.device_status_receiver.on_receive",
+      "kind": "method",
+      "of": "phoneprojection.device_status_receiver",
+      "find": {
+        "name": "onReceive",
+        "params": [
+          "android.content.Context",
+          "android.content.Intent"
+        ],
+        "ret": "void"
+      },
+      "about": "gets com.daudio.app.dipo.start (a CarPlay session became active; stock sends no extras) and com.daudio.app.dipo.close"
+    },
+    {
+      "id": "phoneprojection.wireless_util",
+      "kind": "class",
+      "find": {
+        "package": "com.daudio.app.phoneprojection.wireless",
+        "strings": [
+          "showDeviceChangeBroadcast() ppType: "
+        ]
+      },
+      "about": "the wireless part's static helpers (popups, device lookups, disconnect reason)"
+    },
+    {
+      "id": "phoneprojection.wireless_util.show_device_change",
+      "kind": "method",
+      "of": "phoneprojection.wireless_util",
+      "find": {
+        "params": [
+          "android.content.Context",
+          "java.lang.String",
+          "java.lang.String",
+          "int",
+          "int",
+          "java.lang.String",
+          "java.lang.String"
+        ],
+        "ret": "void",
+        "static": true,
+        "strings": [
+          "showDeviceChangeBroadcast() ppType: "
+        ]
+      },
+      "about": "shows the stock 'another device is connected, switch?' popup: (context, btAddress, usbSerial, ppType, transferType, connectedName, newName); broadcasts CHANGE_USB_PP, the answer comes back as CHANGE_USB_PP_YES with the same address/serial"
+    },
+    {
+      "id": "phoneprojection.state",
+      "kind": "class",
+      "find": {
+        "package": "com.daudio.app.phoneprojection",
+        "strings": [
+          "isCarPlayConnected is true"
+        ]
+      },
+      "about": "PhoneProjection's static state helpers"
+    },
+    {
+      "id": "phoneprojection.state.carplay_connected",
+      "kind": "method",
+      "of": "phoneprojection.state",
+      "find": {
+        "params": [],
+        "ret": "boolean",
+        "static": true,
+        "strings": [
+          "isCarPlayConnected is true"
+        ]
+      },
+      "about": "isCarPlayConnected: DiPOManager.isDiPOActivated (any CarPlay session, wired or wireless)"
+    },
+    {
+      "id": "phoneprojection.state.connectivity_activated",
+      "kind": "method",
+      "of": "phoneprojection.state",
+      "find": {
+        "params": [],
+        "ret": "boolean",
+        "static": true,
+        "code": "if-nez v0, :cond_\\w+\\ninvoke-static \\{\\}, L[\\w/$]+;->isMirrorLinkConnected\\(\\)Z\\n"
+      },
+      "about": "isConnectivityActivated: CarPlay, MirrorLink or another projection active (the connect handler's early-return test)"
+    }
+  ]
+}
