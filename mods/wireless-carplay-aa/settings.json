@@ -20,7 +20,7 @@
       "type": "toggle",
       "default": true,
       "apply": "restart",
-      "title": "Wireless CarPlay: retry stuck starts, end with the car (testing)"
+      "title": "CarPlay: retry stuck starts, end with the car (test)"
     },
     {
       "key": "audio",

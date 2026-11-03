@@ -6,14 +6,14 @@
       "type": "toggle",
       "default": true,
       "apply": "rebuild",
-      "title": "Voice button: press for the phone's assistant, hold for the car's (testing)"
+      "title": "Voice button: press for phone, hold for car (test)"
     },
     {
       "key": "carplay_screen_retry",
       "type": "toggle",
       "default": true,
       "apply": "restart",
-      "title": "CarPlay screen: retry for 15 s instead of closing (testing)"
+      "title": "CarPlay screen: retry for 15 s (test)"
     }
   ]
 }

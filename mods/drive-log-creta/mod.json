@@ -1,13 +1,13 @@
 {
   "id": "drive-log-creta",
-  "name": "Cluster and navigation drive log (Creta Electric India)",
+  "name": "Drive log (Creta)",
   "version": "1.0.4",
   "hmgapi": ">=1.0.0",
   "authors": [
     "sirishant"
   ],
   "license": "AGPL-3.0",
-  "description": "CRETA-SPECIFIC. Records what goes to the cluster and what Android Auto's navigation sends, onto a USB drive that has a creta-drive-logs folder, from every start with that drive in. Read only: writes only to that drive. No folder, no log.",
+  "description": "Creta Electric India only. Logs cluster and navigation data to a USB drive with a creta-drive-logs folder.",
   "system": {
     "model": [
       "SU2IEV"

@@ -1,13 +1,13 @@
 {
   "id": "wireless-creta-rhd",
-  "name": "Creta Electric cluster display (India, right-hand drive)",
+  "name": "Creta cluster display (RHD)",
   "version": "1.3.0",
   "hmgapi": ">=1.0.0",
   "authors": [
     "sirishant"
   ],
   "license": "AGPL-3.0",
-  "description": "CRETA-SPECIFIC, right-hand drive, no guarantee for any other car. Android Auto on the Hyundai Creta Electric India cluster (SU2IEV.IND, 260430): left-hand traffic roundabouts, the car's near-turn scenes and countdown bar, destination side, compass after a route. Needs the Wireless mod.",
+  "description": "Creta Electric India only. Android Auto and CarPlay turns on the cluster: near scenes, bar, roundabouts.",
   "system": {
     "model": [
       "SU2IEV"
