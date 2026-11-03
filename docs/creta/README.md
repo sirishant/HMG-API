@@ -22,16 +22,20 @@ dark.
 ## 1. Install NEMESIS
 
 1. Copy `ota_package.tar` from [hmg_nemesis](https://github.com/xwtk/hmg_nemesis) to the drive. Don't
-   unpack it. Use version 1.16.2 or later.
+   unpack it.
 2. Plug it in. "No Supported Files" messages are expected.
 3. Engineering Mode > USB Copy > Update DSP > Update OTA. Wait for it to finish and restart.
 
 NEMESIS Manager now shows My Packages, Package Store, Android Apps and Settings. Clear the drive.
 
+**Already have NEMESIS?** Update it to 1.16.4 or later: turn on Bluetooth tethering on your phone,
+connect it to the car, then NEMESIS Manager > Settings > **Check for updates**. The head unit's Wi-Fi
+can't join a phone's Wi-Fi hotspot while it runs wireless projection.
+
 ## 2. Install HMG-API
 
 1. Unzip `hmgapi-1.0.0-beta.5-nemesis.zip` to the top level of the drive.
-2. Plug it in and confirm "HMG-API".
+2. Plug it in and confirm "HMG-API". When it's done, **remove the drive**.
 3. Open the app: NEMESIS Manager > My Packages > HMG-API > **Launch**. Tap **Restart unit**.
 4. Open the app the same way. Settings > Hook map > **Check the map on this car**. It takes about a
    minute.
@@ -67,12 +71,15 @@ Keep USB drives out of the port unless you're logging.
 ## Updating
 
 Only use updates from this project's releases. The official HMG-API download doesn't include the
-Creta map or the fixes this setup needs.
+Creta map or the fixes this setup needs. If NEMESIS Manager offers an "HMG-API" update from the
+Package Store, decline it.
 
 - **A mod:** put the new zip in `HMGAPI/updates`, then use **Check USB updates**, **Apply changes** and
   **Restart unit**.
 - **HMG-API:** unzip the new `nemesis.zip` to a drive and confirm the reinstall. Your mods and settings
-  stay. Then tap **Apply changes** and **Restart unit**.
+  stay. Remove the drive, then tap **Apply changes** and **Restart unit**.
+- **After a NEMESIS update:** plug in the HMG-API drive once and confirm, so HMG-API's start-up hook
+  goes back in.
 
 ## If something goes wrong
 
