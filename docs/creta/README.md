@@ -34,7 +34,7 @@ can't join a phone's Wi-Fi hotspot while it runs wireless projection.
 
 ## 2. Install HMG-API
 
-1. Unzip `hmgapi-1.0.0-beta.5-nemesis.zip` to the top level of the drive.
+1. Unzip `hmgapi-1.0.0-beta.6-nemesis.zip` to the top level of the drive.
 2. Plug it in and confirm "HMG-API". When it's done, **remove the drive**.
 3. Open the app: NEMESIS Manager > My Packages > HMG-API > **Launch**. Tap **Restart unit**.
 4. Open the app the same way. Settings > Hook map > **Check the map on this car**. It takes about a
