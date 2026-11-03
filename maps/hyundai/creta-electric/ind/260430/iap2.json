@@ -13,6 +13,16 @@
     "type": "int",
     "static": true
   },
+  "iap2.init_info.use_vehicle_information": {
+    "field": "iAP2UsedVehicelInformation",
+    "type": "int",
+    "static": true
+  },
+  "iap2.init_info.use_vehicle_status": {
+    "field": "iAP2UsedVehicleStatus",
+    "type": "int",
+    "static": true
+  },
   "iap2.service": {
     "class": "com.tcc.iap2server.Iap2Service"
   },
@@ -33,8 +43,32 @@
     "type": "java.util.concurrent.BlockingQueue",
     "static": true
   },
+  "iap2.service.native_handle": {
+    "field": "mHandleIap2",
+    "type": "long",
+    "static": true
+  },
+  "iap2.service.native_lock": {
+    "field": "mLock",
+    "type": "java.lang.Object",
+    "static": true
+  },
+  "iap2.service.on_bind": {
+    "method": "onBind",
+    "params": [
+      "android.content.Intent"
+    ],
+    "ret": "android.os.IBinder",
+    "static": false
+  },
   "iap2.service.on_create": {
     "method": "onCreate",
+    "params": [],
+    "ret": "void",
+    "static": false
+  },
+  "iap2.service.on_destroy": {
+    "method": "onDestroy",
     "params": [],
     "ret": "void",
     "static": false
