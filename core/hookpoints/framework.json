@@ -2255,6 +2255,19 @@
         "ret": "void"
       },
       "about": "sendBroadcast(Intent) of a Service/Application; hooked in DiPO's process only, to add extras to com.daudio.app.dipo.start"
+    },
+    {
+      "id": "framework.navigation_cluster.update_tbt_trap_info_new",
+      "kind": "method",
+      "of": "framework.navigation_cluster",
+      "find": {
+        "name": "updateTBTTrapInfoNew",
+        "params": [
+          "com.hkmc.cluster.NavigationCluster$NaviTbtTrapInfo"
+        ],
+        "ret": "void"
+      },
+      "about": "the trap frame as one object (the car's navigation sends this one): speed limit, cameras, tolls, the bar"
     }
   ]
 }

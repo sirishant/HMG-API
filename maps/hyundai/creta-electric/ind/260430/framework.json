@@ -811,6 +811,14 @@
     "ret": "void",
     "static": false
   },
+  "framework.navigation_cluster.update_tbt_trap_info_new": {
+    "method": "updateTBTTrapInfoNew",
+    "params": [
+      "com.hkmc.cluster.NavigationCluster$NaviTbtTrapInfo"
+    ],
+    "ret": "void",
+    "static": false
+  },
   "framework.navigation_cluster.update_tp_crossroad_name": {
     "method": "updateTPCrossroadName",
     "params": [
