@@ -325,7 +325,9 @@ public final class Wireless extends ModEntry {
             @Override
             protected void beforeHookedMethod(Param p) {
                 int region = Car.region();
-                if (region != Car.REGION_US && region != Car.REGION_CANADA) return;   // other regions: stock choice
+                // India (Creta Electric): the stock wireless page lists only phones Hyundai's own
+                // wireless service paired, so the bridge's CarPlay phones never show there
+                if (region != Car.REGION_US && region != Car.REGION_CANADA && !india()) return;   // other regions: stock choice
                 Context c = (Context) p.args[0];
                 if (Boolean.TRUE.equals(Points.call(cl, HELPER + ".device_connections_available", null))) {
                     Points.call(cl, HELPER + ".open_device_connections", null, c, 1);
@@ -333,9 +335,19 @@ public final class Wireless extends ModEntry {
                     Points.call(cl, HELPER + ".open_other_page", null, c);
                 }
                 p.setResult(null);
-                mod.log("Phone Projection: Device Connections (US/Canada), not the wireless page");
+                mod.log("Phone Projection: Device Connections or the car's phone page, not the wireless page");
             }
         });
         mod.log("Phone Projection menu hook in " + app.processName);
+    }
+
+    /** an Indian head unit (product SU2IEV.IND...): region codes don't name India */
+    static boolean india() {
+        try {
+            Object v = Class.forName("android.os.SystemProperties").getMethod("get", String.class).invoke(null, "ro.build.product");
+            return String.valueOf(v).contains(".IND.");
+        } catch (Throwable t) {
+            return false;
+        }
     }
 }
