@@ -64,6 +64,9 @@ final class Bridge {
     /** settings: the session watchdog, and CarPlay off with the car */
     static volatile boolean sWatchdog = true, sCarOffRule = true;
     static volatile boolean sCarOff;
+    /** an iPhone whose CarPlay was ended on request (DISCONNECT_CARPLAY): not started again until it reconnects */
+    static volatile String sHeld;
+    static final String ACTION_DISCONNECT_CARPLAY = "com.daudio.app.dipo.DISCONNECT_CARPLAY";
     private static int sWatchId;
     /** retries of the same phone since it last connected or a session started: a phone that keeps closing SPP isn't hammered */
     private static int sSameTries;
@@ -326,8 +329,27 @@ final class Bridge {
         }
     }
 
+    /** CarPlay was ended on request (the projection switch): that iPhone waits for its next Bluetooth connect */
+    static void watchEndRequests(Context c) {
+        if (c == null) return;
+        try {
+            c.registerReceiver(new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context x, Intent i) {
+                    String addr = sAddr;
+                    if (addr == null) return;
+                    sHeld = addr;
+                    unwatch();
+                    log("CarPlay ended on request: " + addr + " waits for its next Bluetooth connect");
+                }
+            }, new IntentFilter(ACTION_DISCONNECT_CARPLAY));
+        } catch (Throwable t) {
+            error("end requests", t);
+        }
+    }
+
     static void scheduleSppConnect(final String addr) {
-        if (addr == null || !enabled() || sUsb || sSession || sCpWireless || sCarOff) return;
+        if (addr == null || addr.equals(sHeld) || !enabled() || sUsb || sSession || sCpWireless || sCarOff) return;
         handler().postDelayed(new Runnable() {
             @Override
             public void run() {
@@ -346,7 +368,7 @@ final class Bridge {
     static void onSppUp(final String addr) {
         if (addr == null || sSession) return;
         sAddr = addr;
-        if (sCpClient || sCpWireless || !enabled() || sUsb || sCarOff) return;
+        if (sCpClient || sCpWireless || !enabled() || sUsb || sCarOff || addr.equals(sHeld)) return;
         sSession = true;
         sCp = null;
         watch(addr);
@@ -652,6 +674,7 @@ final class Bridge {
             try {
                 if (isApple(d)) {
                     sSameTries = 0;
+                    if (d.getAddress().equals(sHeld)) sHeld = null;
                     log("iPhone BT connected: " + d.getAddress());
                     scheduleSppConnect(d.getAddress());
                 }
