@@ -1,8 +1,10 @@
 package hmgapi.mods.wireless.dipo;
 
 import android.bluetooth.BluetoothDevice;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.net.wifi.WifiConfiguration;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -51,6 +53,21 @@ final class Bridge {
     static final int MAX_PENDING = 64;
     static final long SPP_CONNECT_DELAY_MS = 3000;
     static final int SPP_DISCONNECTED = 0, SPP_CONNECTED = 2, EVENT_BTCM_CONNECTED = 2;
+    /** Broadcom's connected profiles: HFP, A2DP */
+    static final int PROFILE_HFP = 0, PROFILE_A2DP = 1;
+    /** after Enhanced Phone Projection 1.11: no CarPlay session this long after the Bluetooth start */
+    static final long REJOIN_MS = 8000, IDLE_MS = 40000, HOTSPOT_OFF_MS = 2000;
+    /** the car's power (MicomPowerManager): on, and delay mode / pre-off / off */
+    static final String ACTION_ACC = "com.hkmc.intent.action.ACTION_ACC_STATUS_CHANGED";
+    static final String EXTRA_ACC = "android.ibox.mode.EXTRA_ACC_STATUS";
+    static final int ACC_ON = 0, ACC_DELAY = 6, ACC_PRE_OFF = 7, ACC_OFF = 0xff;
+    /** settings: the session watchdog, and CarPlay off with the car */
+    static volatile boolean sWatchdog = true, sCarOffRule = true;
+    static volatile boolean sCarOff;
+    private static int sWatchId;
+    /** retries of the same phone since it last connected or a session started: a phone that keeps closing SPP isn't hammered */
+    private static int sSameTries;
+    static final int MAX_SAME_TRIES = 2;
 
     static volatile String sAddr;
     static volatile HfDeviceBTCMManager sBtcm;
@@ -88,8 +105,8 @@ final class Bridge {
             }
             m.registerHfDeviceStatusListener(sBt);
             log("BTCM listener registered");
-            BluetoothDevice d = m.IbtcmGetHfpConnectedDevice();
-            if (d != null && isApple(d)) scheduleSppConnect(d.getAddress());
+            String a = connectedIphone(m, null);
+            if (a != null) scheduleSppConnect(a);
         } catch (Throwable t) {
             error("onBtcmReady", t);
         }
@@ -154,14 +171,169 @@ final class Bridge {
         }
     }
 
+    /**
+     * An iPhone connected over Bluetooth, from both of the manager's slots: the given one
+     * if it's still there, else one with handsfree and music, then handsfree, then music.
+     * (The manager's HFP call returns only the first slot with handsfree, so a second
+     * iPhone, or one on music only, was never seen. After Evergreen's multi-phone note.)
+     */
+    static String connectedIphone(HfDeviceBTCMManager m, String prefer) {
+        if (m == null) return null;
+        String best = null;
+        int bestScore = 0;
+        BluetoothDevice[] slots;
+        try {
+            slots = new BluetoothDevice[] { m.IbtcmGetConnectedDevice1(), m.IbtcmGetConnectedDevice2() };
+        } catch (Throwable t) {
+            BluetoothDevice d = m.IbtcmGetHfpConnectedDevice();
+            return d != null && isApple(d) ? d.getAddress() : null;
+        }
+        for (BluetoothDevice d : slots) {
+            if (d == null || !isApple(d)) continue;
+            boolean[] p = null;
+            try {
+                p = m.IbtcmGetConnectedProfilesAll(d);
+            } catch (Throwable t) {
+                // no profile list: count it as connected
+            }
+            boolean hfp = p == null || (p.length > PROFILE_HFP && p[PROFILE_HFP]);
+            boolean a2dp = p != null && p.length > PROFILE_A2DP && p[PROFILE_A2DP];
+            if (!hfp && !a2dp) continue;
+            int score = d.getAddress().equals(prefer) ? 4 : hfp && a2dp ? 3 : hfp ? 2 : 1;
+            if (score > bestScore) {
+                best = d.getAddress();
+                bestScore = score;
+            }
+        }
+        return best;
+    }
+
+    /** a session ended or its phone's SPP went: start with whichever iPhone is still connected */
+    static void rescan(final String prefer) {
+        handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    if (sUsb || sSession || sCpWireless || sCarOff || !enabled()) return;
+                    String a = connectedIphone(sBtcm, prefer);
+                    if (a == null) return;
+                    if (a.equals(prefer) && ++sSameTries > MAX_SAME_TRIES) {
+                        log("not retrying " + a + " again until it reconnects");
+                        return;
+                    }
+                    log("connected iPhone " + a + (a.equals(prefer) ? " (the same one)" : " (another one)"));
+                    scheduleSppConnect(a);
+                } catch (Throwable t) {
+                    error("rescan", t);
+                }
+            }
+        }, SPP_CONNECT_DELAY_MS);
+    }
+
+    /** CarPlay's Bluetooth start: if no session comes, the phone gets the hotspot again, then the attempt ends */
+    static void watch(final String addr) {
+        if (!sWatchdog) return;
+        final int id = ++sWatchId;
+        handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if (id != sWatchId || sCp != null || !sSession || sUsb) return;
+                log("no CarPlay session " + (REJOIN_MS / 1000) + " s after the Bluetooth start: hotspot off and on");
+                rejoinHotspot();
+            }
+        }, REJOIN_MS);
+        handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if (id != sWatchId || sCp != null || !sSession || sUsb) return;
+                log("no CarPlay session " + (IDLE_MS / 1000) + " s after the Bluetooth start: ending the attempt (Bluetooth stays)");
+                sSession = false;
+                sendDetach();
+            }
+        }, IDLE_MS);
+    }
+
+    /** the session came (or the attempt is over): the watchdog stands down */
+    static void unwatch() {
+        sWatchId++;
+    }
+
+    /** the hotspot off, then on again, so the phone joins afresh */
+    static void rejoinHotspot() {
+        final Context c = context;
+        if (c == null) return;
+        try {
+            Object wifi = c.getSystemService(Context.WIFI_SERVICE);
+            Class<?> k = wifi.getClass();
+            Object conf = k.getMethod("getWifiApConfiguration").invoke(wifi);
+            k.getMethod("setWifiApEnabledForConnectivity", WifiConfiguration.class, boolean.class).invoke(wifi, conf, false);
+        } catch (Throwable t) {
+            error("hotspot off", t);
+            return;
+        }
+        handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                ensureHotspot(c);
+            }
+        }, HOTSPOT_OFF_MS);
+    }
+
+    /** the car's power: wireless CarPlay ends at delay mode or off, and starts again only once the car is on */
+    static void watchPower(Context c) {
+        if (!sCarOffRule || c == null) return;
+        try {
+            Intent last = c.registerReceiver(new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context x, Intent i) {
+                    onPower(i.getIntExtra(EXTRA_ACC, -1));
+                }
+            }, new IntentFilter(ACTION_ACC));
+            if (last != null) onPower(last.getIntExtra(EXTRA_ACC, -1));
+        } catch (Throwable t) {
+            error("power status", t);
+        }
+    }
+
+    static void onPower(int acc) {
+        if (acc == ACC_DELAY || acc == ACC_PRE_OFF || acc == ACC_OFF) {
+            if (sCarOff) return;
+            sCarOff = true;
+            log("car off (" + acc + "): wireless CarPlay ends, no new start until the car is on");
+            unwatch();
+            final String addr = sAddr;
+            if (sSession) {
+                sSession = false;
+                sendDetach();
+            }
+            final HfDeviceBTCMManager m = sBtcm;
+            if (addr != null && m != null) {
+                handler().post(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            log("IbtcmSppDisconnect(" + addr + ") = " + m.IbtcmSppDisconnect(addr));
+                        } catch (Throwable t) {
+                            error("sppDisconnect", t);
+                        }
+                    }
+                });
+            }
+        } else if (acc == ACC_ON && sCarOff) {
+            sCarOff = false;
+            log("car on: wireless CarPlay can start again");
+            rescan(sAddr);
+        }
+    }
+
     static void scheduleSppConnect(final String addr) {
-        if (addr == null || !enabled() || sUsb || sSession || sCpWireless) return;
+        if (addr == null || !enabled() || sUsb || sSession || sCpWireless || sCarOff) return;
         handler().postDelayed(new Runnable() {
             @Override
             public void run() {
                 try {
                     HfDeviceBTCMManager m = sBtcm;
-                    if (m == null || sUsb || sSession || sCpWireless || !enabled()) return;
+                    if (m == null || sUsb || sSession || sCpWireless || sCarOff || !enabled()) return;
                     if (m.IbtcmIsSppConnectedDevice(addr)) log("SPP already up for " + addr);
                     else log("IbtcmSppConnect(" + addr + ") = " + m.IbtcmSppConnect(addr));
                 } catch (Throwable t) {
@@ -174,8 +346,10 @@ final class Bridge {
     static void onSppUp(final String addr) {
         if (addr == null || sSession) return;
         sAddr = addr;
-        if (sCpClient || sCpWireless || !enabled() || sUsb) return;
+        if (sCpClient || sCpWireless || !enabled() || sUsb || sCarOff) return;
         sSession = true;
+        sCp = null;
+        watch(addr);
         handler().post(new Runnable() {
             @Override
             public void run() {
@@ -211,6 +385,7 @@ final class Bridge {
                 try {
                     HfDeviceBTCMManager m = sBtcm;
                     if (m != null && !sUsb && !sSession && addr.equals(sAddr) && m.IbtcmIsSppConnectedDevice(addr)) onSppUp(addr);
+                    else rescan(addr);
                 } catch (Throwable t) {
                     error("onUsbGone", t);
                 }
@@ -220,6 +395,7 @@ final class Bridge {
 
     static void onCpSessionCreated(Object cp) {
         if (cp != null) sCp = cp;
+        unwatch();
         log("CarPlay session created (usb=" + sUsb + " btAddr=" + sAddr + ")");
         if ("created".equals(prop("persist.ev6.cpwl.handover", "data")) && !sUsb && sAddr != null) {
             startCpClient("session created");
@@ -228,6 +404,7 @@ final class Bridge {
 
     static void onCpSessionStarted(int transport) {
         sCpWireless = transport == 1 && !sUsb;
+        sSameTries = 0;
         log("CarPlay session started transport=" + transport + " wireless=" + sCpWireless);
     }
 
@@ -380,10 +557,12 @@ final class Bridge {
             return;
         }
         sAddr = null;
+        unwatch();
         if (sSession) {
             sSession = false;
             sendDetach();
         }
+        rescan(addr);
     }
 
     static void sendDetach() {
@@ -472,6 +651,7 @@ final class Bridge {
             if (event != EVENT_BTCM_CONNECTED) return;
             try {
                 if (isApple(d)) {
+                    sSameTries = 0;
                     log("iPhone BT connected: " + d.getAddress());
                     scheduleSppConnect(d.getAddress());
                 }
