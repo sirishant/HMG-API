@@ -173,6 +173,11 @@ public final class CretaRhdTest {
         // roundabouts: clockwise family, mirrored angle, checked on the road by heading
         second(RAB, UNSPEC, 90, "Main", 900, "900", METERS, 5000);
         frame("left exit, far", 0xc9, 0, 270, 0, -1);
+        // slight-left exit: the cluster has no far icon for 0xca (the loader on the road)
+        second(RAB, UNSPEC, 160, "Main", 900, "900", METERS, 5000);
+        frame("slight left exit, far: the left exit's icon", 0xc9, 0, 315, 0, -1);
+        second(RAB, UNSPEC, 160, "Main", 200, "200", METERS, 5000);
+        frame("slight left exit, near: the scene at 315", 0x21, 0, 315, 50, 0);
         second(RAB, UNSPEC, 90, "Main", 200, "200", METERS, 5000);
         frame("left exit, near", 0x21, 0, 270, 50, 0);
         second(RAB, UNSPEC, 225, "Main", 200, "200", METERS, 5000);
@@ -259,6 +264,15 @@ public final class CretaRhdTest {
         t.display.position(1500, 2000);
         t.display.send(0x43, 90f, 1.5f, 1, 32, 0);
         frame("CarPlay: 1.5 km stays the card", 0x43, 65535, 90, 0, -1);
+        // a step with no direction (type 64) is the straight card, not the cluster's loader
+        t.display.position(20, 2000);
+        t.display.send(0x40, 0f, 20f, 0, 32, 0);
+        frame("no direction: straight card, not the loader", 0x41, 65535, 0, 0, -1);
+        // Maps' roundabout instruction as the road line: shortened so the exit fits
+        check("At the roundabout, take the 2nd exit".equals(t.display.roadText("At the roundabout, take the 2nd exit")) == false
+                && "Take the 2nd exit".equals(t.display.roadText("At the roundabout, take the 2nd exit")), "roundabout road line shortened");
+        check("Main Rd".equals(t.display.roadText("Main Rd")) && t.display.roadText(null) == null
+                && "At the roundabout, ".equals(t.display.roadText("At the roundabout, ")), "other road lines stay");
         // the bar's frame keeps the car navigation's speed limit; only the bar changes
         java.lang.reflect.Method tw = Class.forName("hmgapi.mods.creta.CretaRhd").getDeclaredMethod("trapWith", int[].class, int.class);
         tw.setAccessible(true);

@@ -1,7 +1,7 @@
 {
   "id": "wireless-creta-rhd",
   "name": "Creta Electric cluster display (India, right-hand drive)",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "hmgapi": ">=1.0.0",
   "authors": [
     "sirishant"
@@ -16,7 +16,7 @@
     "firmware": "260430"
   },
   "requires": [
-    "wireless-carplay-aa ^2.3"
+    "wireless-carplay-aa ^2.5"
   ],
   "logs": {
     "tags": [
@@ -30,7 +30,8 @@
     "jar": "hooks.jar",
     "entry": "hmgapi.mods.creta.CretaMod",
     "points": {
-      "framework.navigation_cluster.update_tbt_trap_info": "observe"
+      "framework.navigation_cluster.update_tbt_trap_info": "observe",
+      "framework.navigation_cluster.update_tbt_trap_info_new": "observe"
     }
   }
 }

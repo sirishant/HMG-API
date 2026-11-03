@@ -46,6 +46,11 @@ final class CretaRhd implements TurnDisplay {
         return f;
     }
 
+    private static final String ROUNDABOUT_PREFIX = "At the roundabout, ";
+    // Maps' step with no direction (a roundabout's exit with no side, or an unknown one): type 64,
+    // which this cluster draws as its loader. A straight card shows instead (seen on a short step
+    // just after a roundabout; an educated guess at what fits best).
+    private static final int TYPE_NO_DIRECTION = 0x40, TYPE_STRAIGHT = 0x41;
     private static final long FRESH_MS = 3000;
     // The car sends road names only when they change; Leafia's path repeated the same
     // name about once a second. A slow refresh covers a cluster that missed one.
@@ -90,6 +95,7 @@ final class CretaRhd implements TurnDisplay {
     private static final int FAMILY_MASK = 0xf0;
     private static final int FAMILY_ROUNDABOUT = 0xc0;
     private static final int ROUNDABOUT_RIGHT_FAMILY = 0x60;
+    private static final int ROUNDABOUT_SLIGHT_LEFT = 0xca, ROUNDABOUT_LEFT = 0xc9;
     private static final int NEAR_E3 = 400000;
     // The car's own trap frames still reach the cluster and carry level 0, which empties
     // the bar. Repeating ours restores it within this time.
@@ -229,10 +235,18 @@ final class CretaRhd implements TurnDisplay {
 
     // ---- what the cluster gets
 
-    /** The car's clockwise family and mirrored angle, from the right-hand traffic table. */
+    /**
+     * The car's clockwise family and mirrored angle, from the right-hand traffic table. The far
+     * card is drawn from this code too, and the cluster has no far icon for the slight-left exit
+     * (0xca): it drew the loader over 400 m on the road. Its own navigation's turn lists only
+     * used 0xc1, 0xc3, 0xc4, 0xc6 and 0xc9, so the slight-left exit shows the left exit's icon
+     * far away; the near scene still points at 315 degrees.
+     */
     @Override
     public int roundaboutType(int type) {
-        return (type & FAMILY_MASK) == ROUNDABOUT_RIGHT_FAMILY ? FAMILY_ROUNDABOUT | (type & 0x0f) : type;
+        if ((type & FAMILY_MASK) != ROUNDABOUT_RIGHT_FAMILY) return type;
+        int t = FAMILY_ROUNDABOUT | (type & 0x0f);
+        return t == ROUNDABOUT_SLIGHT_LEFT ? ROUNDABOUT_LEFT : t;
     }
 
     @Override
@@ -338,6 +352,10 @@ final class CretaRhd implements TurnDisplay {
     @Override
     public void send(int type, float direction, float distance, int unit, int bar, int barErr) {
         cancelCompass();
+        if (type == TYPE_NO_DIRECTION) {
+            type = TYPE_STRAIGHT;
+            direction = 0f;
+        }
         float d = direction(type, direction);
         int out = nearType(type);
         int err = barErr(out, barErr);
@@ -345,6 +363,18 @@ final class CretaRhd implements TurnDisplay {
         cluster.tbtInfo(out, side(out, 65535), d, distance, 0, 0, unit, level, err);
         int t = trapBar(out, level, err, now());
         if (t >= 0) trap.bar(t);
+    }
+
+    /**
+     * Maps sends "At the roundabout, take the 2nd exit" as the road line, and the cluster cuts it
+     * off before the exit: the instruction alone, "Take the 2nd exit", fits.
+     */
+    @Override
+    public String roadText(String road) {
+        if (road == null || road.length() <= ROUNDABOUT_PREFIX.length()
+                || !road.regionMatches(true, 0, ROUNDABOUT_PREFIX, 0, ROUNDABOUT_PREFIX.length())) return road;
+        String rest = road.substring(ROUNDABOUT_PREFIX.length()).trim();
+        return rest.isEmpty() ? road : Character.toUpperCase(rest.charAt(0)) + rest.substring(1);
     }
 
     /** True when this road name went out recently and needs no new frame. */

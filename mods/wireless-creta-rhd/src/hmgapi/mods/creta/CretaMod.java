@@ -7,6 +7,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Handler;
+import android.os.Parcel;
+import android.os.Parcelable;
 
 import hmgapi.hook.Cluster;
 import hmgapi.hook.LoadedApp;
@@ -26,6 +28,8 @@ public final class CretaMod extends ModEntry {
     static final String WIRELESS = "wireless-carplay-aa";
     static final String NAVIGATION = "com.mnsoft.navi";
     static final String TRAP_POINT = "framework.navigation_cluster.update_tbt_trap_info";
+    /** the trap frame as one object, which the car's navigation sends (it has a few more fields) */
+    static final String TRAP_NEW_POINT = "framework.navigation_cluster.update_tbt_trap_info_new";
     /** the car navigation's latest trap frame, from its process to Android Auto's */
     static final String ACTION_NAVI_TRAP = "hmgapi.creta.NAVI_TRAP";
     static final int[] TRAP_CLEAR = CretaRhd.TRAP_CLEAR;
@@ -70,10 +74,25 @@ public final class CretaMod extends ModEntry {
                 }
             }
         });
+        mod.hook(null, TRAP_NEW_POINT, new MethodHook() {
+            @Override
+            protected void beforeHookedMethod(Param p) {
+                try {
+                    if (!(p.args[0] instanceof Parcelable)) return;
+                    Parcelable f = (Parcelable) p.args[0];
+                    app.context.sendBroadcast(new Intent(ACTION_NAVI_TRAP).setPackage(GPM).putExtra("trap_info", f));
+                    app.context.sendBroadcast(new Intent(ACTION_NAVI_TRAP).setPackage(DIPO).putExtra("trap_info", f));
+                } catch (Throwable t) {
+                    mod.error("navigation trap frame", t);
+                }
+            }
+        });
         mod.log("Creta: the navigation's speed limit and cameras go along with the bar");
     }
 
     static volatile int[] naviTrap;
+    /** the navigation's latest trap frame as an object, when that's the call it used last */
+    static volatile Object naviTrapInfo;
     private static boolean listening;
 
     /** once per process: the navigation's frames as they come */
@@ -85,12 +104,31 @@ public final class CretaMod extends ModEntry {
                 @Override
                 public void onReceive(Context x, Intent i) {
                     int[] f = i.getIntArrayExtra("trap");
-                    if (f != null && f.length == TRAP_CLEAR.length) naviTrap = f;
+                    if (f != null && f.length == TRAP_CLEAR.length) {
+                        naviTrap = f;
+                        naviTrapInfo = null;
+                    }
+                    Parcelable o = i.getParcelableExtra("trap_info");
+                    if (o != null) naviTrapInfo = o;
                 }
             }, new IntentFilter(ACTION_NAVI_TRAP));
             listening = true;
         } catch (Throwable t) {
             mod.error("navigation trap frames", t);
+        }
+    }
+
+    /** a copy of the navigation's trap object with our bar level (the original stays as it was) */
+    static Object withBar(Object info, int level) throws Exception {
+        Parcel p = Parcel.obtain();
+        try {
+            ((Parcelable) info).writeToParcel(p, 0);
+            p.setDataPosition(0);
+            Object copy = info.getClass().getConstructor(Parcel.class).newInstance(p);
+            copy.getClass().getField("barGraphLevel").setInt(copy, level);
+            return copy;
+        } finally {
+            p.recycle();
         }
     }
 
@@ -110,7 +148,17 @@ public final class CretaMod extends ModEntry {
         } catch (Throwable t) {
             mod.error("no trap frame, the bar won't move", t);
         }
-        final Method method = m;
+        Method mNew = null;
+        try {
+            if (nc != null) {
+                for (Method x : nc.getClass().getMethods()) {
+                    if ("updateTBTTrapInfoNew".equals(x.getName()) && x.getParameterTypes().length == 1) mNew = x;
+                }
+            }
+        } catch (Throwable t) {
+            mod.error("no object trap frame", t);
+        }
+        final Method method = m, methodNew = mNew;
         final Object cluster = nc;
         listenNaviTrap(mod, context);
         return new CretaRhd.TrapFrame() {
@@ -118,6 +166,11 @@ public final class CretaMod extends ModEntry {
             public void bar(int level) {
                 if (method == null) return;
                 try {
+                    Object info = naviTrapInfo;
+                    if (info != null && methodNew != null) {
+                        methodNew.invoke(cluster, withBar(info, level));
+                        return;
+                    }
                     int[] f = CretaRhd.trapWith(naviTrap, level);
                     Object[] args = new Object[f.length];
                     for (int i = 0; i < f.length; i++) args[i] = f[i];
