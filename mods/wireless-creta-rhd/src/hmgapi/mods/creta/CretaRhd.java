@@ -34,6 +34,18 @@ final class CretaRhd implements TurnDisplay {
         void bar(int level);
     }
 
+    /** stock GPM's clear of the trap frame: what goes out before the navigation has sent one */
+    static final int[] TRAP_CLEAR = {-1, -1, 3, -1, 0, 0, 0, 0, 15, 0xffff, 3, 0, 255, 15, 3, 3, 15};
+    /** the trap frame's countdown bar and speed limit (255: none) */
+    static final int TRAP_BAR = 11, TRAP_LIMIT = 12;
+
+    /** the frame the bar goes out in: the car navigation's latest (its speed limit, cameras, tolls), else the clear */
+    static int[] trapWith(int[] navi, int level) {
+        int[] f = (navi != null && navi.length == TRAP_CLEAR.length ? navi : TRAP_CLEAR).clone();
+        f[TRAP_BAR] = level;
+        return f;
+    }
+
     private static final long FRESH_MS = 3000;
     // The car sends road names only when they change; Leafia's path repeated the same
     // name about once a second. A slow refresh covers a cluster that missed one.

@@ -1,7 +1,7 @@
 {
   "id": "wireless-creta-rhd",
   "name": "Creta Electric cluster display (India, right-hand drive)",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "hmgapi": ">=1.0.0",
   "authors": [
     "sirishant"
@@ -29,6 +29,8 @@
   "hooks": {
     "jar": "hooks.jar",
     "entry": "hmgapi.mods.creta.CretaMod",
-    "points": {}
+    "points": {
+      "framework.navigation_cluster.update_tbt_trap_info": "observe"
+    }
   }
 }
