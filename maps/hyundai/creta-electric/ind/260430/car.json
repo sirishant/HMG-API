@@ -91,7 +91,8 @@
     "iap2": {
       "package": "com.tcc.iap2server",
       "files": [
-        "/system/app/Iap2ServerApp.odex"
+        "/system/app/Iap2ServerApp.odex",
+        "/system/framework/com.tcc.iap2.odex"
       ]
     },
     "launcher": {
