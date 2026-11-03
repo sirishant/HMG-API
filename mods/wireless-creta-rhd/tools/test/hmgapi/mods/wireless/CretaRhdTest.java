@@ -259,6 +259,16 @@ public final class CretaRhdTest {
         t.display.position(1500, 2000);
         t.display.send(0x43, 90f, 1.5f, 1, 32, 0);
         frame("CarPlay: 1.5 km stays the card", 0x43, 65535, 90, 0, -1);
+        // the bar's frame keeps the car navigation's speed limit; only the bar changes
+        java.lang.reflect.Method tw = Class.forName("hmgapi.mods.creta.CretaRhd").getDeclaredMethod("trapWith", int[].class, int.class);
+        tw.setAccessible(true);
+        int[] navi = {-1, -1, 3, -1, 0, 0, 0, 0, 15, 0xffff, 3, 0, 60, 15, 1, 1, 15};
+        int[] got = (int[]) tw.invoke(null, navi, 50);
+        check(got[11] == 50 && got[12] == 60 && got[14] == 1 && navi[11] == 0, "trap frame: the navigation's speed limit stays, only the bar changes");
+        got = (int[]) tw.invoke(null, null, 30);
+        check(got[11] == 30 && got[12] == 255 && got[9] == 0xffff, "trap frame: stock clear before the navigation sent one");
+        got = (int[]) tw.invoke(null, new int[3], 30);
+        check(got.length == 17 && got[12] == 255, "trap frame: a short frame is ignored");
         Object d = t.display;
         java.lang.reflect.Method heading = d.getClass().getDeclaredMethod("setHeading", int.class, long.class);
         heading.setAccessible(true);
