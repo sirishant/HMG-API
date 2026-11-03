@@ -54,6 +54,7 @@ final class CpTurns {
     private static final int DISPLAY_GUIDING = 2, DISPLAY_REROUTING = 3;
     private static final int DISPLAY_BAR = 32;
     private static final int ROUNDABOUT_FAMILY = 0x60;
+    private static final int TYPE_START_ROUTE = 11, SCENE_HEAD_FOR_ROUTE = 2;
     /** a roundabout icon's low digit for each eighth of a turn */
     private static final int[] RING = {0, 1, 3, 4, 6, 7, 9, 10};
     TurnDisplay.Registry registry;
@@ -362,8 +363,8 @@ final class CpTurns {
         }
         TurnDisplay d = display();
         int icon = displayIcon(x, u.state);
-        // StartRoute has no direction: clear the previous app's HUD arrow.
-        if (x.type == 11 && icon == 1) hudBlank();
+        // start route has no direction: clear the previous app's HUD arrow
+        if (x.type == TYPE_START_ROUTE && icon == SCENE_HEAD_FOR_ROUTE) hudBlank();
         logManeuver(x, u, list.length, icon);
         if (d == null || !d.roadUnchanged(x.afterRoad)) cluster.crossroadName(x.afterRoad);
         if (icon == 0) {
@@ -472,8 +473,8 @@ final class CpTurns {
                 int i = side == 0 && junction == 0 ? 112 : 0;
                 return state == 2 ? 3 : i;
             }
-            case 11:  // departure: NO_INFO, not a turn inferred from missing geometry
-                return (side == 0 || side == 1) && junction == 0 && exit == 0 ? 1 : 0;
+            case 11:  // start route: the head-for-route scene, as AaTurns sends for Android Auto's depart
+                return (side == 0 || side == 1) && junction == 0 ? SCENE_HEAD_FOR_ROUTE : 0;
             case 15: return side == 0 && junction == 0 && exit == 0 ? 176 : 0;
             case 19: return side == 0 && junction == 1 && exit == -180 ? 102 : 0;
             case 22: return side == 0 && junction == 0 && exit == 0 ? 82 : 0;
@@ -507,23 +508,24 @@ final class CpTurns {
     }
 
     /**
-     * Left-hand traffic at a junction. The table below lists these turns for right-hand traffic
-     * and exact angles only, so they use its icons at the nearest listed angle. Type 11 (start
-     * route) and side 1 are seen from an iPhone; the rest follow CarPlay's maneuver list and
-     * aren't seen yet. Roundabouts stay out: the table's icons are for right-hand traffic.
+     * Left-hand traffic at a junction: the maneuver types that name their own direction, which
+     * the table below lists for right-hand traffic only (keep, end of road, end of directions,
+     * U-turn, sharp and slight), and left, right and straight at the table's nearest angle (a
+     * turn with no angle is a plain one), so a turn the table doesn't list exactly still shows
+     * its direction. These follow CarPlay's maneuver list; side 1 is seen from an iPhone in
+     * India. Roundabouts stay out: the table's icons are for right-hand traffic.
      */
     static int leftTrafficIcon(int type, int exit, int state) {
         switch (type) {
             case 4: case 18: case 26: return 73;   // U-turns
             case 10: case 27: return state == 2 ? 3 : 112;   // end of directions
-            case 11: return 65;   // start route
             case 13: return 174;   // keep left
             case 14: return 173;   // keep right
             case 20: return 70;   // left at the end of the road
             case 21: return 67;   // right at the end of the road
             default: break;
         }
-        int icon = icon(type, 0, 0, leftTrafficExit(type, exit), state);
+        int icon = icon(type, 0, 0, nearestExit(type, exit), state);
         if (icon != 0) return icon;
         switch (type) {
             case 47: return 69;
@@ -534,10 +536,10 @@ final class CpTurns {
         }
     }
 
-    /** the nearest angle the table lists; a turn with no angle is a plain one */
-    static int leftTrafficExit(int type, int exit) {
-        if (type >= 47 && type <= 50) return exit;
-        if (type != 1 && type != 2) return 0;
+    /** left, right or straight at the nearest angle the table lists; other types keep theirs */
+    static int nearestExit(int type, int exit) {
+        if (type == 3) return 0;
+        if (type != 1 && type != 2) return exit;
         int a = Math.abs(exit);
         int plain = a == 0 ? 90 : a < 52 ? 45 : a < 75 ? 60 : a < 105 ? 90 : 120;
         return type == 1 ? -plain : plain;

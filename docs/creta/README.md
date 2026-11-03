@@ -46,7 +46,7 @@ The app's title bar now says "Hooks on (map checked)", and HMG-API has a tile in
 ## 3. Add the mods
 
 1. Clear the drive and make a folder `HMGAPI/updates`. Put these in it:
-   - `wireless-carplay-aa-2.4.0.zip`
+   - `wireless-carplay-aa-2.4.1.zip`
    - `wireless-creta-rhd-1.2.0.zip`
    - `projection-extras-1.0.0.zip`
    - `ev-routing-creta-1.0.1.zip`

@@ -79,15 +79,16 @@ public final class CpTurnsTest {
         for (int side = 0; side <= 1; side++) {
             check("explicit ordinary turns without optional angle, side " + side,
                     CpTurns.icon(1, side, 0, 0, 1) == 70 && CpTurns.icon(2, side, 0, 0, 1) == 67);
-            check("departure is NO_INFO, not a straight arrow, side " + side,
-                    CpTurns.icon(11, side, 0, 0, 1) == 1);
+            check("departure is the head-for-route scene, not a straight arrow, side " + side,
+                    CpTurns.icon(11, side, 0, 0, 1) == 2);
         }
         check("invalid traffic sides do not gain ordinary turn/departure fallbacks",
                 CpTurns.icon(1, 2, 0, 0, 1) == 0 && CpTurns.icon(2, -1, 0, 0, 1) == 0
                         && CpTurns.icon(3, 2, 0, 0, 1) == 0 && CpTurns.icon(11, 2, 0, 0, 1) == 0);
-        check("unrecognized angles and junctions stay unsupported",
-                CpTurns.icon(1, 1, 0, -91, 1) == 0 && CpTurns.icon(2, 1, 0, 91, 1) == 0
-                        && CpTurns.icon(11, 1, 0, 90, 1) == 0 && CpTurns.icon(11, 1, 1, 0, 1) == 0);
+        check("left-hand traffic: an unlisted angle shows its direction at the nearest; right-hand traffic stays exact",
+                CpTurns.icon(1, 1, 0, -91, 1) == 70 && CpTurns.icon(2, 1, 0, 91, 1) == 67
+                        && CpTurns.icon(1, 0, 0, -91, 1) == 0 && CpTurns.icon(2, 0, 0, 91, 1) == 0);
+        check("start route at a roundabout stays unsupported", CpTurns.icon(11, 1, 1, 0, 1) == 0);
         c = new Cluster();
         CpTurns t = new CpTurns(new android.content.Context(), c, null);
         t.maneuver(maneuver(0, 2, 1, 0, 90, "Test Road", 100));
@@ -98,9 +99,9 @@ public final class CpTurnsTest {
                 "hud f201430000" + utf16("Test Road"), "2c 0 0 100 0 0 0 0 0 0");
         t.maneuver(msg(0, U16, i(1), 1, U16, i(0), 3, ENUM, i(11)));
         t.routeGuidance(msg(0, U16, i(1)));
-        expect("Google departure clears prior HUD turn and sends non-directional NO_INFO",
+        expect("Google departure clears prior HUD turn and sends the head-for-route scene",
                 "2c 0 0 0 0 0 0 0 0 0", "lanes f1", "hud f2", "hud f2",
-                "road [Test Road]", "tbt 1 0 0.0 100.0 0 0 0 0 0", "2c 0 0 100 0 0 0 0 0 0");
+                "road [Test Road]", "tbt 2 0 0.0 100.0 0 0 0 0 0", "2c 0 0 100 0 0 0 0 0 0");
         t.maneuver(msg(0, U16, i(1), 1, U16, i(0), 3, ENUM, i(2)));
         t.routeGuidance(msg(0, U16, i(1)));
         expect("Google right without angle reaches cluster and HUD after departure",
@@ -261,6 +262,9 @@ public final class CpTurnsTest {
         int was = sent.size();
         d.routeGuidance(msg(0, U16, i(1), 1, ENUM, i(0)));
         check("display: only once", sent.size() == was);
+        d.maneuver(maneuver(0, 11, 1, 0, 0, "Home St", 0));
+        d.routeGuidance(msg(0, U16, i(1), 1, ENUM, i(6), 11, STR, s("0"), 12, ENUM, i(2), 13, U16, i(0)));
+        check("display: start route is the head-for-route scene, as Android Auto's depart", sent.contains("send 2 0.0 0.0"));
 
         check("icons: sharp left 69, slight right 66, roundabout exit 96/97, U-turn left-hand traffic 73",
                 CpTurns.icon(1, 0, 0, -120, 1) == 69 && CpTurns.icon(2, 0, 0, 60, 1) == 66 && CpTurns.icon(2, 0, 1, 0, 1) == 96
@@ -275,8 +279,8 @@ public final class CpTurnsTest {
         check("left-hand traffic: arrival, ramps, U-turn",
                 CpTurns.icon(12, 1, 0, 0, 1) == 112 && CpTurns.icon(12, 1, 0, 0, 2) == 3 && CpTurns.icon(22, 1, 0, 0, 1) == 82
                         && CpTurns.icon(4, 1, 0, 0, 1) == 73 && CpTurns.icon(48, 1, 0, 30, 1) == 66);
-        check("left-hand traffic: start route, as an iPhone sends it",
-                CpTurns.icon(11, 1, 0, 0, 6) == 65 && CpTurns.icon(11, 1, 0, 0, 1) == 65);
+        check("left-hand traffic: start route, as an iPhone sends it, is the head-for-route scene",
+                CpTurns.icon(11, 1, 0, 0, 6) == 2 && CpTurns.icon(11, 1, 0, 0, 1) == 2);
         check("left-hand traffic: keep, end of road, end of directions",
                 CpTurns.icon(13, 1, 0, 0, 1) == 174 && CpTurns.icon(14, 1, 0, 0, 1) == 173 && CpTurns.icon(20, 1, 0, 0, 1) == 70
                         && CpTurns.icon(21, 1, 0, 0, 1) == 67 && CpTurns.icon(27, 1, 0, 0, 2) == 3 && CpTurns.icon(26, 1, 0, 0, 1) == 73);
@@ -290,7 +294,6 @@ public final class CpTurnsTest {
                         && CpTurns.ringStep(122) == 3 && CpTurns.ringStep(0) == 0 && CpTurns.ringStep(180) == 4);
         check("meters from the phone's units",
                 CpTurns.meters(0.3f, Cluster.UNIT_KM) == 300 && CpTurns.meters(150f, Cluster.UNIT_M) == 150);
-        check("right-hand traffic: start route stays as it was", CpTurns.icon(11, 0, 0, 0, 1) == 0);
         check("right-hand traffic still needs the exact angle",
                 CpTurns.icon(1, 0, 0, -80, 1) == 0 && CpTurns.icon(3, 0, 0, 7, 1) == 0);
         check("lane angles: 0 straight, 90 right, -45 slight left, 180 back",
