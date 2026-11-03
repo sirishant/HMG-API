@@ -198,6 +198,17 @@
     "ret": "android.content.ComponentName",
     "static": false
   },
+  "framework.context_wrapper": {
+    "class": "android.content.ContextWrapper"
+  },
+  "framework.context_wrapper.send_broadcast": {
+    "method": "sendBroadcast",
+    "params": [
+      "android.content.Intent"
+    ],
+    "ret": "void",
+    "static": false
+  },
   "framework.crossroad_name": {
     "class": "com.hkmc.cluster.NavigationCluster$CrossroadName"
   },
@@ -770,6 +781,30 @@
       "int",
       "int",
       "float",
+      "int",
+      "int"
+    ],
+    "ret": "void",
+    "static": false
+  },
+  "framework.navigation_cluster.update_tbt_trap_info": {
+    "method": "updateTBTTrapInfo",
+    "params": [
+      "int",
+      "int",
+      "int",
+      "int",
+      "int",
+      "int",
+      "int",
+      "int",
+      "int",
+      "int",
+      "int",
+      "int",
+      "int",
+      "int",
+      "int",
       "int",
       "int"
     ],

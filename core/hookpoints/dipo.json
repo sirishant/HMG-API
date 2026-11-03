@@ -16,6 +16,11 @@
       "in": "@dipo.session_listener",
       "regex": "invoke-virtual \\{v\\d+\\}, L[\\w/$]+;->(?P<address>\\w+)\\(\\)Ljava/lang/String;\\nmove-result-object v\\d+\\ninvoke-virtual \\{v\\d+\\}, Ljava/lang/String;->toUpperCase\\(\\)Ljava/lang/String;\\n",
       "about": "onSessionDetails reads the iAP2 manager's Bluetooth address and upper-cases it"
+    },
+    "screen_mode_local_on": {
+      "in": "@dipo.activity_handler",
+      "regex": "const-string v\\d+, \"HANDLER_MESSAGE_SCREEN_MODE_CHECK isLocalScreenOnOffstate\\(\\) : \"\\n(?:.*\\n)*?invoke-virtual \\{v\\d+\\}, Lcom/daudio/app/dipo/service/DipoService;->(?P<on>\\w+)\\(\\)Z\\n",
+      "about": "the screen-mode check logs DipoService's local-screen-on flag"
     }
   },
   "points": [
@@ -336,6 +341,499 @@
         "ret": "boolean"
       },
       "about": "stop the phone's route guidance updates (DiPO: the car's navigation took turn-by-turn back)"
+    },
+    {
+      "id": "dipo.carplay.force_key_frame",
+      "kind": "method",
+      "of": "dipo.carplay",
+      "find": {
+        "name": "forceKeyFrame",
+        "params": [],
+        "ret": "com.daudio.app.dipo.telechips.CarPlayReturn"
+      },
+      "about": "asks the phone for a video key frame (public CarPlay library call)"
+    },
+    {
+      "id": "dipo.carplay_listener",
+      "kind": "class",
+      "find": {
+        "package": "com.daudio.app.dipo",
+        "strings": [
+          "onNotifyDecodeFailure() error is invalid value : "
+        ],
+        "methods": [
+          {
+            "name": "onNotifyDecodeFailure",
+            "params": [
+              "com.daudio.app.dipo.telechips.CarPlayScreenError"
+            ],
+            "ret": "void"
+          }
+        ]
+      },
+      "about": "the CarPlay player's library listener (CarPlay callbacks, readable names)"
+    },
+    {
+      "id": "dipo.carplay_listener.decode_failure",
+      "kind": "method",
+      "of": "dipo.carplay_listener",
+      "find": {
+        "name": "onNotifyDecodeFailure",
+        "params": [
+          "com.daudio.app.dipo.telechips.CarPlayScreenError"
+        ],
+        "ret": "void"
+      },
+      "about": "the CarPlay video decoder reported a screen error (UNKNOWN, NO_OUTPUT_FRAME, SEQ_HEADER_FAILED, BLACK_SCREEN_DETECTED)"
+    },
+    {
+      "id": "dipo.carplay_listener.owner",
+      "kind": "field",
+      "of": "dipo.carplay_listener",
+      "find": {
+        "type": "@dipo.iap2"
+      },
+      "about": "the CarPlay player the listener belongs to"
+    },
+    {
+      "id": "dipo.iap2.carplay",
+      "kind": "field",
+      "of": "dipo.iap2",
+      "find": {
+        "type": "com.daudio.app.dipo.telechips.CarPlayService"
+      },
+      "about": "the player's CarPlay service (null until bound)"
+    },
+    {
+      "id": "dipo.activity",
+      "kind": "class",
+      "find": {
+        "name": "com.daudio.app.dipo.ui.DipoActivity"
+      },
+      "about": "the CarPlay screen"
+    },
+    {
+      "id": "dipo.activity.on_resume",
+      "kind": "method",
+      "of": "dipo.activity",
+      "find": {
+        "name": "onResume",
+        "params": [],
+        "ret": "void"
+      },
+      "about": "the CarPlay screen is shown; posts the screen-mode check (3 s) when the local screen is on"
+    },
+    {
+      "id": "dipo.activity.on_destroy",
+      "kind": "method",
+      "of": "dipo.activity",
+      "find": {
+        "name": "onDestroy",
+        "params": [],
+        "ret": "void"
+      }
+    },
+    {
+      "id": "dipo.activity.set_display",
+      "kind": "method",
+      "of": "dipo.activity",
+      "find": {
+        "name": "setDisplay",
+        "params": [
+          "android.view.SurfaceHolder"
+        ],
+        "ret": "void"
+      },
+      "about": "the screen's video surface changed: hands it to DipoService (private)"
+    },
+    {
+      "id": "dipo.activity.update_display",
+      "kind": "method",
+      "of": "dipo.activity",
+      "find": {
+        "params": [],
+        "ret": "void",
+        "strings": [
+          "updateDisplay does not call mDipoService.play()"
+        ]
+      },
+      "about": "re-attaches the screen to DipoService with the activity's mode (private)"
+    },
+    {
+      "id": "dipo.activity_handler",
+      "kind": "class",
+      "find": {
+        "package": "com.daudio.app.dipo",
+        "super": "android.os.Handler",
+        "strings": [
+          "HANDLER_MESSAGE_SCREEN_MODE_CHECK Current Screen Mode Accessory"
+        ]
+      },
+      "about": "the CarPlay screen's handler (message 7: screen-mode check, 6: finish)"
+    },
+    {
+      "id": "dipo.activity_handler.handle_message",
+      "kind": "method",
+      "of": "dipo.activity_handler",
+      "find": {
+        "name": "handleMessage",
+        "params": [
+          "android.os.Message"
+        ],
+        "ret": "void"
+      }
+    },
+    {
+      "id": "dipo.activity_handler.activity",
+      "kind": "field",
+      "of": "dipo.activity_handler",
+      "find": {
+        "type": "@dipo.activity"
+      }
+    },
+    {
+      "id": "dipo.service",
+      "kind": "class",
+      "find": {
+        "name": "com.daudio.app.dipo.service.DipoService"
+      },
+      "about": "DiPO's service"
+    },
+    {
+      "id": "dipo.service.device_name",
+      "kind": "field",
+      "of": "dipo.service",
+      "find": {
+        "name": "mDeviceName",
+        "type": "java.lang.String",
+        "static": false
+      },
+      "about": "name of the iPhone DiPO is talking to"
+    },
+    {
+      "id": "dipo.service.instance",
+      "kind": "field",
+      "of": "dipo.service",
+      "find": {
+        "type": "@dipo.service",
+        "static": true
+      },
+      "about": "the running DipoService (null before onCreate)"
+    },
+    {
+      "id": "dipo.service.local_screen_on",
+      "kind": "method",
+      "of": "dipo.service",
+      "find": {
+        "pattern": "screen_mode_local_on",
+        "group": "on",
+        "params": [],
+        "ret": "boolean"
+      },
+      "about": "isLocalScreenOnOffstate: the head unit's screen is on"
+    },
+    {
+      "id": "dipo.screen_mode",
+      "kind": "class",
+      "find": {
+        "package": "com.daudio.app.dipo",
+        "methods": [
+          {
+            "name": "getScreen",
+            "params": [],
+            "ret": "int"
+          }
+        ]
+      },
+      "about": "DiPO's CarPlay mode state"
+    },
+    {
+      "id": "dipo.screen_mode.get_screen",
+      "kind": "method",
+      "of": "dipo.screen_mode",
+      "find": {
+        "name": "getScreen",
+        "params": [],
+        "ret": "int"
+      },
+      "about": "who has the screen (2: accessory, the phone; 0 before CarPlay reports one)"
+    },
+    {
+      "id": "dipo.service.screen_mode",
+      "kind": "method",
+      "of": "dipo.service",
+      "find": {
+        "params": [],
+        "ret": "@dipo.screen_mode"
+      },
+      "about": "DipoService's current CarPlay mode state"
+    },
+    {
+      "id": "dipo.service.display_default",
+      "kind": "method",
+      "of": "dipo.service",
+      "find": {
+        "params": [],
+        "ret": "void",
+        "strings": [
+          "displayDefault() "
+        ]
+      },
+      "about": "asks CarPlay for the screen (the player's default display request)"
+    },
+    {
+      "id": "dipo.service.set_display",
+      "kind": "method",
+      "of": "dipo.service",
+      "find": {
+        "name": "setDisplay",
+        "params": [
+          "android.view.SurfaceHolder"
+        ],
+        "ret": "void"
+      },
+      "about": "the CarPlay video surface (null: gone)"
+    },
+    {
+      "id": "dipo.service.show_screen",
+      "kind": "method",
+      "of": "dipo.service",
+      "find": {
+        "params": [],
+        "ret": "void",
+        "code": "iget-object v\\d+, p0, Lcom/daudio/app/dipo/service/DipoService;->\\w+:Landroid/view/SurfaceHolder;\\ninvoke-virtual \\{v\\d+, v\\d+\\}, L[\\w/$]+;->\\w+\\(Landroid/view/SurfaceHolder;\\)V\\n"
+      },
+      "about": "hands the stored video surface to the CarPlay player (shows the screen)"
+    },
+    {
+      "id": "dipo.session_listener.session_started",
+      "kind": "method",
+      "of": "dipo.session_listener",
+      "find": {
+        "name": "onSessionStarted",
+        "params": [
+          "com.daudio.app.dipo.telechips.CarPlayTransportType"
+        ],
+        "ret": "void"
+      },
+      "about": "DipoService's CarPlay session start (transport Wired, Wireless)"
+    },
+    {
+      "id": "dipo.session_listener.iap2_connected",
+      "kind": "method",
+      "of": "dipo.session_listener",
+      "find": {
+        "params": [
+          "int",
+          "java.lang.String"
+        ],
+        "ret": "void",
+        "strings": [
+          "BGKim_WL onIap2Connected() ===start"
+        ]
+      },
+      "about": "DipoService's onIap2Connected(component, serial)"
+    },
+    {
+      "id": "dipo.service.start_carplay_session",
+      "kind": "method",
+      "of": "dipo.service",
+      "find": {
+        "params": [
+          "boolean"
+        ],
+        "ret": "void",
+        "strings": [
+          "startCarPlaySession() : isCpPhoneBtAudioPlaying = "
+        ]
+      },
+      "about": "startCarPlaySession(phone BT audio playing); ends by posting message 15 (connection-error check)"
+    },
+    {
+      "id": "dipo.service.dipo_activated",
+      "kind": "method",
+      "of": "dipo.service",
+      "find": {
+        "params": [
+          "int"
+        ],
+        "ret": "void",
+        "strings": [
+          "dipoActivated()"
+        ]
+      },
+      "about": "dipoActivated(transport 0 wired, 1 wireless): sets the CarPlay phone's address on PPManager"
+    },
+    {
+      "id": "dipo.service.post_message",
+      "kind": "method",
+      "of": "dipo.service",
+      "find": {
+        "params": [
+          "int",
+          "long"
+        ],
+        "ret": "void",
+        "strings": [
+          "sendEmptyMessage [what] = "
+        ]
+      },
+      "about": "posts an empty message (what, delay ms) to DipoService's handler, replacing a pending one"
+    },
+    {
+      "id": "dipo.service.remove_message",
+      "kind": "method",
+      "of": "dipo.service",
+      "find": {
+        "params": [
+          "int"
+        ],
+        "ret": "void",
+        "strings": [
+          "removeMessageFromHandler sWhat = "
+        ]
+      },
+      "about": "removes a pending DipoService handler message (-1: all)"
+    },
+    {
+      "id": "dipo.service.set_cp_bt_address",
+      "kind": "method",
+      "of": "dipo.service",
+      "find": {
+        "name": "setCPConnectedBTAddress",
+        "params": [
+          "java.lang.String"
+        ],
+        "ret": "void"
+      },
+      "about": "sets the CarPlay phone's Bluetooth address (upper-cased) on PPManager and broadcasts it (null: ignored)"
+    },
+    {
+      "id": "dipo.service.start_dipo_activity",
+      "kind": "method",
+      "of": "dipo.service",
+      "find": {
+        "params": [
+          "int"
+        ],
+        "ret": "void",
+        "strings": [
+          "startDipoActivity invalid mode : "
+        ]
+      },
+      "about": "starts the CarPlay screen (mode extra)"
+    },
+    {
+      "id": "dipo.service.set_dipo_status",
+      "kind": "method",
+      "of": "dipo.service",
+      "find": {
+        "params": [
+          "int"
+        ],
+        "ret": "void",
+        "strings": [
+          "setDipoStatus() invalid status : "
+        ]
+      },
+      "about": "setDipoStatus: DiPOManager's connect status"
+    },
+    {
+      "id": "dipo.service.vui_event",
+      "kind": "method",
+      "of": "dipo.service",
+      "find": {
+        "params": [
+          "int"
+        ],
+        "ret": "void",
+        "strings": [
+          "================> kakaoIEvent() end"
+        ]
+      },
+      "about": "voice (Siri) start/end; on end posts message 46 (800 ms)"
+    },
+    {
+      "id": "dipo.utils.current_iap_device",
+      "kind": "method",
+      "of": "dipo.utils",
+      "find": {
+        "params": [],
+        "ret": "java.lang.String",
+        "strings": [
+          "mCurrentIapConnectedDevice = "
+        ]
+      },
+      "about": "the last iAP2-connected device's serial (a Bluetooth address for Bluetooth sessions)"
+    },
+    {
+      "id": "dipo.pp_manager",
+      "kind": "class",
+      "find": {
+        "name": "android.phoneprojection.PPManager"
+      },
+      "about": "phone projection manager (framework)"
+    },
+    {
+      "id": "dipo.pp_manager.set_cp_bt_address",
+      "kind": "method",
+      "of": "dipo.pp_manager",
+      "find": {
+        "name": "setCPConnectedBTAddress",
+        "params": [
+          "java.lang.String"
+        ],
+        "ret": "void"
+      },
+      "about": "tells the system which Bluetooth device the CarPlay phone is (DiPO passes \"\" when it has none)"
+    },
+    {
+      "id": "dipo.service.player",
+      "kind": "field",
+      "of": "dipo.service",
+      "find": {
+        "type": "@dipo.iap2"
+      },
+      "about": "DipoService's CarPlay player (mDipoPlayer, the dipo.iap2 class); null before the service sets it up"
+    },
+    {
+      "id": "dipo.iap2.stop_carplay",
+      "kind": "method",
+      "of": "dipo.iap2",
+      "find": {
+        "params": [],
+        "ret": "void",
+        "strings": [
+          "dipoStop()"
+        ]
+      },
+      "about": "dipoStop: releases the player's resources and stops the CarPlay library (stopCarPlay: hides the display, native stop); no-op without a CarPlay service"
+    },
+    {
+      "id": "dipo.iap2.start_carplay",
+      "kind": "method",
+      "of": "dipo.iap2",
+      "find": {
+        "params": [],
+        "ret": "void",
+        "strings": [
+          "startDipo()"
+        ]
+      },
+      "about": "startDipo: starts the CarPlay library again (startCarPlay) after a dipoStop"
+    },
+    {
+      "id": "dipo.service.dipo_finalized",
+      "kind": "method",
+      "of": "dipo.service",
+      "find": {
+        "params": [],
+        "ret": "void",
+        "strings": [
+          "dipoFinalized() isReset:"
+        ]
+      },
+      "about": "dipoFinalized: DiPO's own end-of-session cleanup (what onSessionFinalized runs); once per session (guarded)"
     }
   ]
 }

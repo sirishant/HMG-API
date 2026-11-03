@@ -26,6 +26,7 @@
     "/system/app/Iap2ServerApp.odex": "847da970fe67622188e84b82254506f0",
     "/system/app/Launcher_WP3.odex": "162e1c58e9fbeaa8a922ecfe20e231fe",
     "/system/app/RightScreenHome.odex": "d75dc142e79b131d6b071750ac54ed6b",
+    "/system/app/PhoneProjection.odex": "6cc03cbbc48c0b026ecb9ebf69af3956",
     "/system/app/Settings_W.odex": "ce4f9cc6b9fc188024f2d9a84e98cfb9",
     "/system/app/ThemeSettings.odex": "538ea377526fdd34acbcb78968c94924"
   },
@@ -39,6 +40,7 @@
     "iap2",
     "launcher",
     "panel",
+    "phoneprojection",
     "settings",
     "themesettings"
   ],
@@ -102,6 +104,12 @@
       "package": "com.mobis.splitscreen.right",
       "files": [
         "/system/app/RightScreenHome.odex"
+      ]
+    },
+    "phoneprojection": {
+      "package": "com.daudio.app.phoneprojection",
+      "files": [
+        "/system/app/PhoneProjection.odex"
       ]
     },
     "settings": {

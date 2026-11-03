@@ -1,0 +1,170 @@
+{
+  "phoneprojection.binder": {
+    "class": "com.daudio.app.phoneprojection.wireless.service.c"
+  },
+  "phoneprojection.binder.disconnect_pp": {
+    "method": "disconnectPP",
+    "params": [
+      "int",
+      "java.lang.String",
+      "java.lang.String",
+      "int"
+    ],
+    "ret": "void",
+    "static": false
+  },
+  "phoneprojection.device_status_receiver": {
+    "class": "com.daudio.app.phoneprojection.receiver.DeviceStatusReceiver"
+  },
+  "phoneprojection.device_status_receiver.on_receive": {
+    "method": "onReceive",
+    "params": [
+      "android.content.Context",
+      "android.content.Intent"
+    ],
+    "ret": "void",
+    "static": false
+  },
+  "phoneprojection.state": {
+    "class": "com.daudio.app.phoneprojection.d"
+  },
+  "phoneprojection.state.carplay_connected": {
+    "method": "dQ",
+    "params": [],
+    "ret": "boolean",
+    "static": true
+  },
+  "phoneprojection.state.connectivity_activated": {
+    "method": "dV",
+    "params": [],
+    "ret": "boolean",
+    "static": true
+  },
+  "phoneprojection.status_info": {
+    "class": "com.daudio.app.phoneprojection.wireless.info.WPPDeviceStatusInfo"
+  },
+  "phoneprojection.status_info.bt_address": {
+    "method": "hp",
+    "params": [],
+    "ret": "java.lang.String",
+    "static": false
+  },
+  "phoneprojection.status_info.device_name": {
+    "method": "getDeviceName",
+    "params": [],
+    "ret": "java.lang.String",
+    "static": false
+  },
+  "phoneprojection.status_info.pp_type": {
+    "method": "jN",
+    "params": [],
+    "ret": "int",
+    "static": false
+  },
+  "phoneprojection.status_info.transfer_type": {
+    "method": "iU",
+    "params": [],
+    "ret": "int",
+    "static": false
+  },
+  "phoneprojection.status_info.usb_serial": {
+    "method": "hq",
+    "params": [],
+    "ret": "java.lang.String",
+    "static": false
+  },
+  "phoneprojection.wireless_receiver": {
+    "class": "com.daudio.app.phoneprojection.wireless.service.h"
+  },
+  "phoneprojection.wireless_receiver.on_receive": {
+    "method": "onReceive",
+    "params": [
+      "android.content.Context",
+      "android.content.Intent"
+    ],
+    "ret": "void",
+    "static": false
+  },
+  "phoneprojection.wireless_service": {
+    "class": "com.daudio.app.phoneprojection.wireless.service.WirelessPhoneProjectionService"
+  },
+  "phoneprojection.wireless_service.connect_device": {
+    "method": "a",
+    "params": [
+      "android.phoneprojection.WLDeviceInfo",
+      "int",
+      "boolean"
+    ],
+    "ret": "void",
+    "static": false
+  },
+  "phoneprojection.wireless_service.connect_handler": {
+    "method": "f",
+    "params": [
+      "java.lang.String",
+      "java.lang.String"
+    ],
+    "ret": "void",
+    "static": false
+  },
+  "phoneprojection.wireless_service.disconnect_handler": {
+    "method": "a",
+    "params": [
+      "java.lang.String",
+      "java.lang.String",
+      "int"
+    ],
+    "ret": "void",
+    "static": false
+  },
+  "phoneprojection.wireless_service.disconnect_pp": {
+    "method": "disconnectPP",
+    "params": [
+      "int",
+      "java.lang.String",
+      "java.lang.String",
+      "int"
+    ],
+    "ret": "void",
+    "static": false
+  },
+  "phoneprojection.wireless_service.on_create": {
+    "method": "onCreate",
+    "params": [],
+    "ret": "void",
+    "static": false
+  },
+  "phoneprojection.wireless_service.on_destroy": {
+    "method": "onDestroy",
+    "params": [],
+    "ret": "void",
+    "static": false
+  },
+  "phoneprojection.wireless_service.pp_manager": {
+    "field": "bp",
+    "type": "android.phoneprojection.PPManager",
+    "static": false
+  },
+  "phoneprojection.wireless_service.status": {
+    "field": "lP",
+    "type": "com.daudio.app.phoneprojection.wireless.info.WPPDeviceStatusInfo",
+    "static": false
+  },
+  "phoneprojection.wireless_util": {
+    "class": "com.daudio.app.phoneprojection.wireless.a.f"
+  },
+  "phoneprojection.wireless_util.show_device_change": {
+    "method": "a",
+    "params": [
+      "android.content.Context",
+      "java.lang.String",
+      "java.lang.String",
+      "int",
+      "int",
+      "java.lang.String",
+      "java.lang.String"
+    ],
+    "ret": "void",
+    "static": true
+  }
+}

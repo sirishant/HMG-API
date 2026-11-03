@@ -28,6 +28,11 @@
     "ret": "boolean",
     "static": true
   },
+  "iap2.service.msg_queue": {
+    "field": "mMsgQueue",
+    "type": "java.util.concurrent.BlockingQueue",
+    "static": true
+  },
   "iap2.service.on_create": {
     "method": "onCreate",
     "params": [],
@@ -50,6 +55,26 @@
     "ret": "void",
     "static": false
   },
+  "iap2.service.send_accessory_config": {
+    "method": "doSendAccessoryConfigurationInformation",
+    "params": [
+      "java.lang.String",
+      "boolean",
+      "java.lang.String",
+      "boolean",
+      "int",
+      "boolean",
+      "int"
+    ],
+    "ret": "boolean",
+    "static": false
+  },
+  "iap2.service.send_wifi_information": {
+    "method": "OnSendWifiInformation",
+    "params": [],
+    "ret": "void",
+    "static": false
+  },
   "iap2.service.set_device_serial": {
     "method": "setDeviceSerial",
     "params": [
@@ -57,6 +82,22 @@
     ],
     "ret": "void",
     "static": false
+  },
+  "iap2.service.set_wireless_carplay_status": {
+    "method": "setWirelessCarplayStatusMsg",
+    "params": [
+      "com.tcc.iap2.Iap2NotiMsg"
+    ],
+    "ret": "void",
+    "static": true
+  },
+  "iap2.service.update_wireless_carplay_status": {
+    "method": "updateWirelessCarplayStatus",
+    "params": [
+      "java.lang.Object"
+    ],
+    "ret": "void",
+    "static": true
   },
   "iap2.service_receiver": {
     "class": "com.tcc.iap2server.Iap2Service$1"
