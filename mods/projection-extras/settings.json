@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "settings": [
+    {
+      "key": "carplay_screen_retry",
+      "type": "toggle",
+      "default": true,
+      "apply": "restart",
+      "title": "CarPlay screen: retry for 15 s instead of closing (testing)"
+    }
+  ]
+}

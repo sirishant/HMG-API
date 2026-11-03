@@ -1,0 +1,54 @@
+{
+  "id": "projection-extras",
+  "name": "Projection extras: phone switching and CarPlay session fixes",
+  "version": "1.0.0",
+  "hmgapi": ">=1.0.0",
+  "authors": [
+    "sirishant"
+  ],
+  "license": "AGPL-3.0",
+  "description": "Android Auto and CarPlay take turns (the car's own question when CarPlay starts during Android Auto; the projection button ends CarPlay first; no automatic Android Auto while the car is off or after it was ended on the head unit), and CarPlay session fixes (key frames on screen errors, screen re-attach and retry, wireless checks, Siri timing, hotspot details). After Enhanced Phone Projection, written for HMG-API's hook points. Loads only where those points are mapped (so far the Hyundai Creta Electric India). Needs the Wireless mod.",
+  "system": "all",
+  "requires": [
+    "wireless-carplay-aa ^2.4"
+  ],
+  "logs": {
+    "tags": [
+      "DiPO",
+      "PhoneProjection"
+    ],
+    "match": [
+      "switch:",
+      "CarPlay:",
+      "iAP2:",
+      "Android Auto:",
+      "PhoneProjection:"
+    ]
+  },
+  "hooks": {
+    "jar": "hooks.jar",
+    "entry": "hmgapi.mods.projextras.Switch",
+    "points": {
+      "dipo.service.dipo_activated": "observe",
+      "framework.context_wrapper.send_broadcast": "change",
+      "dipo.carplay_listener.decode_failure": "observe",
+      "dipo.carplay.session_started": "observe",
+      "dipo.carplay.session_finalized": "observe",
+      "dipo.activity.set_display": "observe",
+      "dipo.activity.on_destroy": "observe",
+      "dipo.service.set_display": "observe",
+      "dipo.service.post_message": "change",
+      "dipo.activity_handler.handle_message": "replace",
+      "iap2.service.send_accessory_config": "change",
+      "iap2.service.set_wireless_carplay_status": "observe",
+      "phoneprojection.wireless_service.on_create": "observe",
+      "phoneprojection.wireless_service.on_destroy": "observe",
+      "phoneprojection.device_status_receiver.on_receive": "observe",
+      "phoneprojection.wireless_receiver.on_receive": "replace",
+      "phoneprojection.wireless_service.connect_handler": "replace",
+      "phoneprojection.wireless_service.disconnect_handler": "replace",
+      "phoneprojection.binder.disconnect_pp": "observe",
+      "phoneprojection.wireless_service.connect_device": "change"
+    }
+  }
+}
