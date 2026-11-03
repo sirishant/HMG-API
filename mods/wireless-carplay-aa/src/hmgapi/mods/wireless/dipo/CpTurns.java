@@ -277,6 +277,13 @@ final class CpTurns {
         return a <= 157 ? 6 : 5;
     }
 
+    /** a CarPlay session started: nothing from an earlier one carries over */
+    void sessionStarted() {
+        reset();
+        lastManeuver = null;
+        source = null;
+    }
+
     /** the iAP2 session ended (DiPO e/u.disconnected) */
     void disconnected() {
         reset();
