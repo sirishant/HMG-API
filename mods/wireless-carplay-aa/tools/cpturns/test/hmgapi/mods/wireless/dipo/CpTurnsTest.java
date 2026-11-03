@@ -244,6 +244,7 @@ public final class CpTurnsTest {
                     public int destType(int r) { return r; }
                     public void send(int type, float dir, float dist, int unit, int bar, int err) { sent.add("send " + type + " " + dir + " " + dist); }
                     public boolean roadUnchanged(String r) { return false; }
+                    public String roadText(String r) { return r; }
                     public void status(int st) { sent.add("status " + st); }
                     public void guidanceEnded() { sent.add("ended"); }
                 };

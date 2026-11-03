@@ -53,6 +53,9 @@ public interface TurnDisplay {
     /** Sends the turn frame, in place of AaTurns's own. */
     void send(int type, float direction, float distance, int unit, int bar, int barErr);
 
+    /** The road line as this cluster can show it (it may shorten Maps' instruction text). */
+    String roadText(String road);
+
     /** True to skip sending this road name. */
     boolean roadUnchanged(String road);
 

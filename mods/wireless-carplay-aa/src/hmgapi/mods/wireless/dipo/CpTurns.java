@@ -366,7 +366,8 @@ final class CpTurns {
         // start route has no direction: clear the previous app's HUD arrow
         if (x.type == TYPE_START_ROUTE && icon == SCENE_HEAD_FOR_ROUTE) hudBlank();
         logManeuver(x, u, list.length, icon);
-        if (d == null || !d.roadUnchanged(x.afterRoad)) cluster.crossroadName(x.afterRoad);
+        String road = d == null ? x.afterRoad : d.roadText(x.afterRoad);
+        if (d == null || !d.roadUnchanged(road)) cluster.crossroadName(road);
         if (icon == 0) {
             if (d != null) sendTrip(u);
             return;

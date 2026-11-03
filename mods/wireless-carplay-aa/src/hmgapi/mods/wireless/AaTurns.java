@@ -234,7 +234,8 @@ final class AaTurns {
     // ---- the next turn
 
     void sendRoad() {
-        if (display == null || !display.roadUnchanged(road)) cluster.crossroadName(road);
+        String r = display == null ? road : display.roadText(road);
+        if (display == null || !display.roadUnchanged(r)) cluster.crossroadName(r);
     }
 
     void sendTurn() {
