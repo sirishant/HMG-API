@@ -16,20 +16,11 @@
       "apply": "rebuild"
     },
     {
-      "key": "carplay_watchdog",
+      "key": "carplay_rules",
       "type": "toggle",
       "default": true,
       "apply": "restart",
-      "title": "Wireless CarPlay: retry a stuck start",
-      "description": "If no CarPlay session starts 8 s after the iPhone's Bluetooth start, the hotspot restarts once; after 40 s the attempt ends so the next one can start. After Enhanced Phone Projection."
-    },
-    {
-      "key": "carplay_car_off",
-      "type": "toggle",
-      "default": true,
-      "apply": "restart",
-      "title": "Wireless CarPlay ends with the car",
-      "description": "At delay mode or off, wireless CarPlay ends and doesn't start again until the car is on."
+      "title": "Wireless CarPlay: retry stuck starts, end with the car (testing)"
     },
     {
       "key": "audio",

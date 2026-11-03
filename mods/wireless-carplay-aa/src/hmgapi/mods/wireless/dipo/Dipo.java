@@ -255,9 +255,9 @@ public final class Dipo {
         final ClassLoader cl = app.classLoader;
         Bridge.cl = cl;
         Bridge.context = app.context;
-        Bridge.sWatchdog = mod.settingBoolean("carplay_watchdog", true);
-        Bridge.sCarOffRule = mod.settingBoolean("carplay_car_off", true);
+        Bridge.sWatchdog = Bridge.sCarOffRule = mod.settingBoolean("carplay_rules", true);
         Bridge.watchPower(app.context);
+        Bridge.watchEndRequests(app.context);
         // Broadcom's manager: DiPO registers its listener once the service is connected; the bridge's follows
         mod.hook(cl, "dipo.btcm.register_listener", new MethodHook() {
             @Override
