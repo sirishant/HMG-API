@@ -57,6 +57,9 @@ mod a '{"features": ["hmgapi.wifi"]}'; ok a "driver, firmware and the stock hots
 rm $R/system/wifi/fw_bcmdhd.bin
 mod a '{"features": ["hmgapi.wifi"]}'; no a "driver without its firmware: no" "no Wi-Fi chip or driver found on this unit"
 rm -r $R/system/wifi $R/system/etc/permissions/hotspot.xml
+mkdir -p $R/sys/class/net/wlan0
+mod a '{"features": ["hmgapi.wifi"]}'; ok a "a wlan interface counts as the chip"
+rmdir $R/sys/class/net/wlan0
 
 # the engine: refuses the mod, leaves out a part, override at the owner's risk
 mod b '{"region": "KOR"}'
