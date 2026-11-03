@@ -146,6 +146,36 @@ public final class Dipo {
                 });
             }
         });
+        // a new CarPlay session starts clean, and an ended one leaves nothing on the cluster
+        // (after Enhanced Phone Projection 1.11's session tracking)
+        mod.hook(app.classLoader, "dipo.carplay.session_started", new MethodHook() {
+            @Override
+            protected void afterHookedMethod(Param p) {
+                post(new Runnable() {
+                    @Override
+                    public void run() {
+                        turns.sessionStarted();
+                    }
+                });
+                if (iap2 != null) new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        restartRouteGuidance();
+                    }
+                }, "hmgapi-cp-rg-session").start();
+            }
+        });
+        mod.hook(app.classLoader, "dipo.carplay.session_finalized", new MethodHook() {
+            @Override
+            protected void beforeHookedMethod(Param p) {
+                post(new Runnable() {
+                    @Override
+                    public void run() {
+                        turns.disconnected();
+                    }
+                });
+            }
+        });
         log("CarPlay: turn-by-turn to the cluster (HMG-API's route guidance listener)");
     }
 
@@ -225,6 +255,9 @@ public final class Dipo {
         final ClassLoader cl = app.classLoader;
         Bridge.cl = cl;
         Bridge.context = app.context;
+        Bridge.sWatchdog = mod.settingBoolean("carplay_watchdog", true);
+        Bridge.sCarOffRule = mod.settingBoolean("carplay_car_off", true);
+        Bridge.watchPower(app.context);
         // Broadcom's manager: DiPO registers its listener once the service is connected; the bridge's follows
         mod.hook(cl, "dipo.btcm.register_listener", new MethodHook() {
             @Override
