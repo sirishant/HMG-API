@@ -301,6 +301,66 @@
         "ret": "void"
       },
       "about": "a key for Android Auto (action, flags, _, keyCode, _, metaState, _, isViewHandled); Call (5) sends the phone key, Search first while the assistant runs"
+    },
+    {
+      "id": "gpm.main_activity",
+      "kind": "class",
+      "find": {
+        "name": "com.google.android.projection.sink.ui.MainActivity"
+      },
+      "about": "Android Auto's screen"
+    },
+    {
+      "id": "gpm.main_activity.on_key_up",
+      "kind": "method",
+      "of": "gpm.main_activity",
+      "find": {
+        "name": "onKeyUp",
+        "params": [
+          "int",
+          "android.view.KeyEvent"
+        ],
+        "ret": "boolean"
+      },
+      "about": "a car key released on Android Auto's screen; Media (251) pops up the car's media screen"
+    },
+    {
+      "id": "gpm.receiver_service.start_music_view",
+      "kind": "method",
+      "of": "gpm.receiver_service",
+      "find": {
+        "name": "onStartMusicView",
+        "params": [],
+        "ret": "void",
+        "strings": [
+          "onStartMusicView: a Media gate is floating on AA screen."
+        ]
+      },
+      "about": "brings Android Auto forward and sends its media key (KEYCODE_MEDIA): the phone's media screen"
+    },
+    {
+      "id": "gpm.receiver_service.send_osd_message",
+      "kind": "method",
+      "of": "gpm.receiver_service",
+      "find": {
+        "name": "sendToOsdMessage",
+        "params": [
+          "int",
+          "int"
+        ],
+        "ret": "void"
+      },
+      "about": "an on-screen message (kind, message id); 17 = the guide to hold the voice button for Android Auto's assistant"
+    },
+    {
+      "id": "gpm.key_listener.service",
+      "kind": "field",
+      "of": "gpm.key_listener",
+      "find": {
+        "name": "this$0",
+        "type": "@gpm.receiver_service"
+      },
+      "about": "the GPM service the key listener belongs to"
     }
   ]
 }

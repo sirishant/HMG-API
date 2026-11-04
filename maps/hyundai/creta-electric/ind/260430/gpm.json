@@ -30,6 +30,23 @@
     "ret": "void",
     "static": false
   },
+  "gpm.key_listener.service": {
+    "field": "this$0",
+    "type": "com.google.android.projection.service.GalReceiverService",
+    "static": false
+  },
+  "gpm.main_activity": {
+    "class": "com.google.android.projection.sink.ui.MainActivity"
+  },
+  "gpm.main_activity.on_key_up": {
+    "method": "onKeyUp",
+    "params": [
+      "int",
+      "android.view.KeyEvent"
+    ],
+    "ret": "boolean",
+    "static": false
+  },
   "gpm.navigation_status": {
     "class": "com.google.android.projection.protocol.NavigationStatus"
   },
@@ -116,6 +133,21 @@
       "boolean",
       "int"
     ],
+    "ret": "void",
+    "static": false
+  },
+  "gpm.receiver_service.send_osd_message": {
+    "method": "sendToOsdMessage",
+    "params": [
+      "int",
+      "int"
+    ],
+    "ret": "void",
+    "static": false
+  },
+  "gpm.receiver_service.start_music_view": {
+    "method": "onStartMusicView",
+    "params": [],
     "ret": "void",
     "static": false
   },
