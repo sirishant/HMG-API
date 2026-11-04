@@ -15,9 +15,10 @@ or software. There is no guarantee, and you use it at your own risk.
 - **Leave Android running for 2 minutes after every start before you restart.** Quick restarts turn
   HMG-API's hooks off.
 
-Already have HMG Leafia Plus or the AA EV package? Uninstall them first in NEMESIS Manager > Packages,
-newest first, with a real restart after each: car off, driver's door open, wait for the screen to go
-dark.
+Already have HMG Leafia Plus, the AA EV package, or NEMESIS's own wireless projection or
+turn-by-turn packages? Uninstall them first in NEMESIS Manager > My Packages, newest first, with a real
+restart after each: car off, driver's door open, wait for the screen to go dark. NEMESIS won't install
+HMG-API next to them.
 
 ## 1. Install NEMESIS
 
@@ -28,35 +29,28 @@ dark.
 
 NEMESIS Manager now shows My Packages, Package Store, Android Apps and Settings. Clear the drive.
 
-**Already have NEMESIS?** Update it to 1.16.4 or later: turn on Bluetooth tethering on your phone,
+**Already have NEMESIS?** Update it to 1.16.7 or later (older versions can't install from the
+HMG-API drive): turn on Bluetooth tethering on your phone,
 connect it to the car, then NEMESIS Manager > Settings > **Check for updates**. The head unit's Wi-Fi
 can't join a phone's Wi-Fi hotspot while it runs wireless projection.
 
-## 2. Install HMG-API
+## 2. Install HMG-API and the mods
 
-1. Unzip `hmgapi-1.0.0-beta.6-nemesis.zip` to the top level of the drive.
-2. Plug it in and confirm "HMG-API". When it's done, **remove the drive**.
-3. Open the app: NEMESIS Manager > My Packages > HMG-API > **Launch**. Tap **Restart unit**.
-4. Open the app the same way. Settings > Hook map > **Check the map on this car**. It takes about a
+1. Unzip `hmgapi-1.0.1-nemesis.zip` to the top level of the drive.
+2. Plug it in. NEMESIS's Package Store opens with the drive's packages. Install them in this order:
+   1. **HMG-API**
+   2. **Wireless CarPlay + Android Auto**
+   3. **Creta cluster display (RHD)**, **Projection extras**, **EV routing (Creta)** and **Drive log
+      (Creta)**
+3. **Remove the drive.**
+4. Open the app: NEMESIS Manager > My Packages > HMG-API > **Launch**. Tap **Restart unit**.
+5. Open the app the same way. Settings > Hook map > **Check the map on this car**. It takes about a
    minute.
-5. Tap **Restart unit**.
+6. Tap **Restart unit**.
 
 The app's title bar now says "Hooks on (map checked)", and HMG-API has a tile in the app menu.
 
-## 3. Add the mods
-
-1. Clear the drive and make a folder `HMGAPI/updates`. Put these in it:
-   - `wireless-carplay-aa-2.5.0.zip`
-   - `wireless-creta-rhd-1.3.0.zip`
-   - `projection-extras-1.1.1.zip`
-   - `ev-routing-creta-1.0.3.zip`
-   - `drive-log-creta-1.0.4.zip`
-2. Plug it in. HMG-API app > **Check USB updates**.
-3. Install the Wireless mod first, then the others. A warning about the author is expected.
-4. Tap **Apply changes**, then **Restart unit**.
-5. Remove the drive.
-
-## 4. Connect your phone
+## 3. Connect your phone
 
 - **Android:** connect wireless Android Auto from the car's phone connection screen.
 - **iPhone:** pair it from the same screen and allow CarPlay.
@@ -75,19 +69,19 @@ Only use updates from this project's releases. The official HMG-API download doe
 Creta map or the fixes this setup needs. If NEMESIS Manager offers an "HMG-API" update from the
 Package Store, decline it.
 
-- **A mod:** put the new zip in `HMGAPI/updates`, then use **Check USB updates**, **Apply changes** and
-  **Restart unit**.
-- **HMG-API:** unzip the new `nemesis.zip` to a drive and confirm the reinstall. Your mods and settings
-  stay. Remove the drive, then tap **Apply changes** and **Restart unit**.
-- **After a NEMESIS update:** plug in the HMG-API drive once and confirm, so HMG-API's start-up hook
-  goes back in.
+Unzip the new `nemesis.zip` to a drive and plug it in. In the Package Store, update HMG-API first,
+then the mods. Your settings stay. Remove the drive, then in the app tap **Apply changes** and
+**Restart unit**.
+
+A single mod can also go in `HMGAPI/updates` on a drive: **Check USB updates**, **Apply changes**,
+**Restart unit**.
 
 ## If something goes wrong
 
 | What you see | What to do |
 |---|---|
 | A mod misbehaves | Turn it off in the app, then **Apply changes** |
-| "Hooks not running" and no HMG-API tile | Repeat section 2, steps 1 and 2, then **Apply changes** and **Restart unit** |
+| "Hooks not running" and no HMG-API tile | Reinstall HMG-API from the drive (section 2, steps 1 and 2), then **Apply changes** and **Restart unit** |
 | The app won't open | NEMESIS Manager > My Packages > HMG-API > Uninstall, then restart |
 | Android won't start | Use a drive with the `nemesis.zip` contents and an empty file named `NEMESIS.emergency` at its top level |
 
