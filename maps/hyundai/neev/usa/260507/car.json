@@ -198,6 +198,8 @@
     "gpm.util": "not mapped yet: needs this car's stock files (added for the Hyundai Creta Electric)",
     "gpm.util.spec_step": "not mapped yet: needs this car's stock files (added for the Hyundai Creta Electric)",
     "gpm.key_listener": "not mapped yet: needs this car's stock files (added for the Hyundai Creta Electric)",
-    "gpm.key_listener.key_for_service": "not mapped yet: needs this car's stock files (added for the Hyundai Creta Electric)"
+    "gpm.key_listener.key_for_service": "not mapped yet: needs this car's stock files (added for the Hyundai Creta Electric)",
+    "framework.hscan_service.drive_range": "not mapped yet: needs this car's stock files (added for the Hyundai Creta Electric)",
+    "framework.hscan_service.battery_percent": "not mapped yet: needs this car's stock files (added for the Hyundai Creta Electric)"
   }
 }

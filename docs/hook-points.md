@@ -13,16 +13,16 @@ use one. A point a car's map lacks is off on that car, and the HMG-API app says 
 How points are described and found: [core/hookpoints/README.md](../core/hookpoints/README.md).
 Need one that isn't here? Open a "New hook point" issue.
 
-422 hook points. **Cars** (`maps/`):
+424 hook points. **Cars** (`maps/`):
 
 | Car | Map | Points |
 |---|---|---|
-| Hyundai Creta Electric IND 260430 | mapped from stock files | 422 of 422 |
-| Hyundai Ioniq 5 CAN 260206 | mapped from stock files | 343 of 422 |
-| Hyundai Ioniq 5 USA 260507 | mapped from stock files | 343 of 422 |
-| Hyundai Ioniq 5 USA 260903 | mapped on cars by HMG-API's own mapper | 325 of 422 |
-| Kia EV6 CAN 260206 | mapped from stock files | 343 of 422 |
-| Kia EV6 USA 260507 | checked on a car | 343 of 422 |
+| Hyundai Creta Electric IND 260430 | mapped from stock files | 424 of 424 |
+| Hyundai Ioniq 5 CAN 260206 | mapped from stock files | 343 of 424 |
+| Hyundai Ioniq 5 USA 260507 | mapped from stock files | 343 of 424 |
+| Hyundai Ioniq 5 USA 260903 | mapped on cars by HMG-API's own mapper | 325 of 424 |
+| Kia EV6 CAN 260206 | mapped from stock files | 343 of 424 |
+| Kia EV6 USA 260507 | checked on a car | 343 of 424 |
 
 In the tables, **Cars** is "all" when every car above has the point, otherwise the cars without it.
 
@@ -241,6 +241,8 @@ Android framework and the car's service interfaces (any process).
 | `framework.context_wrapper` | class | `android.content.ContextWrapper` |  | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
 | `framework.context_wrapper.send_broadcast` | method | `sendBroadcast(android.content.Intent)` → void | sendBroadcast(Intent) of a Service/Application; hooked in DiPO's process only, to add extras to com.daudio.app.dipo.start | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
 | `framework.navigation_cluster.update_tbt_trap_info_new` | method | `updateTBTTrapInfoNew(com.hkmc.cluster.NavigationCluster$NaviTbtTrapInfo)` → void | the trap frame as one object (the car's navigation sends this one): speed limit, cameras, tolls, the bar | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
+| `framework.hscan_service.drive_range` | method | `ableDriveDistance(byte)` → int | range left; argument 0 = km | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
+| `framework.hscan_service.battery_percent` | method | `remainBatteryPercentage()` → float | high-voltage battery charge, % | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
 
 ## btsettings
 

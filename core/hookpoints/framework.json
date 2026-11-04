@@ -2268,6 +2268,30 @@
         "ret": "void"
       },
       "about": "the trap frame as one object (the car's navigation sends this one): speed limit, cameras, tolls, the bar"
+    },
+    {
+      "id": "framework.hscan_service.drive_range",
+      "kind": "method",
+      "of": "framework.hscan_service",
+      "find": {
+        "name": "ableDriveDistance",
+        "params": [
+          "byte"
+        ],
+        "ret": "int"
+      },
+      "about": "range left; argument 0 = km"
+    },
+    {
+      "id": "framework.hscan_service.battery_percent",
+      "kind": "method",
+      "of": "framework.hscan_service",
+      "find": {
+        "name": "remainBatteryPercentage",
+        "params": [],
+        "ret": "float"
+      },
+      "about": "high-voltage battery charge, %"
     }
   ]
 }

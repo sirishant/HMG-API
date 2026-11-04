@@ -564,6 +564,12 @@
     "ret": "int",
     "static": false
   },
+  "framework.hscan_service.battery_percent": {
+    "method": "remainBatteryPercentage",
+    "params": [],
+    "ret": "float",
+    "static": false
+  },
   "framework.hscan_service.brake_pressure": {
     "method": "getCylPrsrVal",
     "params": [],
@@ -581,6 +587,14 @@
   "framework.hscan_service.charging_status": {
     "method": "getChargingStatus",
     "params": [],
+    "ret": "int",
+    "static": false
+  },
+  "framework.hscan_service.drive_range": {
+    "method": "ableDriveDistance",
+    "params": [
+      "byte"
+    ],
     "ret": "int",
     "static": false
   },
