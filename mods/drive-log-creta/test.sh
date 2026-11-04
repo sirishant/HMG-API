@@ -7,6 +7,8 @@ mkdir -p "$T/bin" "$T/usb0" "$T/usb1"
 printf '#!/bin/sh\necho "$@" >> %s/logcat.args\necho $$ > %s/logcat.pid\nexec /bin/sleep 600\n' "$T" "$T" > "$T/bin/logcat"
 printf '#!/bin/sh\necho "$*" >> %s/toasts\n' "$T" > "$T/bin/am"
 printf '#!/bin/sh\necho test\n' > "$T/bin/getprop"
+echo 6.3G > "$T/free"
+printf '#!/bin/sh\necho "Filesystem Size Used Free Blksize"\necho "$1 7.5G 1.2G $(cat %s/free) 32768"\n' "$T" > "$T/bin/df"
 chmod +x "$T/bin/"*
 S="$T/drive-log.sh"
 while IFS= read -r l; do
@@ -27,6 +29,13 @@ check "said so" 'grep -q "Drive log running" "$T/toasts"'
 rm -rf "$T/usb1/creta-drive-logs/log1"
 sleep 1
 check "a new start gets a new logcat" '[ "$(grep -c MicomD "$T/logcat.args")" -ge 2 ]'
+echo 50M > "$T/free"
+sleep 1
+check "nearly full: the running log stops" 'grep -q "logging stopped" "$T/toasts"'
+n=$(ls "$T/usb1/creta-drive-logs" | wc -l)
+sleep 1
+check "nearly full: no new log" '[ "$(ls "$T/usb1/creta-drive-logs" | wc -l)" = "$n" ]'
+echo 6.3G > "$T/free"
 rm -rf "$T/usb1/creta-drive-logs"
 OLD=$(cat "$T/logcat.pid")
 sleep 1
