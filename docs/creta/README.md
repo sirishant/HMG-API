@@ -59,6 +59,9 @@ Keep USB drives out of the port unless you're logging.
 
 ## Logs
 
+Use a drive without the install files: with `NEMESIS.data` on it, NEMESIS opens the Package Store
+at every start.
+
 - **Drive log:** make a folder `creta-drive-logs` on a drive and leave it plugged in. A log starts at
   every car start. Turn the car off before removing the drive.
 - **EV log:** make a folder `egmp-aa-ev-logs` on a drive. Logs copy over whenever it's plugged in.
