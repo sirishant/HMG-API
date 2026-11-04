@@ -6,6 +6,7 @@
   "authors": [
     "sirishant"
   ],
+  "repo": "https://github.com/sirishant/HMG-API",
   "license": "AGPL-3.0",
   "description": "Creta Electric India only. Android Auto and CarPlay turns on the cluster: near scenes, bar, roundabouts.",
   "system": {

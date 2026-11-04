@@ -6,9 +6,16 @@
   "authors": [
     "sirishant"
   ],
+  "repo": "https://github.com/sirishant/HMG-API",
   "license": "AGPL-3.0",
   "description": "Android Auto and CarPlay take turns, voice button swap, and CarPlay session fixes.",
-  "system": "all",
+  "system": {
+    "model": [
+      "SU2IEV"
+    ],
+    "region": "IND",
+    "firmware": "260430"
+  },
   "requires": [
     "wireless-carplay-aa ^2.4"
   ],

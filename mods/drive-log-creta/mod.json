@@ -6,6 +6,7 @@
   "authors": [
     "sirishant"
   ],
+  "repo": "https://github.com/sirishant/HMG-API",
   "license": "AGPL-3.0",
   "description": "Creta Electric India only. Logs cluster and navigation data to a USB drive with a creta-drive-logs folder.",
   "system": {
