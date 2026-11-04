@@ -14,8 +14,8 @@ REPO = os.path.dirname(HERE)
 ALL = 'ALL'
 RUNTIME = ['core/runtime/*-test.sh']
 INSTALL = ['install/common/test.sh', 'install/common/install-test.sh', 'install/usb/test.sh', 'install/nemesis/mod-test.sh', 'install/nemesis/sync-test.sh']
-MODS = ['mods/*/test.sh', 'mods/*/tools/*/test.sh', 'tools/check-scripts.sh']
-HOOKS = ['core/hookpoints/test.sh']
+MODS = ['tools/check-mod-points.sh', 'mods/*/test.sh', 'mods/*/tools/*/test.sh', 'tools/check-scripts.sh']
+HOOKS = ['tools/check-mod-points.sh', 'core/hookpoints/test.sh']
 
 # (path pattern, tests): every rule a path matches adds its tests; first match of DOCS ends it
 DOCS = ['docs/*', 'wiki/*', '*.md', '.github/ISSUE_TEMPLATE/*', '.github/release-notes/*', '.github/pull_request_template.md',
@@ -32,7 +32,8 @@ RULES = [
     (['core/hookpoints/*', 'maps/*', 'tools/map-car.py', 'tools/check-maps.py', 'tools/mkhookdoc.py', 'docs/hook-points.md', 'tools/test-hooks.py', 'tools/probe-test.py'], HOOKS),
     (['core/app/*'], ['core/app/qr-test.sh']),
     (['mods/examples/*'], ['core/runtime/signing-test.sh']),
-    (['mods/*'], ['tools/check-scripts.sh']),   # plus the changed mod's own tests (select)
+    (['mods/*'], ['tools/check-mod-points.sh', 'tools/check-scripts.sh']),
+    (['tools/check-mod-points.*'], ['tools/check-mod-points.sh']),   # plus the changed mod's own tests (select)
     (['install/*'], INSTALL + ['core/runtime/packages-test.sh']),
     (['tools/mkdelta.py', 'tools/mkrecipe.py', 'tools/mkmemrecipe.py'], ['core/runtime/engine-test.sh', 'core/runtime/safety-test.sh', 'tools/lpatch/test.sh']),
     (['tools/mkinstallers.sh', 'tools/mkrelease.sh', 'tools/mkmodpkg.sh', 'tools/mknemesismod.sh', 'tools/nemesis-version.py', 'tools/release-mods.txt'], INSTALL + ['core/runtime/signing-test.sh', 'core/runtime/usb-test.sh']),
