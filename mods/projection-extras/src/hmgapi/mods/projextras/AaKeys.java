@@ -17,9 +17,15 @@ import hmgapi.hook.Points;
  * Call key event only, GPM reads a level below 31, so its own checks decide as on older units:
  * Android Auto on screen, no Bluetooth call going on, rear camera not showing.
  *
- * Media: a short press of Media (251) on Android Auto's screen popped up the car's media screen.
- * It now runs GPM's own onStartMusicView: Android Auto's media key, the phone's media screen.
- * Holding Media still opens the car's media screen.
+ * Screen keys: a key released on Android Auto's screen goes on to the car's own action for that
+ * button unless the screen says it handled it (the car's ModeKeyDispatcher: "return by view").
+ * On Android Auto's screen, a short press of
+ *  - Media (251), which popped up the car's media screen, runs GPM's own onStartMusicView:
+ *    Android Auto's media key, the phone's media screen;
+ *  - NAV (255) or MAP (260), which opened the car's navigation over Android Auto, runs GPM's own
+ *    onStartNaviView: Android Auto's navigation key, the phone's navigation app.
+ * The key then counts as handled, so the car skips its own action. Held, each button does what
+ * the car does (Media: the car's media screen).
  *
  * Voice guide: GPM shows "Press and hold the Voice Recognition button for Android Auto voice
  * recognition" (message 17) whenever the car's assistant starts. With the voice swap on, holding
@@ -27,7 +33,7 @@ import hmgapi.hook.Points;
  */
 final class AaKeys {
     static final String GPM = "com.google.android.projection.sink";
-    static final int KEYCODE_CALL = 5, KEYCODE_MEDIA_CAR = 251;
+    static final int KEYCODE_CALL = 5, KEYCODE_MEDIA_CAR = 251, KEYCODE_NAVI = 255, KEYCODE_MAP = 260;
     static final int SPEC_WITH_TEL = 0;   // any level below 31
     static final int OSD_VR_GUIDE = 17;
 
@@ -36,47 +42,71 @@ final class AaKeys {
 
     private AaKeys() {}
 
+    /** a short press released now (held presses and cancelled ones are the car's) */
+    static boolean shortRelease(KeyEvent e) {
+        return e.getAction() == KeyEvent.ACTION_UP && !e.isCanceled()
+                && e.getEventTime() - e.getDownTime() < ViewConfiguration.getLongPressTimeout();
+    }
+
     static void gpm(final ModContext mod, LoadedApp app) {
         if (!GPM.equals(app.processName)) return;
         final ClassLoader cl = app.classLoader;
         final boolean call = mod.settingBoolean("aa_call_key", true);
         final boolean media = mod.settingBoolean("aa_media_key", true);
-        mod.hook(cl, "gpm.key_listener.key_for_service", new MethodHook() {
-            @Override
-            protected void beforeHookedMethod(Param m) {
-                if (sService == null) {
-                    sService = Points.get(cl, "gpm.key_listener.service", m.thisObject);
+        final boolean nav = mod.settingBoolean("aa_nav_key", true);
+        if (media || nav) {
+            mod.hook(cl, "gpm.receiver_service.on_create", new MethodHook() {
+                @Override
+                protected void afterHookedMethod(Param m) {
+                    sService = m.thisObject;
                 }
-                if (!call || ((Integer) m.args[3]) != KEYCODE_CALL) return;
-                sInCall.set(Boolean.TRUE);
-                if (((Integer) m.args[0]) == 0) mod.log("Android Auto: Call key, phone screen");
-            }
-
-            @Override
-            protected void afterHookedMethod(Param m) {
-                sInCall.remove();
-            }
-        });
+            });
+            mod.hook(cl, "gpm.main_activity.on_key_up", new MethodHook() {
+                @Override
+                protected void beforeHookedMethod(Param m) {
+                    int code = (Integer) m.args[0];
+                    String point, what;
+                    if (media && code == KEYCODE_MEDIA_CAR) {
+                        point = "gpm.receiver_service.start_music_view";
+                        what = "Media key, media screen";
+                    } else if (nav && (code == KEYCODE_NAVI || code == KEYCODE_MAP)) {
+                        point = "gpm.receiver_service.start_navi_view";
+                        what = (code == KEYCODE_NAVI ? "NAV" : "MAP") + " key, navigation";
+                    } else {
+                        return;
+                    }
+                    if (!(m.args[1] instanceof KeyEvent) || !shortRelease((KeyEvent) m.args[1])) return;
+                    Object svc = sService;
+                    if (svc == null) return;
+                    try {
+                        Points.call(cl, point, svc);
+                    } catch (Throwable t) {
+                        mod.error("Android Auto " + what, t);
+                        return;
+                    }
+                    m.setResult(Boolean.TRUE);
+                    mod.log("Android Auto: " + what);
+                }
+            });
+        }
         if (call) {
+            mod.hook(cl, "gpm.key_listener.key_for_service", new MethodHook() {
+                @Override
+                protected void beforeHookedMethod(Param m) {
+                    if (((Integer) m.args[3]) != KEYCODE_CALL) return;
+                    sInCall.set(Boolean.TRUE);
+                    if (((Integer) m.args[0]) == 0) mod.log("Android Auto: Call key, phone screen");
+                }
+
+                @Override
+                protected void afterHookedMethod(Param m) {
+                    sInCall.remove();
+                }
+            });
             mod.hook(cl, "gpm.util.spec_step", new MethodHook() {
                 @Override
                 protected void afterHookedMethod(Param m) {
                     if (sInCall.get() != null) m.setResult(SPEC_WITH_TEL);
-                }
-            });
-        }
-        if (media) {
-            mod.hook(cl, "gpm.main_activity.on_key_up", new MethodHook() {
-                @Override
-                protected void beforeHookedMethod(Param m) {
-                    if (((Integer) m.args[0]) != KEYCODE_MEDIA_CAR || !(m.args[1] instanceof KeyEvent)) return;
-                    KeyEvent e = (KeyEvent) m.args[1];
-                    if (e.getEventTime() - e.getDownTime() >= ViewConfiguration.getLongPressTimeout()) return;
-                    Object svc = sService;
-                    if (svc == null) return;
-                    m.setResult(Boolean.FALSE);
-                    mod.log("Android Auto: Media key, media screen");
-                    Points.call(cl, "gpm.receiver_service.start_music_view", svc);
                 }
             });
         }

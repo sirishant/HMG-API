@@ -2,13 +2,13 @@
   "id": "projection-extras",
   "name": "Projection extras",
   "version": "1.1.2",
-  "hmgapi": ">=1.0.0",
+  "hmgapi": ">=1.0.2",
   "authors": [
     "sirishant"
   ],
   "repo": "https://github.com/sirishant/HMG-API",
   "license": "AGPL-3.0",
-  "description": "Android Auto and CarPlay take turns, voice, Call and Media buttons, and CarPlay session fixes.",
+  "description": "Android Auto and CarPlay take turns, voice, and the Call, Media, NAV and MAP buttons; CarPlay session fixes.",
   "system": {
     "model": [
       "SU2IEV"
@@ -46,6 +46,9 @@
       "dipo.service.set_display": "observe",
       "dipo.service.post_message": "change",
       "dipo.activity_handler.handle_message": "replace",
+      "dipo.activity.dispatch_key_event": "replace",
+      "dipo.service.call_key": "observe",
+      "dipo.service.no_call_message": "replace",
       "iap2.service.send_accessory_config": "change",
       "iap2.service.set_wireless_carplay_status": "observe",
       "phoneprojection.wireless_service.on_create": "observe",
@@ -58,6 +61,7 @@
       "phoneprojection.wireless_service.connect_device": "change",
       "gpm.key_listener.key_for_service": "observe",
       "gpm.util.spec_step": "change",
+      "gpm.receiver_service.on_create": "observe",
       "gpm.main_activity.on_key_up": "replace",
       "gpm.receiver_service.send_osd_message": "replace"
     }

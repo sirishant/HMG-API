@@ -28,6 +28,20 @@
       "default": true,
       "apply": "restart",
       "title": "Media button opens Android Auto's media; hold for the car's (test)"
+    },
+    {
+      "key": "aa_nav_key",
+      "type": "toggle",
+      "default": true,
+      "apply": "restart",
+      "title": "NAV and MAP buttons open Android Auto's navigation; hold for the car's (test)"
+    },
+    {
+      "key": "carplay_keys",
+      "type": "toggle",
+      "default": true,
+      "apply": "restart",
+      "title": "CarPlay: NAV/MAP open Maps, Media Now Playing, Call the Phone app (untried test)"
     }
   ]
 }
