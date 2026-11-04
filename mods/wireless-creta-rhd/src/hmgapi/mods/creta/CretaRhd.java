@@ -96,7 +96,10 @@ final class CretaRhd implements TurnDisplay {
     private static final int FAMILY_ROUNDABOUT = 0xc0;
     private static final int ROUNDABOUT_RIGHT_FAMILY = 0x60;
     private static final int TABLE_SLIGHT_LEFT = 0xca, ROUNDABOUT_SLIGHT_LEFT = 0xcb;
-    private static final int NEAR_E3 = 400000;
+    // Where the car's own navigation switches from the card to its scene: 300 m for a turn
+    // (its first near frame says 300 with a 90% bar), up to 400 m for a roundabout. Ramps,
+    // forks and U-turns weren't on that drive: they go with the turns (a guess).
+    private static final int NEAR_TURN_E3 = 300000, NEAR_ROUNDABOUT_E3 = 400000;
     // The car's own trap frames still reach the cluster and carry level 0, which empties
     // the bar. Repeating ours restores it within this time.
     private static final long TRAP_RESEND_MS = 2000;
@@ -229,8 +232,11 @@ final class CretaRhd implements TurnDisplay {
         return fresh() && unitValue == UNIT_METERS ? e3Value / 1000 : fallback;
     }
 
-    private boolean near() {
-        return fresh() && unitValue == UNIT_METERS && e3Value <= NEAR_E3;
+    /** Close enough for this turn's scene: type is Maps' code mapped, or the scene itself. */
+    private boolean near(int type) {
+        boolean roundabout = (type & FAMILY_MASK) == FAMILY_ROUNDABOUT || type == TYPE_NEAR_ROUNDABOUT;
+        return fresh() && unitValue == UNIT_METERS
+                && e3Value <= (roundabout ? NEAR_ROUNDABOUT_E3 : NEAR_TURN_E3);
     }
 
     // ---- what the cluster gets
@@ -300,7 +306,7 @@ final class CretaRhd implements TurnDisplay {
 
     /** The scene the car uses this close to a turn. Anything else stays the card. */
     int nearType(int type) {
-        if (!near()) return type;
+        if (!near(type)) return type;
         if (arrow(type)) return TYPE_NEAR_TURN;
         if (branchRight(type)) return TYPE_NEAR_BRANCH_RIGHT;
         if (branchLeft(type)) return TYPE_NEAR_BRANCH_LEFT;
@@ -310,7 +316,7 @@ final class CretaRhd implements TurnDisplay {
 
     /** The arrow angle for the type Maps gave; call with the type before nearType. */
     float direction(int type, float fallback) {
-        if (!near()) return fallback;
+        if (!near(type)) return fallback;
         if (type == TYPE_SLIGHT_RIGHT) return SLIGHT_RIGHT_NEAR_DEG;
         if (type == TYPE_SLIGHT_LEFT) return SLIGHT_LEFT_NEAR_DEG;
         if (uTurn(type)) return NEAR_UTURN_DEG;
@@ -325,7 +331,7 @@ final class CretaRhd implements TurnDisplay {
     /** Countdown percent for a turn, the caller's value otherwise. */
     int bar(int type, int fallback) {
         if (!turn(type) || fallback > 100) return fallback;
-        if (near()) {
+        if (near(type)) {
             int m = e3Value / 1000;
             for (int i = 0; i < BAR_M.length; i++) {
                 if (m <= BAR_M[i]) return (i + 1) * 10;
@@ -336,12 +342,12 @@ final class CretaRhd implements TurnDisplay {
 
     /** On only for a near scene. An invalid distance (bar 0xfe, err -2) stays invalid. */
     int barErr(int type, int fallback) {
-        return (!turn(type) || !near()) && fallback == 0 ? BAR_OFF : fallback;
+        return (!turn(type) || !near(type)) && fallback == 0 ? BAR_OFF : fallback;
     }
 
     /** The bar value for the trap frame if it has to go out now, else -1. */
     int trapBar(int type, int bar, int err, long nowMs) {
-        int level = turn(type) && near() && err == 0 ? bar : 0;
+        int level = turn(type) && near(type) && err == 0 ? bar : 0;
         if (level == trapLevel && (level == 0 || nowMs - trapAt < TRAP_RESEND_MS)) return -1;
         trapLevel = level;
         trapAt = nowMs;

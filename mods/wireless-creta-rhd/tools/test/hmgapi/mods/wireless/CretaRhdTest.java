@@ -126,8 +126,14 @@ public final class CretaRhdTest {
         newRoute();
         second(TURN, LEFT, 0, "Main", 900, "900", METERS, 5000);
         frame("left, far", 0x46, 65535, 270, 0, -1);
-        second(TURN, LEFT, 0, "Main", 400, "400", METERS, 5000);
-        frame("left at 400", 0x0d, 0, 270, 100, 0);
+        second(TURN, LEFT, 0, "Main", 350, "350", METERS, 5000);
+        frame("left at 350: still the card (the car's scene starts at 300)", 0x46, 65535, 270, 0, -1);
+        second(TURN, LEFT, 0, "Main", 300, "300", METERS, 5000);
+        frame("left at 300: the scene", 0x0d, 0, 270, 80, 0);
+        second(RAB, UNSPEC, 90, "Main", 400, "400", METERS, 5000);
+        frame("roundabout at 400: the scene (the car's from 400)", 0x21, 0, 270, 100, 0);
+        second(RAB, UNSPEC, 90, "Main", 500, "500", METERS, 5000);
+        frame("roundabout at 500: the card", 0xc9, 0, 270, 0, -1);
         second(TURN, RIGHT, 0, "Main", 120, "120", METERS, 5000);
         frame("right at 120", 0x0d, 0, 90, 30, 0);
         second(TURN, RIGHT, 0, "Main", 1500, "1.5", KM_P1, 5000);
@@ -139,8 +145,13 @@ public final class CretaRhdTest {
         t.nextTurnDistance(848, 10, 850000, METERS);
         eq(tbt().split(" ")[4], "850.0", "shows Maps' 850, not the exact 848");
 
-        // the bar table, the car's own
-        int[][] bars = {{390, 100}, {340, 90}, {300, 80}, {270, 70}, {240, 60}, {200, 50}, {170, 40}, {130, 30}, {100, 20}, {60, 10}, {5, 10}};
+        // the bar table, the car's own (a roundabout's scene starts at 400 m, a turn's at 300)
+        int[][] rbars = {{390, 100}, {340, 90}};
+        for (int[] b : rbars) {
+            second(RAB, UNSPEC, 90, "Main", b[0], "" + b[0], METERS, 5000);
+            eq(frame()[3], b[1], "roundabout bar at " + b[0] + " m");
+        }
+        int[][] bars = {{300, 80}, {270, 70}, {240, 60}, {200, 50}, {170, 40}, {130, 30}, {100, 20}, {60, 10}, {5, 10}};
         for (int[] b : bars) {
             second(TURN, LEFT, 0, "Main", b[0], "" + b[0], METERS, 5000);
             eq(frame()[3], b[1], "bar at " + b[0] + " m");
