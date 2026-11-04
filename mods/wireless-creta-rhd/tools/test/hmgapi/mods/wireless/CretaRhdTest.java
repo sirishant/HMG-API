@@ -173,9 +173,9 @@ public final class CretaRhdTest {
         // roundabouts: clockwise family, mirrored angle, checked on the road by heading
         second(RAB, UNSPEC, 90, "Main", 900, "900", METERS, 5000);
         frame("left exit, far", 0xc9, 0, 270, 0, -1);
-        // slight-left exit: the cluster has no far icon for 0xca (the loader on the road)
+        // slight-left exit: the car's own navigation sends 0xcb (0xca drew the loader)
         second(RAB, UNSPEC, 160, "Main", 900, "900", METERS, 5000);
-        frame("slight left exit, far: the left exit's icon", 0xc9, 0, 315, 0, -1);
+        frame("slight left exit, far: the car's 0xcb", 0xcb, 0, 315, 0, -1);
         second(RAB, UNSPEC, 160, "Main", 200, "200", METERS, 5000);
         frame("slight left exit, near: the scene at 315", 0x21, 0, 315, 50, 0);
         second(RAB, UNSPEC, 90, "Main", 200, "200", METERS, 5000);

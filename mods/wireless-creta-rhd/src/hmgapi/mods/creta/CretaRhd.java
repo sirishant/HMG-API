@@ -95,7 +95,7 @@ final class CretaRhd implements TurnDisplay {
     private static final int FAMILY_MASK = 0xf0;
     private static final int FAMILY_ROUNDABOUT = 0xc0;
     private static final int ROUNDABOUT_RIGHT_FAMILY = 0x60;
-    private static final int ROUNDABOUT_SLIGHT_LEFT = 0xca, ROUNDABOUT_LEFT = 0xc9;
+    private static final int TABLE_SLIGHT_LEFT = 0xca, ROUNDABOUT_SLIGHT_LEFT = 0xcb;
     private static final int NEAR_E3 = 400000;
     // The car's own trap frames still reach the cluster and carry level 0, which empties
     // the bar. Repeating ours restores it within this time.
@@ -237,16 +237,16 @@ final class CretaRhd implements TurnDisplay {
 
     /**
      * The car's clockwise family and mirrored angle, from the right-hand traffic table. The far
-     * card is drawn from this code too, and the cluster has no far icon for the slight-left exit
-     * (0xca): it drew the loader over 400 m on the road. Its own navigation's turn lists only
-     * used 0xc1, 0xc3, 0xc4, 0xc6 and 0xc9, so the slight-left exit shows the left exit's icon
-     * far away; the near scene still points at 315 degrees.
+     * card is drawn from this code too. The car's own navigation, logged on the road, gave
+     * 0xc0 0, 0xc1 45, 0xc3 90, 0xc4 135, 0xc6 180, 0xc9 270 and 0xcb 315 degrees (each with
+     * its near scene's angle): the table's slight-left exit, 0xca, is 0xcb here (0xca drew the
+     * loader). 225 degrees (0xc7) hasn't been seen from the car.
      */
     @Override
     public int roundaboutType(int type) {
         if ((type & FAMILY_MASK) != ROUNDABOUT_RIGHT_FAMILY) return type;
         int t = FAMILY_ROUNDABOUT | (type & 0x0f);
-        return t == ROUNDABOUT_SLIGHT_LEFT ? ROUNDABOUT_LEFT : t;
+        return t == TABLE_SLIGHT_LEFT ? ROUNDABOUT_SLIGHT_LEFT : t;
     }
 
     @Override
