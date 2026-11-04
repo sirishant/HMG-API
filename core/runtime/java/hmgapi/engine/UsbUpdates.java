@@ -22,8 +22,12 @@ import java.util.Set;
 final class UsbUpdates {
     private UsbUpdates() {}
 
-    /** HMG-API's release key: only releases signed with it update HMG-API. */
-    static final String RELEASE_UUID = "7c8adfcb-bf60-88ac-9389-62e9d43728e1";
+    /**
+     * The release key: only releases signed with it update HMG-API. This fork's (sirishant/HMG-API,
+     * the Creta builds), so its own releases update from a stick; upstream's (7c8adfcb-...) are
+     * refused here, as this fork's are by upstream builds.
+     */
+    static final String RELEASE_UUID = "4a60dd53-60b2-8cf8-a111-0f3884eaeba8";
     static final String[] MOUNTS = { "/storage/usb0", "/storage/usb1", "/storage/usb2",
         "/mnt/media_rw/usb0", "/mnt/media_rw/usb1", "/mnt/media_rw/usb2" };
 

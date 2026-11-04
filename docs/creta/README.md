@@ -36,7 +36,7 @@ can't join a phone's Wi-Fi hotspot while it runs wireless projection.
 
 ## 2. Install HMG-API and the mods
 
-1. Unzip `hmgapi-1.0.2-nemesis.zip` to the top level of the drive.
+1. Unzip `hmgapi-1.0.3-nemesis.zip` to the top level of the drive.
 2. Plug it in. NEMESIS's Package Store opens with the drive's packages. Install them in this order:
    1. **HMG-API**
    2. **Wireless CarPlay + Android Auto**
@@ -72,12 +72,15 @@ Only use updates from this project's releases. The official HMG-API download doe
 Creta map or the fixes this setup needs. If NEMESIS Manager offers an "HMG-API" update from the
 Package Store, decline it.
 
-Unzip the new `nemesis.zip` to a drive and plug it in. In the Package Store, update HMG-API first,
-then the mods. Your settings stay. Remove the drive, then in the app tap **Apply changes** and
-**Restart unit**.
+From HMG-API 1.0.3, update from the app: unzip the new `usb.zip` to a drive (or copy only the
+zips you want into `HMGAPI/updates` on it), plug it in, then in the app **Check USB updates**.
+Install HMG-API first if it's listed, then the mods. Your settings stay. Then **Apply changes** and
+**Restart unit**. NEMESIS Manager's My Packages follows by itself: HMG-API lists what it installed
+there at the new versions.
 
-A single mod can also go in `HMGAPI/updates` on a drive: **Check USB updates**, **Apply changes**,
-**Restart unit**.
+Before 1.0.3, HMG-API itself only takes updates signed with the official key, so update it to 1.0.3
+once through the Package Store: unzip the new `nemesis.zip` to a drive, plug it in, update HMG-API
+first, then the mods, remove the drive, **Apply changes** and **Restart unit**.
 
 ## If something goes wrong
 
