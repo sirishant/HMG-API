@@ -1,7 +1,7 @@
 {
   "id": "drive-log-creta",
   "name": "Drive log (Creta)",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "hmgapi": ">=1.0.0",
   "authors": [
     "sirishant"
