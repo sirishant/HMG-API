@@ -1,7 +1,7 @@
 # Hyundai Creta Electric India: getting started
 
-Wireless Android Auto and CarPlay, turn-by-turn on the cluster, and Google Maps EV routing with
-battery on arrival.
+Wireless Android Auto and CarPlay, turn-by-turn on the cluster, and EV routing with battery on
+arrival in Google Maps (Android Auto) and Apple Maps (CarPlay, where iOS offers it).
 
 **Creta-specific, right-hand drive.** This is for the Creta Electric sold in India, product
 `SU2IEV.IND`, head unit software `260430`, and nothing else. The mods refuse any other car, region
@@ -40,8 +40,8 @@ can't join a phone's Wi-Fi hotspot while it runs wireless projection.
 2. Plug it in. NEMESIS's Package Store opens with the drive's packages. Install them in this order:
    1. **HMG-API**
    2. **Wireless CarPlay + Android Auto**
-   3. **Creta cluster display (RHD)**, **Projection extras**, **EV routing (Creta)** and **Drive log
-      (Creta)**
+   3. **Creta cluster display (RHD)**, **Projection extras**, **EV routing (Creta)**, **CarPlay EV
+      routing (Creta)** and **Drive log (Creta)**
 3. **Remove the drive.**
 4. Open the app: NEMESIS Manager > My Packages > HMG-API > **Launch**. Tap **Restart unit**.
 5. Open the app the same way. Settings > Hook map > **Check the map on this car**. It takes about a
