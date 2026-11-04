@@ -14,6 +14,13 @@
       "default": true,
       "apply": "restart",
       "title": "CarPlay screen: retry for 15 s (test)"
+    },
+    {
+      "key": "aa_call_key",
+      "type": "toggle",
+      "default": true,
+      "apply": "restart",
+      "title": "Call button opens Android Auto's phone (test)"
     }
   ]
 }

@@ -8,7 +8,7 @@
   ],
   "repo": "https://github.com/sirishant/HMG-API",
   "license": "AGPL-3.0",
-  "description": "Android Auto and CarPlay take turns, voice button swap, and CarPlay session fixes.",
+  "description": "Android Auto and CarPlay take turns, voice and Call button fixes, and CarPlay session fixes.",
   "system": {
     "model": [
       "SU2IEV"
@@ -55,7 +55,9 @@
       "phoneprojection.wireless_service.connect_handler": "replace",
       "phoneprojection.wireless_service.disconnect_handler": "replace",
       "phoneprojection.binder.disconnect_pp": "observe",
-      "phoneprojection.wireless_service.connect_device": "change"
+      "phoneprojection.wireless_service.connect_device": "change",
+      "gpm.key_listener.key_for_service": "observe",
+      "gpm.util.spec_step": "change"
     }
   },
   "input": [
