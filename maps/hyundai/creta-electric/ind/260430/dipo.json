@@ -2,6 +2,14 @@
   "dipo.activity": {
     "class": "com.daudio.app.dipo.ui.DipoActivity"
   },
+  "dipo.activity.dispatch_key_event": {
+    "method": "dispatchKeyEvent",
+    "params": [
+      "android.view.KeyEvent"
+    ],
+    "ret": "boolean",
+    "static": false
+  },
   "dipo.activity.on_destroy": {
     "method": "onDestroy",
     "params": [],
@@ -244,6 +252,16 @@
   "dipo.service": {
     "class": "com.daudio.app.dipo.service.DipoService"
   },
+  "dipo.service.call_key": {
+    "method": "a",
+    "params": [
+      "com.daudio.app.dipo.service.DipoService",
+      "int",
+      "int"
+    ],
+    "ret": "void",
+    "static": true
+  },
   "dipo.service.device_name": {
     "field": "mDeviceName",
     "type": "java.lang.String",
@@ -269,6 +287,24 @@
     "ret": "void",
     "static": false
   },
+  "dipo.service.display_map": {
+    "method": "p",
+    "params": [],
+    "ret": "void",
+    "static": false
+  },
+  "dipo.service.display_music": {
+    "method": "r",
+    "params": [],
+    "ret": "void",
+    "static": false
+  },
+  "dipo.service.display_phone": {
+    "method": "q",
+    "params": [],
+    "ret": "void",
+    "static": false
+  },
   "dipo.service.instance": {
     "field": "at",
     "type": "com.daudio.app.dipo.service.DipoService",
@@ -278,6 +314,12 @@
     "method": "dB",
     "params": [],
     "ret": "boolean",
+    "static": false
+  },
+  "dipo.service.no_call_message": {
+    "method": "dd",
+    "params": [],
+    "ret": "void",
     "static": false
   },
   "dipo.service.player": {

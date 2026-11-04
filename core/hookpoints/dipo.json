@@ -460,6 +460,19 @@
       "about": "re-attaches the screen to DipoService with the activity's mode (private)"
     },
     {
+      "id": "dipo.activity.dispatch_key_event",
+      "kind": "method",
+      "of": "dipo.activity",
+      "find": {
+        "name": "dispatchKeyEvent",
+        "params": [
+          "android.view.KeyEvent"
+        ],
+        "ret": "boolean"
+      },
+      "about": "a car key on the CarPlay screen (always false: not handled, so the car does that button's own action)"
+    },
+    {
       "id": "dipo.activity_handler",
       "kind": "class",
       "find": {
@@ -834,6 +847,76 @@
         ]
       },
       "about": "dipoFinalized: DiPO's own end-of-session cleanup (what onSessionFinalized runs); once per session (guarded)"
+    },
+    {
+      "id": "dipo.service.display_map",
+      "kind": "method",
+      "of": "dipo.service",
+      "find": {
+        "params": [],
+        "ret": "void",
+        "strings": [
+          "displayMap() "
+        ]
+      },
+      "about": "asks the iPhone for CarPlay's Maps (requestUI maps:)"
+    },
+    {
+      "id": "dipo.service.display_phone",
+      "kind": "method",
+      "of": "dipo.service",
+      "find": {
+        "params": [],
+        "ret": "void",
+        "strings": [
+          "displayPhone() "
+        ]
+      },
+      "about": "asks the iPhone for CarPlay's Phone (requestUI mobilephone:)"
+    },
+    {
+      "id": "dipo.service.display_music",
+      "kind": "method",
+      "of": "dipo.service",
+      "find": {
+        "params": [],
+        "ret": "void",
+        "strings": [
+          "===============>displayMusic() "
+        ]
+      },
+      "about": "asks the iPhone for CarPlay's Now Playing (requestUI nowplaying:); plays if the car's audio was off"
+    },
+    {
+      "id": "dipo.service.call_key",
+      "kind": "method",
+      "of": "dipo.service",
+      "find": {
+        "params": [
+          "@dipo.service",
+          "int",
+          "int"
+        ],
+        "ret": "void",
+        "static": true,
+        "strings": [
+          "onKeyForService() performPhoneKey Call Key - has PTTKey"
+        ]
+      },
+      "about": "static: the Call key for CarPlay (service, action, flags): answers or ends a call, the no-call message on the car's screen"
+    },
+    {
+      "id": "dipo.service.no_call_message",
+      "kind": "method",
+      "of": "dipo.service",
+      "find": {
+        "params": [],
+        "ret": "void",
+        "strings": [
+          "=========================> displayNotCallOsd mNotiManager = null or Oem Popup is Run... OemPoupActive : "
+        ]
+      },
+      "about": "the on-screen message that there's no call (Call pressed without one)"
     }
   ]
 }

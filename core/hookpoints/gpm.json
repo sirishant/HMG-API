@@ -322,7 +322,29 @@
         ],
         "ret": "boolean"
       },
-      "about": "a car key released on Android Auto's screen; Media (251) pops up the car's media screen"
+      "about": "a car key released on Android Auto's screen (true: handled, so the car skips that button's own action); Media (251) pops up the car's media screen, NAV (255) and MAP (260) go on to the car's navigation"
+    },
+    {
+      "id": "gpm.receiver_service.on_create",
+      "kind": "method",
+      "of": "gpm.receiver_service",
+      "find": {
+        "name": "onCreate",
+        "params": [],
+        "ret": "void"
+      },
+      "about": "GPM's service starts (once per GPM process)"
+    },
+    {
+      "id": "gpm.receiver_service.start_navi_view",
+      "kind": "method",
+      "of": "gpm.receiver_service",
+      "find": {
+        "name": "onStartNaviView",
+        "params": [],
+        "ret": "void"
+      },
+      "about": "sends Android Auto's navigation key (KEYCODE_NAVIGATION): the phone's navigation app"
     },
     {
       "id": "gpm.receiver_service.start_music_view",
@@ -351,16 +373,6 @@
         "ret": "void"
       },
       "about": "an on-screen message (kind, message id); 17 = the guide to hold the voice button for Android Auto's assistant"
-    },
-    {
-      "id": "gpm.key_listener.service",
-      "kind": "field",
-      "of": "gpm.key_listener",
-      "find": {
-        "name": "this$0",
-        "type": "@gpm.receiver_service"
-      },
-      "about": "the GPM service the key listener belongs to"
     }
   ]
 }

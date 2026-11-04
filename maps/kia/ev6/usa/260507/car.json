@@ -209,6 +209,13 @@
     "gpm.main_activity.on_key_up": "not mapped yet: needs this car's stock files (added for the Hyundai Creta Electric)",
     "gpm.receiver_service.start_music_view": "not mapped yet: needs this car's stock files (added for the Hyundai Creta Electric)",
     "gpm.receiver_service.send_osd_message": "not mapped yet: needs this car's stock files (added for the Hyundai Creta Electric)",
-    "gpm.key_listener.service": "not mapped yet: needs this car's stock files (added for the Hyundai Creta Electric)"
+    "gpm.receiver_service.on_create": "not mapped yet: needs this car's stock files (added for the Hyundai Creta Electric)",
+    "gpm.receiver_service.start_navi_view": "not mapped yet: needs this car's stock files (added for the Hyundai Creta Electric)",
+    "dipo.activity.dispatch_key_event": "not mapped yet: needs this car's stock files (added for the Hyundai Creta Electric)",
+    "dipo.service.display_map": "not mapped yet: needs this car's stock files (added for the Hyundai Creta Electric)",
+    "dipo.service.display_phone": "not mapped yet: needs this car's stock files (added for the Hyundai Creta Electric)",
+    "dipo.service.display_music": "not mapped yet: needs this car's stock files (added for the Hyundai Creta Electric)",
+    "dipo.service.call_key": "not mapped yet: needs this car's stock files (added for the Hyundai Creta Electric)",
+    "dipo.service.no_call_message": "not mapped yet: needs this car's stock files (added for the Hyundai Creta Electric)"
   }
 }

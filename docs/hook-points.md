@@ -13,16 +13,16 @@ use one. A point a car's map lacks is off on that car, and the HMG-API app says 
 How points are described and found: [core/hookpoints/README.md](../core/hookpoints/README.md).
 Need one that isn't here? Open a "New hook point" issue.
 
-429 hook points. **Cars** (`maps/`):
+436 hook points. **Cars** (`maps/`):
 
 | Car | Map | Points |
 |---|---|---|
-| Hyundai Creta Electric IND 260430 | mapped from stock files | 429 of 429 |
-| Hyundai Ioniq 5 CAN 260206 | mapped from stock files | 343 of 429 |
-| Hyundai Ioniq 5 USA 260507 | mapped from stock files | 343 of 429 |
-| Hyundai Ioniq 5 USA 260903 | mapped on cars by HMG-API's own mapper | 325 of 429 |
-| Kia EV6 CAN 260206 | mapped from stock files | 343 of 429 |
-| Kia EV6 USA 260507 | checked on a car | 343 of 429 |
+| Hyundai Creta Electric IND 260430 | mapped from stock files | 436 of 436 |
+| Hyundai Ioniq 5 CAN 260206 | mapped from stock files | 343 of 436 |
+| Hyundai Ioniq 5 USA 260507 | mapped from stock files | 343 of 436 |
+| Hyundai Ioniq 5 USA 260903 | mapped on cars by HMG-API's own mapper | 325 of 436 |
+| Kia EV6 CAN 260206 | mapped from stock files | 343 of 436 |
+| Kia EV6 USA 260507 | checked on a car | 343 of 436 |
 
 In the tables, **Cars** is "all" when every car above has the point, otherwise the cars without it.
 
@@ -336,6 +336,7 @@ App `com.daudio.app.dipo`.
 | `dipo.activity.on_destroy` | method | `onDestroy()` → void |  | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
 | `dipo.activity.set_display` | method | `setDisplay(android.view.SurfaceHolder)` → void | the screen's video surface changed: hands it to DipoService (private) | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
 | `dipo.activity.update_display` | method | `?()` → void | re-attaches the screen to DipoService with the activity's mode (private) | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
+| `dipo.activity.dispatch_key_event` | method | `dispatchKeyEvent(android.view.KeyEvent)` → boolean | a car key on the CarPlay screen (always false: not handled, so the car does that button's own action) | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
 | `dipo.activity_handler` | class | a class in `com.daudio.app.dipo` (no fixed name) | the CarPlay screen's handler (message 7: screen-mode check, 6: finish) | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
 | `dipo.activity_handler.handle_message` | method | `handleMessage(android.os.Message)` → void |  | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
 | `dipo.activity_handler.activity` | field | `?`: dipo.activity |  | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
@@ -366,6 +367,11 @@ App `com.daudio.app.dipo`.
 | `dipo.iap2.stop_carplay` | method | `?()` → void | dipoStop: releases the player's resources and stops the CarPlay library (stopCarPlay: hides the display, native stop); no-op without a CarPlay service | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
 | `dipo.iap2.start_carplay` | method | `?()` → void | startDipo: starts the CarPlay library again (startCarPlay) after a dipoStop | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
 | `dipo.service.dipo_finalized` | method | `?()` → void | dipoFinalized: DiPO's own end-of-session cleanup (what onSessionFinalized runs); once per session (guarded) | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
+| `dipo.service.display_map` | method | `?()` → void | asks the iPhone for CarPlay's Maps (requestUI maps:) | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
+| `dipo.service.display_phone` | method | `?()` → void | asks the iPhone for CarPlay's Phone (requestUI mobilephone:) | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
+| `dipo.service.display_music` | method | `?()` → void | asks the iPhone for CarPlay's Now Playing (requestUI nowplaying:); plays if the car's audio was off | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
+| `dipo.service.call_key` | method | `static ?(dipo.service, int, int)` → void | static: the Call key for CarPlay (service, action, flags): answers or ends a call, the no-call message on the car's screen | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
+| `dipo.service.no_call_message` | method | `?()` → void | the on-screen message that there's no call (Call pressed without one) | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
 
 ## gpm
 
@@ -398,10 +404,11 @@ App `com.google.android.projection.sink`.
 | `gpm.key_listener` | class | a class in `com.google.android.projection.service` (no fixed name) | GPM's key listener: head unit and steering wheel keys while Android Auto is up | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
 | `gpm.key_listener.key_for_service` | method | `onKeyForService(int, int, int, int, int, int, int, boolean)` → void | a key for Android Auto (action, flags, _, keyCode, _, metaState, _, isViewHandled); Call (5) sends the phone key, Search first while the assistant runs | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
 | `gpm.main_activity` | class | `com.google.android.projection.sink.ui.MainActivity` | Android Auto's screen | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
-| `gpm.main_activity.on_key_up` | method | `onKeyUp(int, android.view.KeyEvent)` → boolean | a car key released on Android Auto's screen; Media (251) pops up the car's media screen | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
+| `gpm.main_activity.on_key_up` | method | `onKeyUp(int, android.view.KeyEvent)` → boolean | a car key released on Android Auto's screen (true: handled, so the car skips that button's own action); Media (251) pops up the car's media screen, NAV (255) and MAP (260) go on to the car's navigation | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
+| `gpm.receiver_service.on_create` | method | `onCreate()` → void | GPM's service starts (once per GPM process) | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
+| `gpm.receiver_service.start_navi_view` | method | `onStartNaviView()` → void | sends Android Auto's navigation key (KEYCODE_NAVIGATION): the phone's navigation app | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
 | `gpm.receiver_service.start_music_view` | method | `onStartMusicView()` → void | brings Android Auto forward and sends its media key (KEYCODE_MEDIA): the phone's media screen | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
 | `gpm.receiver_service.send_osd_message` | method | `sendToOsdMessage(int, int)` → void | an on-screen message (kind, message id); 17 = the guide to hold the voice button for Android Auto's assistant | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
-| `gpm.key_listener.service` | field | `this$0`: gpm.receiver_service | the GPM service the key listener belongs to | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
 
 ## homesetting
 
