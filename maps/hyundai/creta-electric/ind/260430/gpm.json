@@ -12,6 +12,24 @@
     "type": "com.google.android.projection.proto.Protos$NavigationStatusService$InstrumentClusterType",
     "static": true
   },
+  "gpm.key_listener": {
+    "class": "com.google.android.projection.service.GalReceiverService$6"
+  },
+  "gpm.key_listener.key_for_service": {
+    "method": "onKeyForService",
+    "params": [
+      "int",
+      "int",
+      "int",
+      "int",
+      "int",
+      "int",
+      "int",
+      "boolean"
+    ],
+    "ret": "void",
+    "static": false
+  },
   "gpm.navigation_status": {
     "class": "com.google.android.projection.protocol.NavigationStatus"
   },
@@ -120,6 +138,15 @@
   "gpm.sensor_source.speed": {
     "field": "SENSOR_TYPE_SPEED",
     "type": "int",
+    "static": true
+  },
+  "gpm.util": {
+    "class": "com.google.android.projection.sink.d.d"
+  },
+  "gpm.util.spec_step": {
+    "method": "bG",
+    "params": [],
+    "ret": "int",
     "static": true
   },
   "gpm.video_sink": {

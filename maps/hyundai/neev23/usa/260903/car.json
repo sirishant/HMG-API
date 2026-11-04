@@ -210,7 +210,11 @@
     "phoneprojection.wireless_service.status": "not mapped yet: needs this car's stock files (added for the Hyundai Creta Electric)",
     "phoneprojection.wireless_util": "not mapped yet: needs this car's stock files (added for the Hyundai Creta Electric)",
     "phoneprojection.wireless_util.show_device_change": "not mapped yet: needs this car's stock files (added for the Hyundai Creta Electric)",
-    "framework.navigation_cluster.update_tbt_trap_info_new": "not mapped yet: needs this car's stock files (added for the Hyundai Creta Electric)"
+    "framework.navigation_cluster.update_tbt_trap_info_new": "not mapped yet: needs this car's stock files (added for the Hyundai Creta Electric)",
+    "gpm.util": "not mapped yet: needs this car's stock files (added for the Hyundai Creta Electric)",
+    "gpm.util.spec_step": "not mapped yet: needs this car's stock files (added for the Hyundai Creta Electric)",
+    "gpm.key_listener": "not mapped yet: needs this car's stock files (added for the Hyundai Creta Electric)",
+    "gpm.key_listener.key_for_service": "not mapped yet: needs this car's stock files (added for the Hyundai Creta Electric)"
   },
   "by_reference": [
     "btsettings.projection_helper",

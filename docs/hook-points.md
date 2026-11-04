@@ -13,16 +13,16 @@ use one. A point a car's map lacks is off on that car, and the HMG-API app says 
 How points are described and found: [core/hookpoints/README.md](../core/hookpoints/README.md).
 Need one that isn't here? Open a "New hook point" issue.
 
-418 hook points. **Cars** (`maps/`):
+422 hook points. **Cars** (`maps/`):
 
 | Car | Map | Points |
 |---|---|---|
-| Hyundai Creta Electric IND 260430 | mapped from stock files | 418 of 418 |
-| Hyundai Ioniq 5 CAN 260206 | mapped from stock files | 343 of 418 |
-| Hyundai Ioniq 5 USA 260507 | mapped from stock files | 343 of 418 |
-| Hyundai Ioniq 5 USA 260903 | mapped on cars by HMG-API's own mapper | 325 of 418 |
-| Kia EV6 CAN 260206 | mapped from stock files | 343 of 418 |
-| Kia EV6 USA 260507 | checked on a car | 343 of 418 |
+| Hyundai Creta Electric IND 260430 | mapped from stock files | 422 of 422 |
+| Hyundai Ioniq 5 CAN 260206 | mapped from stock files | 343 of 422 |
+| Hyundai Ioniq 5 USA 260507 | mapped from stock files | 343 of 422 |
+| Hyundai Ioniq 5 USA 260903 | mapped on cars by HMG-API's own mapper | 325 of 422 |
+| Kia EV6 CAN 260206 | mapped from stock files | 343 of 422 |
+| Kia EV6 USA 260507 | checked on a car | 343 of 422 |
 
 In the tables, **Cars** is "all" when every car above has the point, otherwise the cars without it.
 
@@ -391,6 +391,10 @@ App `com.google.android.projection.sink`.
 | `gpm.sensor_source` | class | `com.google.android.projection.protocol.SensorSource` | Android Auto's sensor service | all |
 | `gpm.sensor_source.init` | method | `init(int, long, int[], int, int[], int[])` → boolean | (type, native, sensors offered to the phone, location, fuel types, EV connector types): once per connection | all |
 | `gpm.sensor_source.speed` | field | `static SENSOR_TYPE_SPEED`: int | the speed sensor (offered: the phone limits taps while moving) | all |
+| `gpm.util` | class | a class in `com.google.android.projection.sink` (no fixed name) | GPM's helper: car features, spec level, screen and call state checks | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
+| `gpm.util.spec_step` | method | `static ?()` → int | ro.product.opt.stepofspec, the head unit's spec level: below 31 the Call key sends Android Auto's phone key | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
+| `gpm.key_listener` | class | a class in `com.google.android.projection.service` (no fixed name) | GPM's key listener: head unit and steering wheel keys while Android Auto is up | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
+| `gpm.key_listener.key_for_service` | method | `onKeyForService(int, int, int, int, int, int, int, boolean)` → void | a key for Android Auto (action, flags, _, keyCode, _, metaState, _, isViewHandled); Call (5) sends the phone key, Search first while the assistant runs | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
 
 ## homesetting
 

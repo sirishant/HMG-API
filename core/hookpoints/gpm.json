@@ -244,6 +244,63 @@
         "static": true
       },
       "about": "the speed sensor (offered: the phone limits taps while moving)"
+    },
+    {
+      "id": "gpm.util",
+      "kind": "class",
+      "find": {
+        "package": "com.google.android.projection.sink",
+        "strings": [
+          "ro.product.opt.stepofspec"
+        ]
+      },
+      "about": "GPM's helper: car features, spec level, screen and call state checks"
+    },
+    {
+      "id": "gpm.util.spec_step",
+      "kind": "method",
+      "of": "gpm.util",
+      "find": {
+        "params": [],
+        "ret": "int",
+        "static": true,
+        "strings": [
+          "ro.product.opt.stepofspec"
+        ]
+      },
+      "about": "ro.product.opt.stepofspec, the head unit's spec level: below 31 the Call key sends Android Auto's phone key"
+    },
+    {
+      "id": "gpm.key_listener",
+      "kind": "class",
+      "find": {
+        "package": "com.google.android.projection.service",
+        "super": "com.hkmc.mode.ModeKeyListener",
+        "strings": [
+          "KEYCODE_CALL FEATURE_NO_VR_KEY !!!"
+        ]
+      },
+      "about": "GPM's key listener: head unit and steering wheel keys while Android Auto is up"
+    },
+    {
+      "id": "gpm.key_listener.key_for_service",
+      "kind": "method",
+      "of": "gpm.key_listener",
+      "find": {
+        "name": "onKeyForService",
+        "params": [
+          "int",
+          "int",
+          "int",
+          "int",
+          "int",
+          "int",
+          "int",
+          "boolean"
+        ],
+        "ret": "void"
+      },
+      "about": "a key for Android Auto (action, flags, _, keyCode, _, metaState, _, isViewHandled); Call (5) sends the phone key, Search first while the assistant runs"
     }
   ]
 }
