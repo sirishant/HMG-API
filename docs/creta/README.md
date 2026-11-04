@@ -48,7 +48,7 @@ The app's title bar now says "Hooks on (map checked)", and HMG-API has a tile in
 1. Clear the drive and make a folder `HMGAPI/updates`. Put these in it:
    - `wireless-carplay-aa-2.5.0.zip`
    - `wireless-creta-rhd-1.3.0.zip`
-   - `projection-extras-1.1.0.zip`
+   - `projection-extras-1.1.1.zip`
    - `ev-routing-creta-1.0.2.zip`
    - `drive-log-creta-1.0.4.zip`
 2. Plug it in. HMG-API app > **Check USB updates**.

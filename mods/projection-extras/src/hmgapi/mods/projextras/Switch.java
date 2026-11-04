@@ -55,7 +55,7 @@ public final class Switch extends ModEntry {
 
     private static void dipo(final ModContext mod, final LoadedApp app) {
         final ClassLoader cl = app.classLoader;
-        mod.hook(cl, "dipo.service.activated", new MethodHook() {
+        mod.hook(cl, "dipo.service.dipo_activated", new MethodHook() {
             @Override
             protected void beforeHookedMethod(Param p) {
                 transport = (Integer) p.args[0];
