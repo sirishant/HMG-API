@@ -62,6 +62,12 @@
     "ret": "int",
     "static": false
   },
+  "framework.bcm_service.batt_cond_indicator": {
+    "method": "getBattCondIndSta",
+    "params": [],
+    "ret": "int",
+    "static": false
+  },
   "framework.bcm_service.charge_door": {
     "method": "requestChargeLockDoor",
     "params": [
@@ -142,6 +148,11 @@
     "type": "java.lang.String",
     "static": true
   },
+  "framework.car_services.cluster": {
+    "field": "CLUSTER_SERVICE",
+    "type": "java.lang.String",
+    "static": true
+  },
   "framework.car_services.datc": {
     "field": "DATC_SERVICE",
     "type": "java.lang.String",
@@ -185,6 +196,53 @@
   "framework.car_services.vr": {
     "field": "VR_SERVICE",
     "type": "java.lang.String",
+    "static": true
+  },
+  "framework.cluster_listener": {
+    "class": "com.hkmc.cluster.INavigationClusterListener"
+  },
+  "framework.cluster_listener_stub": {
+    "class": "com.hkmc.cluster.INavigationClusterListener$Stub"
+  },
+  "framework.cluster_listener_stub.as_interface": {
+    "method": "asInterface",
+    "params": [
+      "android.os.IBinder"
+    ],
+    "ret": "com.hkmc.cluster.INavigationClusterListener",
+    "static": true
+  },
+  "framework.cluster_listener_stub.battery_info": {
+    "field": "TRANSACTION_onHandleBatteryInfoResp",
+    "type": "int",
+    "static": true
+  },
+  "framework.cluster_service": {
+    "class": "com.hkmc.cluster.IClusterService"
+  },
+  "framework.cluster_service.add_listener": {
+    "method": "addNavigationClusterListener",
+    "params": [
+      "com.hkmc.cluster.INavigationClusterListener"
+    ],
+    "ret": "void",
+    "static": false
+  },
+  "framework.cluster_service.battery_info": {
+    "method": "requestBatteryInfoReq",
+    "params": [],
+    "ret": "void",
+    "static": false
+  },
+  "framework.cluster_service_stub": {
+    "class": "com.hkmc.cluster.IClusterService$Stub"
+  },
+  "framework.cluster_service_stub.as_interface": {
+    "method": "asInterface",
+    "params": [
+      "android.os.IBinder"
+    ],
+    "ret": "com.hkmc.cluster.IClusterService",
     "static": true
   },
   "framework.context_impl": {
@@ -394,6 +452,11 @@
   },
   "framework.hev_flag": {
     "class": "com.hkmc.hev.HEVManager$HEVFlag"
+  },
+  "framework.hev_flag.batt_cond_failure": {
+    "field": "BMS_BATTCONDFAILPOPUP",
+    "type": "int",
+    "static": true
   },
   "framework.hev_flag.battery_conditioning": {
     "field": "EV_BATTERYCONDITIONING",

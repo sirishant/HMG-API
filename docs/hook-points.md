@@ -13,15 +13,16 @@ use one. A point a car's map lacks is off on that car, and the HMG-API app says 
 How points are described and found: [core/hookpoints/README.md](../core/hookpoints/README.md).
 Need one that isn't here? Open a "New hook point" issue.
 
-343 hook points. **Cars** (`maps/`):
+418 hook points. **Cars** (`maps/`):
 
 | Car | Map | Points |
 |---|---|---|
-| Hyundai Ioniq 5 CAN 260206 | mapped from stock files | 343 of 343 |
-| Hyundai Ioniq 5 USA 260507 | mapped from stock files | 343 of 343 |
-| Hyundai Ioniq 5 USA 260903 | mapped on cars by HMG-API's own mapper | 325 of 343 |
-| Kia EV6 CAN 260206 | mapped from stock files | 343 of 343 |
-| Kia EV6 USA 260507 | checked on a car | 343 of 343 |
+| Hyundai Creta Electric IND 260430 | mapped from stock files | 418 of 418 |
+| Hyundai Ioniq 5 CAN 260206 | mapped from stock files | 343 of 418 |
+| Hyundai Ioniq 5 USA 260507 | mapped from stock files | 343 of 418 |
+| Hyundai Ioniq 5 USA 260903 | mapped on cars by HMG-API's own mapper | 325 of 418 |
+| Kia EV6 CAN 260206 | mapped from stock files | 343 of 418 |
+| Kia EV6 USA 260507 | checked on a car | 343 of 418 |
 
 In the tables, **Cars** is "all" when every car above has the point, otherwise the cars without it.
 
@@ -236,6 +237,10 @@ Android framework and the car's service interfaces (any process).
 | `framework.cluster_listener_stub.battery_info` | field | `static TRANSACTION_onHandleBatteryInfoResp`: int | onHandleBatteryInfoResp(int[8]): [1] minimum pack temperature (whole C), [5] conditioning indicator; the answer to requestBatteryInfoReq, sent to every listener | not on Hyundai Ioniq 5 USA 260903 |
 | `framework.cluster_service.add_listener` | method | `addNavigationClusterListener(framework.cluster_listener)` → void | the service keeps a list and calls every listener: the navigation's own stays registered | not on Hyundai Ioniq 5 USA 260903 |
 | `framework.cluster_service.battery_info` | method | `requestBatteryInfoReq()` → void | asks the cluster for the battery info; answered through onHandleBatteryInfoResp | not on Hyundai Ioniq 5 USA 260903 |
+| `framework.navigation_cluster.update_tbt_trap_info` | method | `updateTBTTrapInfo(int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int)` → void | speed cameras, speed limit, tolls and the countdown bar to the cluster (one frame; index 11 the bar, 12 the speed limit) | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
+| `framework.context_wrapper` | class | `android.content.ContextWrapper` |  | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
+| `framework.context_wrapper.send_broadcast` | method | `sendBroadcast(android.content.Intent)` → void | sendBroadcast(Intent) of a Service/Application; hooked in DiPO's process only, to add extras to com.daudio.app.dipo.start | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
+| `framework.navigation_cluster.update_tbt_trap_info_new` | method | `updateTBTTrapInfoNew(com.hkmc.cluster.NavigationCluster$NaviTbtTrapInfo)` → void | the trap frame as one object (the car's navigation sends this one): speed limit, cameras, tolls, the bar | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
 
 ## btsettings
 
@@ -319,6 +324,46 @@ App `com.daudio.app.dipo`.
 | `dipo.btcm.register_listener` | method | `registerHfDeviceStatusListener(com.broadcom.bt.hfdevice.hfbtcm.HfDeviceStatusListener)` → void | a status listener is registered (DiPO does once the Bluetooth service is connected) | all |
 | `dipo.iap2_proxy` | class | `com.tcc.iap2.IIap2Service$Stub$Proxy` | the iAP2 server's binder proxy (library com.tcc.iap2) | all |
 | `dipo.iap2_proxy.stop_route_guidance` | method | `Iap2SvcStopRouteGuidanceUpdate(String[])` → boolean | stop the phone's route guidance updates (DiPO: the car's navigation took turn-by-turn back) | all |
+| `dipo.carplay.force_key_frame` | method | `forceKeyFrame()` → com.daudio.app.dipo.telechips.CarPlayReturn | asks the phone for a video key frame (public CarPlay library call) | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
+| `dipo.carplay_listener` | class | a class in `com.daudio.app.dipo` (no fixed name) | the CarPlay player's library listener (CarPlay callbacks, readable names) | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
+| `dipo.carplay_listener.decode_failure` | method | `onNotifyDecodeFailure(com.daudio.app.dipo.telechips.CarPlayScreenError)` → void | the CarPlay video decoder reported a screen error (UNKNOWN, NO_OUTPUT_FRAME, SEQ_HEADER_FAILED, BLACK_SCREEN_DETECTED) | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
+| `dipo.carplay_listener.owner` | field | `?`: dipo.iap2 | the CarPlay player the listener belongs to | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
+| `dipo.iap2.carplay` | field | `?`: com.daudio.app.dipo.telechips.CarPlayService | the player's CarPlay service (null until bound) | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
+| `dipo.activity` | class | `com.daudio.app.dipo.ui.DipoActivity` | the CarPlay screen | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
+| `dipo.activity.on_resume` | method | `onResume()` → void | the CarPlay screen is shown; posts the screen-mode check (3 s) when the local screen is on | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
+| `dipo.activity.on_destroy` | method | `onDestroy()` → void |  | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
+| `dipo.activity.set_display` | method | `setDisplay(android.view.SurfaceHolder)` → void | the screen's video surface changed: hands it to DipoService (private) | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
+| `dipo.activity.update_display` | method | `?()` → void | re-attaches the screen to DipoService with the activity's mode (private) | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
+| `dipo.activity_handler` | class | a class in `com.daudio.app.dipo` (no fixed name) | the CarPlay screen's handler (message 7: screen-mode check, 6: finish) | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
+| `dipo.activity_handler.handle_message` | method | `handleMessage(android.os.Message)` → void |  | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
+| `dipo.activity_handler.activity` | field | `?`: dipo.activity |  | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
+| `dipo.service` | class | `com.daudio.app.dipo.service.DipoService` | DiPO's service | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
+| `dipo.service.device_name` | field | `mDeviceName`: String | name of the iPhone DiPO is talking to | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
+| `dipo.service.instance` | field | `static ?`: dipo.service | the running DipoService (null before onCreate) | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
+| `dipo.service.local_screen_on` | method | `?()` → boolean | isLocalScreenOnOffstate: the head unit's screen is on | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
+| `dipo.screen_mode` | class | a class in `com.daudio.app.dipo` (no fixed name) | DiPO's CarPlay mode state | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
+| `dipo.screen_mode.get_screen` | method | `getScreen()` → int | who has the screen (2: accessory, the phone; 0 before CarPlay reports one) | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
+| `dipo.service.screen_mode` | method | `?()` → dipo.screen_mode | DipoService's current CarPlay mode state | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
+| `dipo.service.display_default` | method | `?()` → void | asks CarPlay for the screen (the player's default display request) | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
+| `dipo.service.set_display` | method | `setDisplay(android.view.SurfaceHolder)` → void | the CarPlay video surface (null: gone) | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
+| `dipo.service.show_screen` | method | `?()` → void | hands the stored video surface to the CarPlay player (shows the screen) | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
+| `dipo.session_listener.session_started` | method | `onSessionStarted(com.daudio.app.dipo.telechips.CarPlayTransportType)` → void | DipoService's CarPlay session start (transport Wired, Wireless) | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
+| `dipo.session_listener.iap2_connected` | method | `?(int, String)` → void | DipoService's onIap2Connected(component, serial) | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
+| `dipo.service.start_carplay_session` | method | `?(boolean)` → void | startCarPlaySession(phone BT audio playing); ends by posting message 15 (connection-error check) | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
+| `dipo.service.dipo_activated` | method | `?(int)` → void | dipoActivated(transport 0 wired, 1 wireless): sets the CarPlay phone's address on PPManager | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
+| `dipo.service.post_message` | method | `?(int, long)` → void | posts an empty message (what, delay ms) to DipoService's handler, replacing a pending one | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
+| `dipo.service.remove_message` | method | `?(int)` → void | removes a pending DipoService handler message (-1: all) | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
+| `dipo.service.set_cp_bt_address` | method | `setCPConnectedBTAddress(String)` → void | sets the CarPlay phone's Bluetooth address (upper-cased) on PPManager and broadcasts it (null: ignored) | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
+| `dipo.service.start_dipo_activity` | method | `?(int)` → void | starts the CarPlay screen (mode extra) | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
+| `dipo.service.set_dipo_status` | method | `?(int)` → void | setDipoStatus: DiPOManager's connect status | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
+| `dipo.service.vui_event` | method | `?(int)` → void | voice (Siri) start/end; on end posts message 46 (800 ms) | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
+| `dipo.utils.current_iap_device` | method | `?()` → String | the last iAP2-connected device's serial (a Bluetooth address for Bluetooth sessions) | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
+| `dipo.pp_manager` | class | `android.phoneprojection.PPManager` | phone projection manager (framework) | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
+| `dipo.pp_manager.set_cp_bt_address` | method | `setCPConnectedBTAddress(String)` → void | tells the system which Bluetooth device the CarPlay phone is (DiPO passes "" when it has none) | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
+| `dipo.service.player` | field | `?`: dipo.iap2 | DipoService's CarPlay player (mDipoPlayer, the dipo.iap2 class); null before the service sets it up | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
+| `dipo.iap2.stop_carplay` | method | `?()` → void | dipoStop: releases the player's resources and stops the CarPlay library (stopCarPlay: hides the display, native stop); no-op without a CarPlay service | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
+| `dipo.iap2.start_carplay` | method | `?()` → void | startDipo: starts the CarPlay library again (startCarPlay) after a dipoStop | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
+| `dipo.service.dipo_finalized` | method | `?()` → void | dipoFinalized: DiPO's own end-of-session cleanup (what onSessionFinalized runs); once per session (guarded) | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
 
 ## gpm
 
@@ -386,6 +431,11 @@ App `com.tcc.iap2server`.
 | `iap2.service.native_lock` | field | `static mLock`: Object |  | not on Hyundai Ioniq 5 USA 260903 |
 | `iap2.init_info.use_vehicle_information` | field | `static iAP2UsedVehicelInformation`: int |  | not on Hyundai Ioniq 5 USA 260903 |
 | `iap2.init_info.use_vehicle_status` | field | `static iAP2UsedVehicleStatus`: int |  | not on Hyundai Ioniq 5 USA 260903 |
+| `iap2.service.send_wifi_information` | method | `OnSendWifiInformation()` → void | sends the hotspot's Wi-Fi details to the phone (message 12 on the service's queue; private) | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
+| `iap2.service.send_accessory_config` | method | `doSendAccessoryConfigurationInformation(String, boolean, String, boolean, int, boolean, int)` → boolean | iAP2 WiFiAccessoryConfigurationInformation (ssid, has psk, psk, has security, security 0 none 1 WEP 2 WPA/WPA2, has channel, channel) | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
+| `iap2.service.set_wireless_carplay_status` | method | `static setWirelessCarplayStatusMsg(com.tcc.iap2.Iap2NotiMsg)` → void | stores the phone's DeviceWirelessCarPlayUpdate (item 0: status, 1 available); only caller: the native callback for it | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
+| `iap2.service.update_wireless_carplay_status` | method | `static updateWirelessCarplayStatus(Object)` → void | the native callback for DeviceWirelessCarPlayUpdate (a Parcel; private) | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
+| `iap2.service.msg_queue` | field | `static mMsgQueue`: java.util.concurrent.BlockingQueue | the service's message queue (android.os.Message; what 12: send Wi-Fi information) | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
 
 ## launcher
 
@@ -420,6 +470,39 @@ App `com.mobis.splitscreen.right`.
 | `panel.home.test_page` | field | `?`: panel.test_page | never set by stock code | all |
 | `panel.test_gate` | class | a class in `com.mobis.splitscreen.right` (no fixed name) |  | all |
 | `panel.test_gate.on` | method | `static ?()` → boolean | Mobis' test switch for slot 22 (always off on a car; HMG-API answers true only inside page_for_id and build_views) | all |
+
+## phoneprojection
+
+App `com.daudio.app.phoneprojection`.
+
+| Point | Kind | Looks for | About | Cars |
+|---|---|---|---|---|
+| `phoneprojection.wireless_service` | class | `com.daudio.app.phoneprojection.wireless.service.WirelessPhoneProjectionService` | PhoneProjection's wireless service: decides which wireless Android Auto / CarPlay device connects (readable name) | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
+| `phoneprojection.wireless_service.on_create` | method | `onCreate()` → void | the service starts: after it, keep the instance (there is one per process) | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
+| `phoneprojection.wireless_service.on_destroy` | method | `onDestroy()` → void | the service stops: drop the kept instance | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
+| `phoneprojection.status_info` | class | `com.daudio.app.phoneprojection.wireless.info.WPPDeviceStatusInfo` | status of the current wireless projection connection (type, name, BT address, USB serial, transfer type) | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
+| `phoneprojection.wireless_service.status` | field | `?`: phoneprojection.status_info | the service's current-connection status object (final, never null once constructed) | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
+| `phoneprojection.status_info.pp_type` | method | `?()` → int | projection type of the current connection: 0 none, 1 CarPlay, 2 Android Auto | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
+| `phoneprojection.status_info.transfer_type` | method | `?()` → int | transfer type of the current connection (0 wired/USB, else wireless; passed to disconnectPP) | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
+| `phoneprojection.status_info.bt_address` | method | `?()` → String | Bluetooth address of the connected phone (synchronized getter) | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
+| `phoneprojection.status_info.usb_serial` | method | `?()` → String | USB serial of the connected phone (synchronized getter) | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
+| `phoneprojection.status_info.device_name` | method | `getDeviceName()` → String | name of the connected phone | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
+| `phoneprojection.wireless_service.pp_manager` | field | `?`: android.phoneprojection.PPManager | the service's PPManager (getCPConnectedBTAddress: the iPhone DiPO just reported) | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
+| `phoneprojection.wireless_service.disconnect_pp` | method | `disconnectPP(int, String, String, int)` → void | ends a wireless projection: (ppType, btAddress, usbSerial, transferType); private, call through reflection on the service | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
+| `phoneprojection.wireless_service.connect_handler` | method | `?(String, String)` → void | connectivityConnectPPHandler(btAddress, usbSerial): a projection connect asked from the UI (projection button / Device Connections); stock returns at once while CarPlay or another projection is active | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
+| `phoneprojection.wireless_service.disconnect_handler` | method | `?(String, String, int)` → void | connectivityDisconnectPPHandler(btAddress, usbSerial, reason): a projection disconnect asked from the UI; stock always calls disconnectPP with the current status, even when its type is 0 | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
+| `phoneprojection.wireless_service.connect_device` | method | `?(android.phoneprojection.WLDeviceInfo, int, boolean)` → void | connectivityConnectPP(device, ready, fromBT): the automatic connect when a registered phone becomes ready (Bluetooth up); wired path first, then the auto-connection rule | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
+| `phoneprojection.binder` | class | a class in `com.daudio.app.phoneprojection.wireless.service` (no fixed name) | the wireless service's local binder (what the projection UI calls) | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
+| `phoneprojection.binder.disconnect_pp` | method | `disconnectPP(int, String, String, int)` → void | the user ended a projection on the head unit (ppType, btAddress, usbSerial, transferType) | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
+| `phoneprojection.wireless_receiver` | class | a class in `com.daudio.app.phoneprojection.wireless.service` (no fixed name) | the wireless service's broadcast receiver (popup answers, timeouts, ...) | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
+| `phoneprojection.wireless_receiver.on_receive` | method | `onReceive(android.content.Context, android.content.Intent)` → void | gets com.daudio.app.PhoneProjection.Wireless.CHANGE_USB_PP_YES (extras done, deviceAddress, deviceSerial): the device-change popup's answer; stock: done -> switch to that device | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
+| `phoneprojection.device_status_receiver` | class | `com.daudio.app.phoneprojection.receiver.DeviceStatusReceiver` | PhoneProjection's device-status receiver (USB, DiPO start/close, ...) | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
+| `phoneprojection.device_status_receiver.on_receive` | method | `onReceive(android.content.Context, android.content.Intent)` → void | gets com.daudio.app.dipo.start (a CarPlay session became active; stock sends no extras) and com.daudio.app.dipo.close | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
+| `phoneprojection.wireless_util` | class | a class in `com.daudio.app.phoneprojection.wireless` (no fixed name) | the wireless part's static helpers (popups, device lookups, disconnect reason) | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
+| `phoneprojection.wireless_util.show_device_change` | method | `static ?(android.content.Context, String, String, int, int, String, String)` → void | shows the stock 'another device is connected, switch?' popup: (context, btAddress, usbSerial, ppType, transferType, connectedName, newName); broadcasts CHANGE_USB_PP, the answer comes back as CHANGE_USB_PP_YES with the same address/serial | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
+| `phoneprojection.state` | class | a class in `com.daudio.app.phoneprojection` (no fixed name) | PhoneProjection's static state helpers | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
+| `phoneprojection.state.carplay_connected` | method | `static ?()` → boolean | isCarPlayConnected: DiPOManager.isDiPOActivated (any CarPlay session, wired or wireless) | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
+| `phoneprojection.state.connectivity_activated` | method | `static ?()` → boolean | isConnectivityActivated: CarPlay, MirrorLink or another projection active (the connect handler's early-return test) | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
 
 ## settings
 
