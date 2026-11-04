@@ -21,6 +21,13 @@
       "default": true,
       "apply": "restart",
       "title": "Call button opens Android Auto's phone (test)"
+    },
+    {
+      "key": "aa_media_key",
+      "type": "toggle",
+      "default": true,
+      "apply": "restart",
+      "title": "Media button opens Android Auto's media; hold for the car's (test)"
     }
   ]
 }

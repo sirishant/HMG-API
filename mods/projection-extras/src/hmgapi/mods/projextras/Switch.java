@@ -45,8 +45,8 @@ public final class Switch extends ModEntry {
             phoneProjection(mod, app);
         } else if (CarPlayFixes.IAP2.equals(app.packageName)) {
             CarPlayFixes.iap2(mod, app);
-        } else if (CallKey.GPM.equals(app.packageName)) {
-            CallKey.gpm(mod, app);
+        } else if (AaKeys.GPM.equals(app.packageName)) {
+            AaKeys.gpm(mod, app);
         }
     }
 
