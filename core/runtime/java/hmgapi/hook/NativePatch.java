@@ -140,6 +140,15 @@ final class NativePatch {
         w.mod.error("native patch " + w.lib + " not applied" + tried, null);
     }
 
+    /** Has one of this mod's recipes for the library been applied in this process (or found native)? */
+    static synchronized boolean applied(String mod, String lib) {
+        for (Map.Entry<String, List<Owned>> e : owned.entrySet()) {
+            if (!e.getKey().endsWith("/" + lib) && !e.getKey().equals(lib)) continue;
+            for (Owned o : e.getValue()) if (o.mod.equals(mod)) return true;
+        }
+        return false;
+    }
+
     static Owned overlap(List<Owned> here, List<long[]> regions) {
         for (Owned o : here) {
             for (long[] a : o.regions) {

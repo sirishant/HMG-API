@@ -139,6 +139,15 @@ public final class ModContext {
         }
     }
 
+    /**
+     * Is one of this mod's nativePatch recipes for the library in place in this process? Code
+     * that relies on the patched behaviour checks it first: until the library is loaded and the
+     * recipe fits, the stock code runs.
+     */
+    public boolean nativePatched(String lib) {
+        return NativePatch.applied(id, lib);
+    }
+
     /** Is the mod on right now? (Its hooks don't run while it's off.) */
     public boolean enabled() {
         return enabled;
