@@ -36,7 +36,7 @@ can't join a phone's Wi-Fi hotspot while it runs wireless projection.
 
 ## 2. Install HMG-API and the mods
 
-1. Unzip `hmgapi-1.0.4-nemesis.zip` to the top level of the drive.
+1. Unzip `hmgapi-1.0.5-nemesis.zip` to the top level of the drive.
 2. Plug it in. NEMESIS's Package Store opens with the drive's packages. Install them in this order:
    1. **HMG-API**
    2. **Wireless CarPlay + Android Auto**
