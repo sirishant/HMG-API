@@ -37,6 +37,11 @@ public final class Switch extends ModEntry {
     static final String S = "phoneprojection.wireless_service", INFO = "phoneprojection.status_info";
 
     @Override
+    public void zygoteInit(ModContext mod) {
+        NavKeys.zygote(mod);
+    }
+
+    @Override
     public void appLoaded(ModContext mod, LoadedApp app) {
         if (DIPO.equals(app.packageName)) {
             dipo(mod, app);

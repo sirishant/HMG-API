@@ -28,9 +28,12 @@ import hmgapi.hook.Points;
  * The key then counts as handled, so the car skips its own action. Held, each button does what
  * the car does (Media: the car's media screen).
  *
- * From the car's own screens, a short press of one of these buttons goes to the car, which (with
- * Android Auto as the source) brings Android Auto's screen up at its last view (GPM's shortcut
- * handling: onStartMusicCommand for every shortcut). Every car key also reaches GPM's key listener
+ * Short and held are the car's own: a press is held once the car marks it long (FLAG_LONG_PRESS,
+ * the point where it runs a button's long function).
+ *
+ * From the car's own screens, a short Media press goes to the car, which (with Android Auto as
+ * the source) brings Android Auto's screen up at its last view (GPM's shortcut handling:
+ * onStartMusicCommand for every shortcut); a short NAV or MAP brings it up through NavKeys. Every car key also reaches GPM's key listener
  * (onAllKeyForService, before any screen gets it), so a short press is remembered (and forgotten
  * when Android Auto's own screen takes it), and if Android Auto's screen comes up within PENDING_MS, the same Android Auto key
  * goes to the phone then. If the car opens its own screen instead, nothing more happens.
@@ -49,9 +52,14 @@ final class AaKeys {
 
     private static final ThreadLocal<Boolean> sInCall = new ThreadLocal<Boolean>();
     private static volatile Object sService;
-    /** the car's own button presses (onAllKeyForService): the last one down, and a short one no screen took */
+    /**
+     * the car's own button presses (onAllKeyForService, before any screen): the one down now,
+     * whether the car has marked it held (FLAG_LONG_PRESS, its own hold point), and a short one
+     * waiting for Android Auto's screen
+     */
     private static int sDownCode = -1, sPendingCode = -1;
-    private static long sDownAt, sPendingAt;
+    private static boolean sHeld;
+    private static long sPendingAt;
 
     private AaKeys() {}
 
@@ -101,8 +109,11 @@ final class AaKeys {
             protected void beforeHookedMethod(Param m) {
                 int code = (Integer) m.args[0];
                 if (!screenKey(code)) return;
-                if (!(m.args[1] instanceof KeyEvent) || !shortRelease((KeyEvent) m.args[1])) return;
+                if (!(m.args[1] instanceof KeyEvent)) return;
+                KeyEvent e = (KeyEvent) m.args[1];
+                if (e.getAction() != KeyEvent.ACTION_UP || e.isCanceled()) return;
                 synchronized (AaKeys.class) {
+                    if (sDownCode == code && sHeld) return;   // held: the car's own
                     sPendingCode = -1;   // the listener hears every key before the screen does
                 }
                 if (aaKey(mod, cl, code)) m.setResult(Boolean.TRUE);
@@ -111,17 +122,20 @@ final class AaKeys {
         mod.hook(cl, "gpm.key_listener.all_keys", new MethodHook() {
             @Override
             protected void beforeHookedMethod(Param m) {
-                int action = (Integer) m.args[0], code = (Integer) m.args[3];
+                int action = (Integer) m.args[0], flags = (Integer) m.args[1], code = (Integer) m.args[3];
+                int repeat = (Integer) m.args[6];
                 if (!screenKey(code)) return;
-                long now = SystemClock.uptimeMillis();
                 synchronized (AaKeys.class) {
                     if (action == KeyEvent.ACTION_DOWN) {
-                        sDownCode = code;
-                        sDownAt = now;
-                    } else if (action == KeyEvent.ACTION_UP && sDownCode == code && !Boolean.TRUE.equals(m.args[7])
-                            && now - sDownAt < ViewConfiguration.getLongPressTimeout()) {
+                        if (repeat == 0 || sDownCode != code) {
+                            sDownCode = code;
+                            sHeld = false;
+                        }
+                        if ((flags & KeyEvent.FLAG_LONG_PRESS) != 0) sHeld = true;
+                    } else if (action == KeyEvent.ACTION_UP && sDownCode == code && !sHeld
+                            && !Boolean.TRUE.equals(m.args[7])) {
                         sPendingCode = code;
-                        sPendingAt = now;
+                        sPendingAt = SystemClock.uptimeMillis();
                     }
                 }
             }

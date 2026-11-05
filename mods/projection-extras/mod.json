@@ -67,7 +67,10 @@
       "dipo.service.start_carplay_session": "observe",
       "dipo.call_utils.is_bt_call": "observe",
       "gpm.key_listener.all_keys": "observe",
-      "gpm.main_activity.on_resume": "observe"
+      "gpm.main_activity.on_resume": "observe",
+      "framework.hkmc_loader.automotive_service": "observe",
+      "framework.mode_key_dispatcher.send_broadcast_key_event": "observe",
+      "framework.mode_key_dispatcher.request_shortcut": "replace"
     }
   },
   "input": [
