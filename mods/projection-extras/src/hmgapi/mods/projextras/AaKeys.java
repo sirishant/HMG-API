@@ -28,8 +28,9 @@ import hmgapi.hook.Points;
  * the car does (Media: the car's media screen).
  *
  * Voice guide: GPM shows "Press and hold the Voice Recognition button for Android Auto voice
- * recognition" (message 17) whenever the car's assistant starts. With the voice swap on, holding
- * is the car's assistant, so the guide isn't shown.
+ * recognition" (message 17) whenever the car's assistant starts. With the voice button swapped
+ * (press for the phone's, hold for the car's), holding is the car's assistant, so the guide isn't
+ * shown.
  */
 final class AaKeys {
     static final String GPM = "com.google.android.projection.sink";
@@ -51,72 +52,63 @@ final class AaKeys {
     static void gpm(final ModContext mod, LoadedApp app) {
         if (!GPM.equals(app.processName)) return;
         final ClassLoader cl = app.classLoader;
-        final boolean call = mod.settingBoolean("aa_call_key", true);
-        final boolean media = mod.settingBoolean("aa_media_key", true);
-        final boolean nav = mod.settingBoolean("aa_nav_key", true);
-        if (media || nav) {
-            mod.hook(cl, "gpm.receiver_service.on_create", new MethodHook() {
-                @Override
-                protected void afterHookedMethod(Param m) {
-                    sService = m.thisObject;
+        mod.hook(cl, "gpm.receiver_service.on_create", new MethodHook() {
+            @Override
+            protected void afterHookedMethod(Param m) {
+                sService = m.thisObject;
+            }
+        });
+        mod.hook(cl, "gpm.main_activity.on_key_up", new MethodHook() {
+            @Override
+            protected void beforeHookedMethod(Param m) {
+                int code = (Integer) m.args[0];
+                String point, what;
+                if (code == KEYCODE_MEDIA_CAR) {
+                    point = "gpm.receiver_service.start_music_view";
+                    what = "Media key, media screen";
+                } else if (code == KEYCODE_NAVI || code == KEYCODE_MAP) {
+                    point = "gpm.receiver_service.start_navi_view";
+                    what = (code == KEYCODE_NAVI ? "NAV" : "MAP") + " key, navigation";
+                } else {
+                    return;
                 }
-            });
-            mod.hook(cl, "gpm.main_activity.on_key_up", new MethodHook() {
-                @Override
-                protected void beforeHookedMethod(Param m) {
-                    int code = (Integer) m.args[0];
-                    String point, what;
-                    if (media && code == KEYCODE_MEDIA_CAR) {
-                        point = "gpm.receiver_service.start_music_view";
-                        what = "Media key, media screen";
-                    } else if (nav && (code == KEYCODE_NAVI || code == KEYCODE_MAP)) {
-                        point = "gpm.receiver_service.start_navi_view";
-                        what = (code == KEYCODE_NAVI ? "NAV" : "MAP") + " key, navigation";
-                    } else {
-                        return;
-                    }
-                    if (!(m.args[1] instanceof KeyEvent) || !shortRelease((KeyEvent) m.args[1])) return;
-                    Object svc = sService;
-                    if (svc == null) return;
-                    try {
-                        Points.call(cl, point, svc);
-                    } catch (Throwable t) {
-                        mod.error("Android Auto " + what, t);
-                        return;
-                    }
-                    m.setResult(Boolean.TRUE);
-                    mod.log("Android Auto: " + what);
+                if (!(m.args[1] instanceof KeyEvent) || !shortRelease((KeyEvent) m.args[1])) return;
+                Object svc = sService;
+                if (svc == null) return;
+                try {
+                    Points.call(cl, point, svc);
+                } catch (Throwable t) {
+                    mod.error("Android Auto " + what, t);
+                    return;
                 }
-            });
-        }
-        if (call) {
-            mod.hook(cl, "gpm.key_listener.key_for_service", new MethodHook() {
-                @Override
-                protected void beforeHookedMethod(Param m) {
-                    if (((Integer) m.args[3]) != KEYCODE_CALL) return;
-                    sInCall.set(Boolean.TRUE);
-                    if (((Integer) m.args[0]) == 0) mod.log("Android Auto: Call key, phone screen");
-                }
+                m.setResult(Boolean.TRUE);
+                mod.log("Android Auto: " + what);
+            }
+        });
+        mod.hook(cl, "gpm.key_listener.key_for_service", new MethodHook() {
+            @Override
+            protected void beforeHookedMethod(Param m) {
+                if (((Integer) m.args[3]) != KEYCODE_CALL) return;
+                sInCall.set(Boolean.TRUE);
+                if (((Integer) m.args[0]) == 0) mod.log("Android Auto: Call key, phone screen");
+            }
 
-                @Override
-                protected void afterHookedMethod(Param m) {
-                    sInCall.remove();
-                }
-            });
-            mod.hook(cl, "gpm.util.spec_step", new MethodHook() {
-                @Override
-                protected void afterHookedMethod(Param m) {
-                    if (sInCall.get() != null) m.setResult(SPEC_WITH_TEL);
-                }
-            });
-        }
-        if (mod.settingBoolean("voice_swap", true)) {
-            mod.hook(cl, "gpm.receiver_service.send_osd_message", new MethodHook() {
-                @Override
-                protected void beforeHookedMethod(Param m) {
-                    if (((Integer) m.args[1]) == OSD_VR_GUIDE) m.setResult(null);
-                }
-            });
-        }
+            @Override
+            protected void afterHookedMethod(Param m) {
+                sInCall.remove();
+            }
+        });
+        mod.hook(cl, "gpm.util.spec_step", new MethodHook() {
+            @Override
+            protected void afterHookedMethod(Param m) {
+                if (sInCall.get() != null) m.setResult(SPEC_WITH_TEL);
+            }
+        });
+        mod.hook(cl, "gpm.receiver_service.send_osd_message", new MethodHook() {
+            @Override
+            protected void beforeHookedMethod(Param m) {
+                if (((Integer) m.args[1]) == OSD_VR_GUIDE) m.setResult(null);
+            }
+        });
     }
 }

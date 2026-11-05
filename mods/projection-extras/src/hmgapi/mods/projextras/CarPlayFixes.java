@@ -54,7 +54,6 @@ final class CarPlayFixes {
     static void dipo(final ModContext mod, final LoadedApp app) {
         final ClassLoader cl = app.classLoader;
         main = new Handler(Looper.getMainLooper());
-        final boolean retry = mod.settingBoolean("carplay_screen_retry", true);
 
         mod.hook(cl, "dipo.carplay_listener.decode_failure", new MethodHook() {
             @Override
@@ -138,43 +137,41 @@ final class CarPlayFixes {
             }
         });
 
-        if (retry) {
-            mod.hook(cl, "dipo.activity_handler.handle_message", new MethodHook() {
-                @Override
-                protected void beforeHookedMethod(Param p) {
-                    Message m = (Message) p.args[0];
-                    if (m == null || m.what != MSG_SCREEN) return;
-                    try {
-                        Object svc = service(cl);
-                        if (svc == null) return;
-                        Object mode = Points.call(cl, "dipo.service.screen_mode", svc);
-                        int screen = mode == null ? -1 : (Integer) Points.call(cl, "dipo.screen_mode.get_screen", mode);
-                        boolean local = Boolean.TRUE.equals(Points.call(cl, "dipo.service.local_screen_on", svc));
-                        if (screen != SCREEN_NONE && !(screen == SCREEN_LOCAL && local)) {
-                            screenWaitSince.remove(p.thisObject);
-                            return;
-                        }
-                        long now = android.os.SystemClock.elapsedRealtime();
-                        Long since = screenWaitSince.get(p.thisObject);
-                        if (since == null) screenWaitSince.put(p.thisObject, since = now);
-                        if (now - since > SCREEN_RETRY_FOR_MS) {
-                            screenWaitSince.remove(p.thisObject);
-                            if (screen == SCREEN_LOCAL) {
-                                Object a = Points.get(cl, "dipo.activity_handler.activity", p.thisObject);
-                                if (a instanceof Activity) ((Activity) a).finish();
-                                p.setResult(null);
-                            }
-                            return;
-                        }
-                        if (screen == SCREEN_LOCAL) Points.call(cl, "dipo.service.display_default", svc);
-                        ((Handler) p.thisObject).sendEmptyMessageDelayed(MSG_SCREEN, SCREEN_RETRY_MS);
-                        p.setResult(null);
-                    } catch (Throwable t) {
-                        mod.error("screen request", t);
+        mod.hook(cl, "dipo.activity_handler.handle_message", new MethodHook() {
+            @Override
+            protected void beforeHookedMethod(Param p) {
+                Message m = (Message) p.args[0];
+                if (m == null || m.what != MSG_SCREEN) return;
+                try {
+                    Object svc = service(cl);
+                    if (svc == null) return;
+                    Object mode = Points.call(cl, "dipo.service.screen_mode", svc);
+                    int screen = mode == null ? -1 : (Integer) Points.call(cl, "dipo.screen_mode.get_screen", mode);
+                    boolean local = Boolean.TRUE.equals(Points.call(cl, "dipo.service.local_screen_on", svc));
+                    if (screen != SCREEN_NONE && !(screen == SCREEN_LOCAL && local)) {
+                        screenWaitSince.remove(p.thisObject);
+                        return;
                     }
+                    long now = android.os.SystemClock.elapsedRealtime();
+                    Long since = screenWaitSince.get(p.thisObject);
+                    if (since == null) screenWaitSince.put(p.thisObject, since = now);
+                    if (now - since > SCREEN_RETRY_FOR_MS) {
+                        screenWaitSince.remove(p.thisObject);
+                        if (screen == SCREEN_LOCAL) {
+                            Object a = Points.get(cl, "dipo.activity_handler.activity", p.thisObject);
+                            if (a instanceof Activity) ((Activity) a).finish();
+                            p.setResult(null);
+                        }
+                        return;
+                    }
+                    if (screen == SCREEN_LOCAL) Points.call(cl, "dipo.service.display_default", svc);
+                    ((Handler) p.thisObject).sendEmptyMessageDelayed(MSG_SCREEN, SCREEN_RETRY_MS);
+                    p.setResult(null);
+                } catch (Throwable t) {
+                    mod.error("screen request", t);
                 }
-            });
-        }
+            }
+        });
         mod.log("CarPlay: key frames, screen re-attach, wireless checks, Siri timing");
     }
 

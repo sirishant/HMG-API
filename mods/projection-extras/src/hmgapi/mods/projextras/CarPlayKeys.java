@@ -8,7 +8,7 @@ import hmgapi.hook.ModContext;
 import hmgapi.hook.Points;
 
 /**
- * The car's keys on CarPlay, the way Android Auto now has them (setting carplay_keys).
+ * The car's keys on CarPlay, the way Android Auto now has them.
  * Not yet tried with an iPhone: built from DiPO's own code.
  *
  * Screen keys: the CarPlay screen (DipoActivity.dispatchKeyEvent) answers every key "not handled",
@@ -30,7 +30,6 @@ final class CarPlayKeys {
     private CarPlayKeys() {}
 
     static void dipo(final ModContext mod, LoadedApp app) {
-        if (!mod.settingBoolean("carplay_keys", true)) return;
         final ClassLoader cl = app.classLoader;
         mod.hook(cl, "dipo.activity.dispatch_key_event", new MethodHook() {
             @Override

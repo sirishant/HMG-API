@@ -72,13 +72,11 @@
     {
       "key": "ptt",
       "press": "short",
-      "when": "settings.voice_swap",
       "send": "ptt hold"
     },
     {
       "key": "ptt",
       "press": "hold",
-      "when": "settings.voice_swap",
       "send": "ptt short"
     }
   ]
