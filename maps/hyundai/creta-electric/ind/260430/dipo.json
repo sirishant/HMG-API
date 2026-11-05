@@ -74,6 +74,18 @@
     "ret": "void",
     "static": false
   },
+  "dipo.call_utils": {
+    "class": "com.daudio.app.dipo.i.f"
+  },
+  "dipo.call_utils.is_bt_call": {
+    "method": "a",
+    "params": [
+      "com.daudio.app.dipo.f.c",
+      "com.daudio.app.dipo.service.i"
+    ],
+    "ret": "boolean",
+    "static": true
+  },
   "dipo.carplay": {
     "class": "com.daudio.app.dipo.telechips.CarPlayService"
   },

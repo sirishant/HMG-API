@@ -13,16 +13,16 @@ use one. A point a car's map lacks is off on that car, and the HMG-API app says 
 How points are described and found: [core/hookpoints/README.md](../core/hookpoints/README.md).
 Need one that isn't here? Open a "New hook point" issue.
 
-436 hook points. **Cars** (`maps/`):
+438 hook points. **Cars** (`maps/`):
 
 | Car | Map | Points |
 |---|---|---|
-| Hyundai Creta Electric IND 260430 | mapped from stock files | 436 of 436 |
-| Hyundai Ioniq 5 CAN 260206 | mapped from stock files | 343 of 436 |
-| Hyundai Ioniq 5 USA 260507 | mapped from stock files | 343 of 436 |
-| Hyundai Ioniq 5 USA 260903 | mapped on cars by HMG-API's own mapper | 325 of 436 |
-| Kia EV6 CAN 260206 | mapped from stock files | 343 of 436 |
-| Kia EV6 USA 260507 | checked on a car | 343 of 436 |
+| Hyundai Creta Electric IND 260430 | mapped from stock files | 438 of 438 |
+| Hyundai Ioniq 5 CAN 260206 | mapped from stock files | 343 of 438 |
+| Hyundai Ioniq 5 USA 260507 | mapped from stock files | 343 of 438 |
+| Hyundai Ioniq 5 USA 260903 | mapped on cars by HMG-API's own mapper | 325 of 438 |
+| Kia EV6 CAN 260206 | mapped from stock files | 343 of 438 |
+| Kia EV6 USA 260507 | checked on a car | 343 of 438 |
 
 In the tables, **Cars** is "all" when every car above has the point, otherwise the cars without it.
 
@@ -372,6 +372,8 @@ App `com.daudio.app.dipo`.
 | `dipo.service.display_music` | method | `?()` → void | asks the iPhone for CarPlay's Now Playing (requestUI nowplaying:); plays if the car's audio was off | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
 | `dipo.service.call_key` | method | `static ?(dipo.service, int, int)` → void | static: the Call key for CarPlay (service, action, flags): answers or ends a call, the no-call message on the car's screen | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
 | `dipo.service.no_call_message` | method | `?()` → void | the on-screen message that there's no call (Call pressed without one) | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
+| `dipo.call_utils` | class | a class in `com.daudio.app.dipo` (no fixed name) | DiPO's call helpers (is a Bluetooth handsfree call on) | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
+| `dipo.call_utils.is_bt_call` | method | `static ?(dipo.bt, dipo.screen_mode)` → boolean | static: a Bluetooth handsfree call is on (DiPO's Bluetooth manager, its screen and phone state); at session start it makes DiPO hold the audio for that call | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
 
 ## gpm
 

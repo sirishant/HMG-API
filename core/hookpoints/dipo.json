@@ -917,6 +917,34 @@
         ]
       },
       "about": "the on-screen message that there's no call (Call pressed without one)"
+    },
+    {
+      "id": "dipo.call_utils",
+      "kind": "class",
+      "find": {
+        "package": "com.daudio.app.dipo",
+        "strings": [
+          "=========================> isBTCall() fake bt call state"
+        ]
+      },
+      "about": "DiPO's call helpers (is a Bluetooth handsfree call on)"
+    },
+    {
+      "id": "dipo.call_utils.is_bt_call",
+      "kind": "method",
+      "of": "dipo.call_utils",
+      "find": {
+        "params": [
+          "@dipo.bt",
+          "@dipo.screen_mode"
+        ],
+        "ret": "boolean",
+        "static": true,
+        "strings": [
+          "=========================> isBTCall() fake bt call state"
+        ]
+      },
+      "about": "static: a Bluetooth handsfree call is on (DiPO's Bluetooth manager, its screen and phone state); at session start it makes DiPO hold the audio for that call"
     }
   ]
 }
