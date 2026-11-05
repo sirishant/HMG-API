@@ -15,6 +15,11 @@ layouts against those rules.
 
 - install / update: `postinstall` runs `payload/install.sh`, which works out
   whether it's a first install or an update.
+- boot: a `[service.0]` (`name=boot`, `kind=sh`, `mode=background`, `bin/start.sh`).
+  NEMESIS's svcmgr starts it at boot (`once` services it skips) and after an install;
+  it runs `hmgapid boot`, as the boot hook does. Only the first of the two starts
+  HMG-API (`core/hmgapid/README.md`), so HMG-API starts with NEMESIS even after a
+  NEMESIS install or update rewrote `install-recovery.sh` without HMG-API's block.
 - uninstall: `preuninstall` runs `/data/hmgapi/uninstall.sh` (every mod change and
   HMG-API's own files back to stock; `/data/hmgapi` is kept).
 - NEMESIS updates a package by uninstalling the old one first. `preuninstall`
@@ -29,12 +34,12 @@ thing in My Packages. `hmgapid engine nemesis-sync` (`NemesisSync.java`) compare
 two and fixes what differs: HMG-API or a mod installed but not listed (or at another
 version) is listed, a `hmgapi.<id>` whose mod isn't installed is unlisted. It runs
 after `engine install` and `engine remove`, at the end of `install.sh`, two minutes
-after each boot (the boot hook), and by hand; `uninstall.sh` unlists the mods and then
+after each boot (`boot.sh`), and by hand; `uninstall.sh` unlists the mods and then
 HMG-API itself (the engine is gone by then). A failed listing never fails an install:
 it says why, and the next sync tries again.
 
 - A package the sync lists is a small one: `NEMESIS.data` (`os="any"`, `depends` as
-  the full packages), these scripts, `bin/open.sh`, a `registered` marker, no payload
+  the full packages), these scripts, `bin/open.sh` (and for HMG-API, `bin/start.sh` with its boot service), a `registered` marker, no payload
   or mod zip. The scripts and `conflicts.txt` are in the payload (`nemesis/`) and kept
   in `/data/hmgapi/nemesis`.
 - The sync runs NEMESIS with `HMGAPI_NEMESIS_SYNC=1`: every script here then does

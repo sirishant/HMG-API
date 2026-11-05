@@ -134,12 +134,12 @@ payload() {
         [ -f "$OUT/$f" ] || { echo "payload: no out/$f (build it first)"; exit 1; }
         cp "$OUT/$f" "$P/"
     done
-    cp install/common/install.sh install/common/uninstall.sh install/common/lib.sh install/common/stock.txt install/common/app-pending.sh install/common/app-open.sh install/common/hook-check.sh "$P/"
+    cp install/common/install.sh install/common/uninstall.sh install/common/lib.sh install/common/stock.txt install/common/app-pending.sh install/common/app-open.sh install/common/hook-check.sh install/common/boot.sh "$P/"
     # HMG-API's NEMESIS scripts and incompatible packages, for engine nemesis-sync on the unit
     mkdir -p "$P/nemesis/mod" "$P/nemesis/bin"
     cp -r install/nemesis/scripts "$P/nemesis/scripts"
     cp -r install/nemesis/mod/scripts "$P/nemesis/mod/scripts"
-    cp install/nemesis/bin/open.sh "$P/nemesis/bin/open.sh"
+    cp install/nemesis/bin/open.sh install/nemesis/bin/start.sh "$P/nemesis/bin/"
     cp install/nemesis/conflicts.txt "$P/nemesis/conflicts.txt"
     # the hook maps, with every point id in the catalogue (a map missing one isn't used)
     cp -r maps "$P/maps"
@@ -152,7 +152,7 @@ payload() {
     (cd "$P" && find maps -type f | sort | xargs md5sum > MAPS.md5)
     sed -n 's/.*HMGAPI_VERSION = "\(.*\)";/\1/p' core/runtime/java/hmgapi/engine/Engine.java > "$P/VERSION"
     echo "$(git rev-parse --short HEAD 2>/dev/null || echo local)$(git diff --quiet HEAD 2>/dev/null || echo +) $(date -u +%Y-%m-%d)" > "$P/BUILD"
-    (cd "$P" && md5sum hmgapid lpatch app_process libhmgapi_hook.so hmgapi-hook.jar HmgApi.apk install.sh uninstall.sh lib.sh stock.txt app-pending.sh app-open.sh hook-check.sh MAPS.md5 $(find nemesis -type f | sort) > MANIFEST)
+    (cd "$P" && md5sum hmgapid lpatch app_process libhmgapi_hook.so hmgapi-hook.jar HmgApi.apk install.sh uninstall.sh lib.sh stock.txt app-pending.sh app-open.sh hook-check.sh boot.sh MAPS.md5 $(find nemesis -type f | sort) > MANIFEST)
     echo "payload $(cat "$P/VERSION") ($(cat "$P/BUILD")): $P"
 }
 

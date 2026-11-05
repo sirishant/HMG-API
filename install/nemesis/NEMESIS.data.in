@@ -16,3 +16,10 @@ preuninstall=scripts/preuninstall.sh
 kind=sh
 path=bin/open.sh
 uid=root
+
+[service.0]
+name=boot
+kind=sh
+path=bin/start.sh
+uid=root
+mode=background

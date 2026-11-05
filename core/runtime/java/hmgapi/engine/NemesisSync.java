@@ -196,6 +196,8 @@ final class NemesisSync {
             if (fs != null) for (File f : fs) if (f.isFile()) put(z, "scripts/" + f.getName(), bytes(f));
             File open = new File(e.data, "nemesis/bin/open.sh");
             if (open.isFile()) put(z, "bin/open.sh", bytes(open));
+            File start = new File(e.data, "nemesis/bin/start.sh");   // HMG-API's boot service (descriptor)
+            if (modId == null && start.isFile()) put(z, "bin/start.sh", bytes(start));
             if (modId != null) put(z, "mod/id", (modId + "\n").getBytes("UTF-8"));
         } finally {
             z.close();
@@ -242,6 +244,9 @@ final class NemesisSync {
             if (d.containsKey(h)) b.append(h).append('=').append(d.get(h)).append('\n');
         }
         b.append("\n[app.0]\nkind=sh\npath=bin/open.sh\nuid=root\n");
+        // HMG-API itself: a boot service, so NEMESIS's svcmgr starts HMG-API too (hmgapid boot:
+        // once per boot, whichever of it and the boot hook comes first)
+        if ("hmgapi".equals(d.get("id"))) b.append("\n[service.0]\nname=boot\nkind=sh\npath=bin/start.sh\nuid=root\nmode=background\n");
         return b.toString();
     }
 

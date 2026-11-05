@@ -3,7 +3,8 @@
 HMG-API's root daemon and its client, one static ARM binary (no libc, raw syscalls).
 
 ```
-hmgapid daemon            # boot hook only: needs full root, refuses otherwise
+hmgapid daemon            # needs full root, refuses otherwise
+hmgapid boot              # the boot hook: returns at once; detached, starts the daemon and runs /data/hmgapi/boot.sh
 hmgapid <op> [args...]    # any user: asks the daemon, prints its output, exits with its code
 ```
 
@@ -15,6 +16,8 @@ hmgapid <op> [args...]    # any user: asks the daemon, prints its output, exits 
 | anyone else | `ping`, `version` |
 
 **Services.** The daemon runs the enabled mods' services (`state/services.txt`, written by the engine from `mod.json`): as root, system or the mod's app uid, each in its own session, with its own folder (`run/<mod>/<name>`) and log (`logs/<mod>/<name>.log`), started at boot or once `sys.boot_completed` is 1, restarted with backoff, stopped (TERM, then KILL) when the mod is turned off. It also runs `engine apps` once Android is up and whenever `state/apps.txt` changes.
+
+**Boot.** `hmgapid boot` is the boot hook's only line (`install-recovery.sh`, `qb_runtime.sh`) and what HMG-API's NEMESIS service runs. It returns at once, so the boot script goes straight on to NEMESIS's start. A detached child (own session, none of the caller's fds) starts the daemon if none runs (the zygote wrapper usually started it already) and, if it's the first call this boot, runs `/data/hmgapi/boot.sh` (HMG-API's boot steps: binds, the app's installer, `hook-check.sh`, the NEMESIS sync, `engine recover`; output in `boot.log`). The lock is `/dev/.hmgapi-boot`, made with `O_EXCL` on tmpfs (gone at every boot). So whichever trigger comes first runs the boot steps, and the others do nothing.
 
 Abstract socket `@hmgapid` (no file permissions involved; the bind is also the single-instance lock). Request `LFD1` + argc + length-prefixed args; response frames `O` (output, streamed) and `X` (exit code). Log: `/data/hmgapi/hmgapid.log`.
 

@@ -43,7 +43,7 @@ needed to add your car ([Supported cars](https://github.com/VysseCodes/HMG-API/w
 doesn't work, car or firmware support (the Car Report's QR code fills it in), a new
 hook point, or an idea. Guides are in the [wiki](https://github.com/VysseCodes/HMG-API/wiki).
 
-> **Status: 1.0.1.** Tested on a US Kia EV6 (260507): the hook runtime,
+> **Status: 1.0.2.** Tested on a US Kia EV6 (260507): the hook runtime,
 > mods, the app, buttons, the side panel, Android Auto turn-by-turn and projection
 > events, the Car Report. CarPlay on HMG-API, the installers on a car without adb, and
 > other cars aren't tested yet. Leafia 1.x (HMG Leafia Plus) is the previous project.

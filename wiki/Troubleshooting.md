@@ -49,6 +49,18 @@ A stick in the port can make the head unit start wired Android Auto and refuse
 wireless until it times out. Take the stick out; if it stays stuck, restart the head
 unit.
 
+## NEMESIS Manager shows hmgapi/boot as "stopped"
+
+That's normal. `hmgapi/boot` (Services) starts HMG-API when NEMESIS starts, then
+exits; HMG-API keeps running in its own daemon. Start and Stop there change
+nothing: HMG-API starts once per restart, from whichever comes first, this or its
+own boot hook.
+
+## NEMESIS says "daemon not running" for a minute or two after a restart
+
+That was HMG-API 1.0.0 and 1.0.1 holding up NEMESIS's start. Update HMG-API to
+1.0.2 or newer.
+
 ## Sending a report
 
 Make a [Car Report](Car-Report) and open an issue ([Getting help](Getting-help)).

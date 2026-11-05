@@ -27,7 +27,7 @@ echo "version $V" > $R/data/hmgapi/installed.txt
 N=$R/data/hmgapi/nemesis
 mkdir -p $N/mod $N/bin
 cp -r install/nemesis/scripts $N/scripts; cp -r install/nemesis/mod/scripts $N/mod/scripts
-cp install/nemesis/bin/open.sh $N/bin/open.sh; cp install/nemesis/conflicts.txt $N/conflicts.txt
+cp install/nemesis/bin/open.sh install/nemesis/bin/start.sh $N/bin/; cp install/nemesis/conflicts.txt $N/conflicts.txt
 cat > $R/system/bin/hmgapid <<EOF
 #!/bin/sh
 case \$1 in
@@ -105,6 +105,8 @@ D=$R/data/nemesis/apps/hmgapi
 check "... a small package: no payload, a registered marker" "no yes" "$([ -d $D/payload ] && echo yes || echo no) $([ -f $D/registered ] && echo yes || echo no)"
 has "... refusing the packages conflicts.txt lists" 'depends="!wireless.carplay.aa,!carplay.session,!voicehandler.vr-gates"' "$(cat $D/NEMESIS.data)"
 has "... os any" 'os="any"' "$(cat $D/NEMESIS.data)"
+check "... a boot service, so NEMESIS's svcmgr starts HMG-API too" "name=boot kind=sh path=bin/start.sh uid=root mode=background" "$(echo $(grep -A5 '^\[service.0\]' $D/NEMESIS.data | grep -v '^\['))"
+check "... its script: hmgapid boot" "exec /system/bin/hmgapid boot" "$(grep '^exec' $D/bin/start.sh 2>/dev/null)"
 has "... NEMESIS ran its scripts in list-only mode" "install $R/data/hmgapi/state/nemesis-sync/hmgapi.zip sync=1" "$(nlog)"
 check "... and they called no engine" "nemesis-sync" "$(ecalls | sed 's/^engine //')"
 eng nemesis-sync
@@ -118,6 +120,7 @@ check "engine install: the mod in HMG-API" "demo " "$(mods)"
 has "... and listed in NEMESIS" "listed hmgapi.demo in NEMESIS" "$out"
 check "... as hmgapi.demo, at the mod's version" "hmgapi hmgapi.demo 1.0.0" "$(listed)$(pv hmgapi.demo)"
 D=$R/data/nemesis/apps/hmgapi.demo
+check "... a mod gets no boot service" "" "$(grep '^\[service' $D/NEMESIS.data; ls $D/bin/start.sh 2>/dev/null)"
 has "... needing HMG-API 1.0 or newer" 'depends="hmgapi@>=1.0"' "$(cat $D/NEMESIS.data)"
 check "... no mod zip in it, its id and the marker" "no demo yes" "$([ -f $D/mod/package.zip ] && echo yes || echo no) $(cat $D/mod/id) $([ -f $D/registered ] && echo yes || echo no)"
 check "... the package's scripts called no engine (no second install)" "install $T/demo.zip" "$(ecalls | sed 's/^engine //')"

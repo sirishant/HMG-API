@@ -27,7 +27,7 @@ build() {
     printf '#!/bin/sh\n'"$CAT"' "%s/bootprop" 2>/dev/null\n' "$T/$1" > "$T/$1/getprop"
     chmod +x "$T/$1/logcat" "$T/$1/app_process" "$T/$1/getprop"
     OUT="$T/$1" sh build.sh -DNOCAPCHECK -DROOTDIR="\"$T/$1/root\"" -DSH="\"/bin/sh\"" -DLOGCAT="\"$T/$1/logcat\"" \
-        -DREBOOT="\"/bin/true\"" -DAPP_PROCESS="\"$T/$1/app_process\"" -DPACKAGES_LIST="\"$T/$1/packages.list\"" -DGETPROP="\"$T/$1/getprop\"" -DUSBROOT="\"$T/$1/usb\"" -DSOCK_NAME="\"hmgapid-test-$1-$$\"" -DVEHICLE_SOCK="\"hmgapi-vehicle-test-$$\"" \
+        -DREBOOT="\"/bin/true\"" -DAPP_PROCESS="\"$T/$1/app_process\"" -DPACKAGES_LIST="\"$T/$1/packages.list\"" -DGETPROP="\"$T/$1/getprop\"" -DUSBROOT="\"$T/$1/usb\"" -DBOOTMARK="\"$T/$1/bootmark\"" -DSOCK_NAME="\"hmgapid-test-$1-$$\"" -DVEHICLE_SOCK="\"hmgapi-vehicle-test-$$\"" \
         -DSHELL_UID="$2" >/dev/null
 }
 run() { b=$1; shift; "$T/$b/hmgapid" "$@" 2>&1; }
@@ -56,8 +56,15 @@ check "sh stderr streamed" "err" "$(run root sh 'echo err >&2')"
 # a background job with its output elsewhere (the boot hook's "(sleep 120; ...) &") must not
 # hold the client: only fds 1 and 2 may have the pipe, and those it redirected
 t0=$(date +%s)
-run root sh '(sleep 6) </dev/null >/dev/null 2>&1 &' >/dev/null
+run root sh "($SLEEP 6) </dev/null >/dev/null 2>&1 &" >/dev/null
 check "sh: a background job doesn't hold the client" "yes" "$([ $(( $(date +%s) - t0 )) -lt 4 ] && echo yes || echo no)"
+# ... nor one holding a copy of the pipe made after the exec: the unit's mksh keeps fds 1 and 2
+# above 9 while it applies ">file 2>&1", and the job inherits them (seen on the US EV6: 1.0.1's
+# boot hook still waited two minutes). 9>&1 makes such a copy here (dash takes one digit only).
+t0=$(date +%s)
+out=$(run root sh "echo before; ($SLEEP 6) 9>&1 </dev/null >/dev/null 2>&1 & echo after")
+check "sh: a job holding a copy of the pipe doesn't hold the client either" "yes|before after" "$([ $(( $(date +%s) - t0 )) -lt 4 ] && echo yes || echo no)|$(echo $out)"
+check "... and the exit code still comes back" "5" "$(code root sh "($SLEEP 6) 9>&1 </dev/null >/dev/null 2>&1 & exit 5")"
 big=$(run root sh 'i=0; while [ $i -lt 20000 ]; do echo 0123456789; i=$((i+1)); done' | wc -c)
 check "220 KB of output, not cut" "220000" "$big"
 mkdir -p "$T/root/root/mods/demo" "$T/root/root/mods/other"
@@ -279,4 +286,39 @@ s.settimeout(5)
 assert s.recv(10) == b""
 PY
 check "still answers after bad clients" "ok" "$(run root ping)"
+
+# --- boot: the boot hook's line returns at once (NEMESIS's start comes after it); detached, it
+# starts the daemon if none runs and runs boot.sh, once per boot (BOOTMARK): a second trigger
+# (NEMESIS's service) stops there. On the car the zygote wrapper has usually started the daemon
+# already, so boot.sh must run then too.
+build boot "$ME" ""
+B=$T/boot
+printf 'echo ran >> "%s/ran"
+echo "boot output"
+%s 3
+echo done >> "%s/ran"
+' "$B" "$SLEEP" "$B" > "$B/root/boot.sh"
+LD_PRELOAD= "$B/hmgapid" daemon >/dev/null   # the zygote wrapper's start
+t0=$(date +%s)
+out=$("$B/hmgapid" boot 2>&1)   # $(...) waits for every holder of its pipe: the detached child may hold none
+check "boot returns at once, saying nothing" "yes|" "$([ $(( $(date +%s) - t0 )) -lt 2 ] && echo yes || echo no)|$out"
+waitfor '[ "$(run boot ping)" = ok ]' || true
+check "... the daemon runs" "ok" "$(run boot ping)"
+waitfor '[ -f "$B/ran" ]' || true
+check "... and it ran boot.sh, though the daemon was already up (the zygote started it)" "ran" "$(cat "$B/ran" 2>/dev/null)"
+check "... its output in boot.log" "boot output" "$(cat "$B/root/boot.log" 2>/dev/null)"
+t0=$(date +%s)
+out=$("$B/hmgapid" boot 2>&1)
+check "a second boot returns at once too" "yes|" "$([ $(( $(date +%s) - t0 )) -lt 2 ] && echo yes || echo no)|$out"
+waitfor 'grep -q done "$B/ran"' || true
+check "... and doesn't run boot.sh again" "ran done" "$(cat "$B/ran" | tr '\n' ' ' | sed 's/ $//')"
+has "... boot.sh logged in hmgapid.log" "boot: running boot.sh" "$(cat "$B/root/hmgapid.log")"
+check "boot takes no arguments" "2" "$(code boot boot extra)"
+# no daemon yet (the zygote wrapper didn't start one): boot starts it, and runs boot.sh
+build boot2 "$ME" ""
+B=$T/boot2
+printf 'echo ran >> "%s/ran"\n' "$B" > "$B/root/boot.sh"
+"$B/hmgapid" boot >/dev/null 2>&1
+waitfor '[ "$(run boot2 ping)" = ok ] && [ -f "$B/ran" ]' || true
+check "boot with no daemon: starts it and runs boot.sh" "ok ran" "$(run boot2 ping) $(cat "$B/ran" 2>/dev/null)"
 exit $fail

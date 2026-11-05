@@ -64,6 +64,7 @@ check "package: refuses HMG Leafia Plus' package" yes "$(val depends | tr ',' '\
 check "package: NEMESIS Manager's Launch runs bin/open.sh" "kind=sh path=bin/open.sh" "$(echo $(unzip -p "$NZ" NEMESIS.data | grep -A3 '^\[app.0\]' | grep '^kind=\|^path='))"
 check "... naming no app, so NEMESIS never pm uninstalls HMG-API's app" "" "$(unzip -p "$NZ" NEMESIS.data | grep '^package=\|^component=')"
 check "... and the script is in the package" yes "$(unzip -Z1 "$NZ" | grep -qx bin/open.sh && echo yes)"
+check "package: a boot service, so NEMESIS's svcmgr starts HMG-API too (hmgapid boot)" "name=boot kind=sh path=bin/start.sh uid=root mode=background yes" "$(echo $(unzip -p "$NZ" NEMESIS.data | grep -A5 '^\[service.0\]' | grep -v '^\[')) $(unzip -Z1 "$NZ" | grep -qx bin/start.sh && echo yes)"
 check "the package on its own (for the Package Store) is the one in the NEMESIS download" "$(md5sum < "$NZ")" "$(md5sum < "$PWD/out/dist/hmgapi-$V-nemesis-package.zip")"
 # every download unzips the same on a FAT/exFAT stick, Windows and macOS: no two names that differ
 # only in case (payload/MAPS next to payload/maps lost one of them there), nothing FAT can't name
@@ -104,7 +105,7 @@ BEFORE=$(tree)
 mkdir -p $S/HMGAPI/install
 unzip -q "$NZ" 'payload/*' -d $T/pk
 P=$S/HMGAPI/install/payload; mv $T/pk/payload $P
-cp install/common/install.sh install/common/uninstall.sh install/common/lib.sh install/common/stock.txt install/common/app-pending.sh install/common/app-open.sh install/common/hook-check.sh $P/
+cp install/common/install.sh install/common/uninstall.sh install/common/lib.sh install/common/stock.txt install/common/app-pending.sh install/common/app-open.sh install/common/hook-check.sh install/common/boot.sh $P/
 [ -f "$STOCK" ] || echo "$(md5sum < $R/system/bin/app_process | cut -c1-32) test stock" > $P/stock.txt
 (cd $P && md5sum hmgapid lpatch app_process libhmgapi_hook.so hmgapi-hook.jar HmgApi.apk install.sh uninstall.sh lib.sh stock.txt app-pending.sh app-open.sh hook-check.sh MAPS.md5 > MANIFEST)
 TS=$PWD/install/usb/troubleShooter

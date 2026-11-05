@@ -27,7 +27,7 @@ calls() { cat $T/calls.log 2>/dev/null || true; : > $T/calls.log; }
 run() { set +e; out=$(cd $T && env PATH="$T/bin:$PATH" ROOT=$R CAPCHECK=0 $SH "$@" 2>&1); rc=$?; set -e; }
 tree() { (cd $R/system && find . -type f | sort | while read f; do echo "$(md5sum < "$f" | cut -c1-32) $f"; done) }
 
-mkdir -p $R/system/bin $R/system/lib $R/system/framework $R/system/etc $R/data/dalvik-cache
+mkdir -p $R/system/bin $R/system/lib $R/system/framework $R/system/etc $R/data/dalvik-cache $R/dev
 STOCK=$HOME/hmg-private/stock/ev6-sysimg/bin/app_process
 if [ -f "$STOCK" ]; then cp $STOCK $R/system/bin/app_process; else head -c 9000 /dev/urandom > $R/system/bin/app_process; fi
 chmod 755 $R/system/bin/app_process
@@ -49,12 +49,12 @@ chmod 755 $R/system/xbin/nemesis
 BEFORE=$(tree)
 # the payload's binaries, with this tree's scripts (so a script edit needs no rebuild)
 P=$T/payload; cp -r $PL $P
-cp install/common/install.sh install/common/uninstall.sh install/common/lib.sh install/common/stock.txt install/common/app-pending.sh install/common/app-open.sh install/common/hook-check.sh $P/
+cp install/common/install.sh install/common/uninstall.sh install/common/lib.sh install/common/stock.txt install/common/app-pending.sh install/common/app-open.sh install/common/hook-check.sh install/common/boot.sh $P/
 rm -rf $P/nemesis; mkdir -p $P/nemesis/mod $P/nemesis/bin
 cp -r install/nemesis/scripts $P/nemesis/scripts; cp -r install/nemesis/mod/scripts $P/nemesis/mod/scripts
-cp install/nemesis/bin/open.sh $P/nemesis/bin/; cp install/nemesis/conflicts.txt $P/nemesis/
+cp install/nemesis/bin/open.sh install/nemesis/bin/start.sh $P/nemesis/bin/; cp install/nemesis/conflicts.txt $P/nemesis/
 [ -f "$STOCK" ] || echo "$(md5sum < $R/system/bin/app_process | cut -c1-32) test stock" > $P/stock.txt
-(cd $P && md5sum hmgapid lpatch app_process libhmgapi_hook.so hmgapi-hook.jar HmgApi.apk install.sh uninstall.sh lib.sh stock.txt app-pending.sh app-open.sh hook-check.sh MAPS.md5 > MANIFEST)
+(cd $P && md5sum hmgapid lpatch app_process libhmgapi_hook.so hmgapi-hook.jar HmgApi.apk install.sh uninstall.sh lib.sh stock.txt app-pending.sh app-open.sh hook-check.sh boot.sh MAPS.md5 > MANIFEST)
 
 # refusals first: nothing may change
 cp $R/system/bin/app_process $T/real; echo x >> $R/system/bin/app_process
@@ -84,19 +84,23 @@ for f in bin/hmgapid bin/lpatch lib/libhmgapi_hook.so framework/hmgapi-hook.jar;
 done
 check "boot hook in install-recovery.sh" 1 "$(grep -c 'HMGAPI_HOOK begin' $R/system/etc/install-recovery.sh)"
 check "boot hook in qb_runtime.sh" 1 "$(grep -c 'HMGAPI_HOOK begin' $R/system/etc/qb_runtime.sh)"
+check "boot hook: only hmgapid boot, which returns at once (NEMESIS's start comes after it)" "if [ -x /system/bin/hmgapid ]; then /system/bin/hmgapid boot; fi" "$(sed -n 3p $R/system/etc/install-recovery.sh)"
+check "... and NEMESIS's own lines still follow it" "# NEMESIS|nemesis watchdog" "$(sed -n 5p $R/system/etc/install-recovery.sh)|$(sed -n 6p $R/system/etc/install-recovery.sh)"
+check "boot.sh (the boot steps hmgapid boot runs) kept, root only" "-rwx------" "$(ls -l $R/data/hmgapi/boot.sh | cut -c1-10)"
+check "this boot marked done, so a boot service NEMESIS starts after the install runs no boot steps (no engine recover mid-install)" yes "$([ -f $R/dev/.hmgapi-boot ] && echo yes)"
 check "hooks on at the next start" "yes" "$([ -f $R/data/hmgapi/hook/enable ] && echo yes)"
 check "updates off by default" '{"updates": false}' "$(cat $R/data/hmgapi/settings/hmgapi.json)"
 check "/data/hmgapi: traverse only for apps" "drwx--x--x" "$(ls -ld $R/data/hmgapi | cut -c1-10)"
 check "Android down: app kept for later, readable by the package manager" "-rw-r--r--" "$(ls -l $R/data/hmgapi/public/HmgApi.apk | cut -c1-10)"
 check "... and its installer kept" yes "$([ -f $R/data/hmgapi/app-pending.sh ] && echo yes)"
-has "boot hook starts it while the app waits" "app-pending.sh" "$(cat $R/system/etc/install-recovery.sh)"
+has "boot.sh starts it while the app waits" "app-pending.sh" "$(cat $R/data/hmgapi/boot.sh)"
 check "uninstaller kept on the unit" yes "$([ -f $R/data/hmgapi/uninstall.sh ] && echo yes)"
 check "a copy of the app kept, readable by the package manager" "-rw-r--r--" "$(ls -l $R/data/hmgapi/HmgApi.apk | cut -c1-10)"
 check "open.sh kept" yes "$([ -f $R/data/hmgapi/open.sh ] && echo yes)"
 check "hook-check.sh kept, root only" "-rwx------" "$(ls -l $R/data/hmgapi/hook-check.sh | cut -c1-10)"
-has "boot hook: puts a rewritten boot script's block back (hook-check.sh)" "sh /data/hmgapi/hook-check.sh" "$(cat $R/system/etc/install-recovery.sh)"
+has "boot.sh: puts a rewritten boot script's block back (hook-check.sh)" "hook-check.sh" "$(cat $R/data/hmgapi/boot.sh)"
 check "HMG-API's NEMESIS scripts and conflicts kept, for engine nemesis-sync" yes "$([ -f $R/data/hmgapi/nemesis/scripts/preuninstall.sh ] && [ -f $R/data/hmgapi/nemesis/mod/scripts/preuninstall.sh ] && [ -f $R/data/hmgapi/nemesis/conflicts.txt ] && echo yes)"
-has "boot hook: engine nemesis-sync when NEMESIS is there" "hmgapid engine nemesis-sync" "$(cat $R/system/etc/install-recovery.sh)"
+has "boot.sh: engine nemesis-sync when NEMESIS is there" "engine nemesis-sync" "$(cat $R/data/hmgapi/boot.sh)"
 check "hook maps installed" yes "$([ -f $R/data/hmgapi/maps/kia/ev6/usa/260507/car.json ] && [ -s $R/data/hmgapi/maps/points.txt ] && echo yes)"
 has "install record" "file $(md5sum < $P/app_process | cut -c1-32) /system/bin/app_process" "$(cat $R/data/hmgapi/installed.txt)"
 echo '{"updates": true}' > $R/data/hmgapi/settings/hmgapi.json
@@ -158,7 +162,7 @@ has "uninstall finishes" "HMG-API uninstalled" "$out"
 check "... NEMESIS: the mod's package unlisted first, then HMG-API's, list-only" "nemesis uninstall hmgapi.demo sync=1|nemesis uninstall hmgapi sync=1" "$(tr '\n' '|' < $T/nemesis.log | sed 's/|$//')"
 check "... neither listed any more (the old script copy refreshed first)" "" "$(ls $R/data/nemesis/apps)"
 has "... said" "NEMESIS: hmgapi unlisted" "$out"
-check "the app's copy, open.sh and hook-check.sh gone" no "$([ -e $R/data/hmgapi/HmgApi.apk ] || [ -e $R/data/hmgapi/open.sh ] || [ -e $R/data/hmgapi/hook-check.sh ] && echo yes || echo no)"
+check "the app's copy, open.sh, hook-check.sh and boot.sh gone" no "$([ -e $R/data/hmgapi/HmgApi.apk ] || [ -e $R/data/hmgapi/open.sh ] || [ -e $R/data/hmgapi/hook-check.sh ] || [ -e $R/data/hmgapi/boot.sh ] && echo yes || echo no)"
 check "/system byte-identical to stock" "$BEFORE" "$(tree)"
 check "settings kept without --purge" yes "$([ -f $R/data/hmgapi/settings/hmgapi.json ] && echo yes)"
 check "hooks off" no "$([ -f $R/data/hmgapi/hook/enable ] && echo yes || echo no)"
