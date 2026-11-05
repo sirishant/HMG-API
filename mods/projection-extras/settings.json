@@ -42,6 +42,13 @@
       "default": true,
       "apply": "restart",
       "title": "CarPlay: NAV/MAP open Maps, Media Now Playing, Call the Phone app (untried test)"
+    },
+    {
+      "key": "carplay_call_handover",
+      "type": "toggle",
+      "default": true,
+      "apply": "restart",
+      "title": "CarPlay: a call already going when CarPlay connects moves to CarPlay (untried test)"
     }
   ]
 }
