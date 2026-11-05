@@ -72,15 +72,16 @@ Only use updates from this project's releases. The official HMG-API download doe
 Creta map or the fixes this setup needs. If NEMESIS Manager offers an "HMG-API" update from the
 Package Store, decline it.
 
-From HMG-API 1.0.3, update from the app: unzip the new `usb.zip` to a drive (or copy only the
-zips you want into `HMGAPI/updates` on it), plug it in, then in the app **Check USB updates**.
-Install HMG-API first if it's listed, then the mods. Your settings stay. Then **Apply changes** and
-**Restart unit**. NEMESIS Manager's My Packages follows by itself: HMG-API lists what it installed
-there at the new versions.
+From HMG-API 1.0.3, update from the app: make a folder `HMGAPI/updates` on a drive and copy the
+release's `hmgapi-<version>.zip` and the mod zips into it (only the ones you want). Plug it in, then
+in the app **Check USB updates**. Install HMG-API first if it's listed, then the mods. Your settings
+stay. Then **Apply changes** and **Restart unit**. NEMESIS Manager's My Packages follows by itself:
+HMG-API lists what it installed there at the new versions.
 
-Before 1.0.3, HMG-API itself only takes updates signed with the official key, so update it to 1.0.3
-once through the Package Store: unzip the new `nemesis.zip` to a drive, plug it in, update HMG-API
-first, then the mods, remove the drive, **Apply changes** and **Restart unit**.
+On HMG-API 1.0.1 or 1.0.2 (the 1.3.0 release or earlier), HMG-API only takes updates signed with the
+official key, so update once through the Package Store: unzip the new `hmgapi-<version>-nemesis.zip`
+to a drive, plug it in, update HMG-API first, then the mods, remove the drive, **Apply changes** and
+**Restart unit**. After that, use the app as above.
 
 ## If something goes wrong
 
