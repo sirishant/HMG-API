@@ -46,9 +46,9 @@
     {
       "key": "carplay_call_handover",
       "type": "toggle",
-      "default": true,
+      "default": false,
       "apply": "restart",
-      "title": "CarPlay: a call already going when CarPlay connects moves to CarPlay (untried test)"
+      "title": "CarPlay: a call already going when CarPlay connects moves to CarPlay (untried test, off)"
     }
   ]
 }

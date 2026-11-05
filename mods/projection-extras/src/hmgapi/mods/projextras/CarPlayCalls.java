@@ -6,9 +6,11 @@ import hmgapi.hook.ModContext;
 import hmgapi.hook.Points;
 
 /**
- * A call already going when CarPlay connects (setting carplay_call_handover). A tester found
- * that CarPlay then says the call is on the car, but neither side hears anything; a call started
- * once CarPlay is up works. Not yet tried: built from DiPO's own code (a guess at the cause).
+ * A call already going when CarPlay connects (setting carplay_call_handover, off by default).
+ * A tester found that CarPlay then says the call is on the car, but neither side hears anything;
+ * a call started once CarPlay is up works. Not yet tried: built from DiPO's own code (a guess at
+ * the cause). Whatever the setting, the log says when a session starts during a Bluetooth call,
+ * so a first log with it off shows whether this is the cause at all.
  *
  * When a session starts during a Bluetooth handsfree call, DiPO (updateInitAppState) takes the
  * screen and the main audio from the iPhone for good ("isBTCall BORROW NEVER / NEVER", reason
@@ -32,7 +34,7 @@ final class CarPlayCalls {
     private CarPlayCalls() {}
 
     static void dipo(final ModContext mod, LoadedApp app) {
-        if (!mod.settingBoolean("carplay_call_handover", true)) return;
+        final boolean handover = mod.settingBoolean("carplay_call_handover", false);
         final ClassLoader cl = app.classLoader;
         mod.hook(cl, "dipo.service.start_carplay_session", new MethodHook() {
             @Override
@@ -44,7 +46,7 @@ final class CarPlayCalls {
             @Override
             protected void afterHookedMethod(Param p) {
                 sStarting.remove();
-                if (sHeldForCall) mod.log("CarPlay: session started during a Bluetooth call");
+                if (sHeldForCall) mod.log("CarPlay: session started during a Bluetooth call (DiPO holds the audio for it)");
             }
         });
         mod.hook(cl, "dipo.call_utils.is_bt_call", new MethodHook() {
@@ -58,6 +60,10 @@ final class CarPlayCalls {
             protected void afterHookedMethod(Param p) {
                 if (!sHeldForCall) return;
                 sHeldForCall = false;
+                if (!handover) {
+                    mod.log("CarPlay: active during a Bluetooth call; call handover is off");
+                    return;
+                }
                 try {
                     Points.call(cl, "dipo.service.post_message", p.thisObject, MSG_BT_TO_CARPLAY, 0L);
                     mod.log("CarPlay: active during a Bluetooth call, handing the call to CarPlay");
