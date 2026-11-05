@@ -65,7 +65,9 @@
       "gpm.main_activity.on_key_up": "replace",
       "gpm.receiver_service.send_osd_message": "replace",
       "dipo.service.start_carplay_session": "observe",
-      "dipo.call_utils.is_bt_call": "observe"
+      "dipo.call_utils.is_bt_call": "observe",
+      "gpm.key_listener.all_keys": "observe",
+      "gpm.main_activity.on_resume": "observe"
     }
   },
   "input": [
