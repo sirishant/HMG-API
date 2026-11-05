@@ -1301,6 +1301,100 @@
       "about": "every key once Android is up, from the key policy's dispatch step (the queueing step calls it only before boot): (focus, action, flags, deviceId, keyCode, scanCode, metaState, repeatCount, 0); negative: the key is used up. ModeManagerService.interceptKeyBefore* aren't called on 260507"
     },
     {
+      "id": "framework.mode_key_dispatcher.send_broadcast_key_event",
+      "kind": "method",
+      "of": "framework.mode_key_dispatcher",
+      "find": {
+        "name": "sendBroadcastKeyEvent",
+        "params": [
+          "int",
+          "int",
+          "int",
+          "int",
+          "int",
+          "boolean"
+        ],
+        "ret": "void",
+        "strings": [
+          "sendBroadcastKeyEvent : pressType - "
+        ]
+      },
+      "about": "a key no screen took, to the car's own action (action, keyCode, flags, deviceId, repeatCount, isViewHandled): NAV, MAP and the other shortcut buttons"
+    },
+    {
+      "id": "framework.mode_key_dispatcher.request_shortcut",
+      "kind": "method",
+      "of": "framework.mode_key_dispatcher",
+      "find": {
+        "name": "requestBroadcastShortcutEvent",
+        "params": [
+          "java.lang.String",
+          "int",
+          "int"
+        ],
+        "ret": "void"
+      },
+      "about": "the car's shortcut for a button (action such as com.hkmc.intent.action.NAVI_SHORTCUT, NAVI_SHORTCUT_LONG, MAP_SHORTCUT): starts its service or broadcasts it"
+    },
+    {
+      "id": "framework.mode_key_dispatcher.context",
+      "kind": "field",
+      "of": "framework.mode_key_dispatcher",
+      "find": {
+        "name": "mContext",
+        "type": "android.content.Context"
+      }
+    },
+    {
+      "id": "framework.mode_manager_state",
+      "kind": "class",
+      "find": {
+        "name": "com.hkmc.micom.ModeManagerState"
+      },
+      "about": "the car's modes (radio, media sources, navigation, phone projection) and which are available"
+    },
+    {
+      "id": "framework.mode_key_dispatcher.mode_state",
+      "kind": "field",
+      "of": "framework.mode_key_dispatcher",
+      "find": {
+        "name": "mModeManagerState",
+        "type": "@framework.mode_manager_state"
+      }
+    },
+    {
+      "id": "framework.mode_info",
+      "kind": "class",
+      "find": {
+        "name": "com.hkmc.micom.ModeManagerState$ModeInfo"
+      },
+      "about": "one of the car's modes"
+    },
+    {
+      "id": "framework.mode_manager_state.get_mode_info",
+      "kind": "method",
+      "of": "framework.mode_manager_state",
+      "find": {
+        "name": "getModeInfo",
+        "params": [
+          "int"
+        ],
+        "ret": "@framework.mode_info"
+      },
+      "about": "a mode by number (0x74 Android Auto, 0x73 CarPlay)"
+    },
+    {
+      "id": "framework.mode_info.is_available",
+      "kind": "method",
+      "of": "framework.mode_info",
+      "find": {
+        "name": "isAvailable",
+        "params": [],
+        "ret": "boolean"
+      },
+      "about": "the mode can be used now (Android Auto: connected, set by GPM's setMediaAvailable)"
+    },
+    {
       "id": "framework.mode_manager_service.intercept_key_dispatching",
       "kind": "method",
       "of": "framework.mode_manager_service",

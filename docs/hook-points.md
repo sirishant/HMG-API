@@ -13,16 +13,16 @@ use one. A point a car's map lacks is off on that car, and the HMG-API app says 
 How points are described and found: [core/hookpoints/README.md](../core/hookpoints/README.md).
 Need one that isn't here? Open a "New hook point" issue.
 
-440 hook points. **Cars** (`maps/`):
+448 hook points. **Cars** (`maps/`):
 
 | Car | Map | Points |
 |---|---|---|
-| Hyundai Creta Electric IND 260430 | mapped from stock files | 440 of 440 |
-| Hyundai Ioniq 5 CAN 260206 | mapped from stock files | 343 of 440 |
-| Hyundai Ioniq 5 USA 260507 | mapped from stock files | 343 of 440 |
-| Hyundai Ioniq 5 USA 260903 | mapped on cars by HMG-API's own mapper | 325 of 440 |
-| Kia EV6 CAN 260206 | mapped from stock files | 343 of 440 |
-| Kia EV6 USA 260507 | checked on a car | 343 of 440 |
+| Hyundai Creta Electric IND 260430 | mapped from stock files | 448 of 448 |
+| Hyundai Ioniq 5 CAN 260206 | mapped from stock files | 343 of 448 |
+| Hyundai Ioniq 5 USA 260507 | mapped from stock files | 343 of 448 |
+| Hyundai Ioniq 5 USA 260903 | mapped on cars by HMG-API's own mapper | 325 of 448 |
+| Kia EV6 CAN 260206 | mapped from stock files | 343 of 448 |
+| Kia EV6 USA 260507 | checked on a car | 343 of 448 |
 
 In the tables, **Cars** is "all" when every car above has the point, otherwise the cars without it.
 
@@ -151,6 +151,14 @@ Android framework and the car's service interfaces (any process).
 | `framework.window_manager_service.intercept_key` | method | `interceptKey(android.view.KeyEvent)` → int | HKMC's key entry: the key policy's dispatch step hands it every key once Android is up and it passes the key to the car's key dispatcher; negative: the key is used up. A key put back with InputManager.injectInputEvent comes through here again | all |
 | `framework.mode_key_dispatcher` | class | `com.hkmc.micom.ModeKeyDispatcher` | the car's key dispatcher (automotive-service.jar, in system_server): WindowManagerService.interceptKey hands it every key | all |
 | `framework.mode_key_dispatcher.intercept_key` | method | `interceptKeyFromAndroid(android.view.InputChannel, int, int, int, int, int, int, int, int)` → int | every key once Android is up, from the key policy's dispatch step (the queueing step calls it only before boot): (focus, action, flags, deviceId, keyCode, scanCode, metaState, repeatCount, 0); negative: the key is used up. ModeManagerService.interceptKeyBefore* aren't called on 260507 | all |
+| `framework.mode_key_dispatcher.send_broadcast_key_event` | method | `sendBroadcastKeyEvent(int, int, int, int, int, boolean)` → void | a key no screen took, to the car's own action (action, keyCode, flags, deviceId, repeatCount, isViewHandled): NAV, MAP and the other shortcut buttons | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
+| `framework.mode_key_dispatcher.request_shortcut` | method | `requestBroadcastShortcutEvent(String, int, int)` → void | the car's shortcut for a button (action such as com.hkmc.intent.action.NAVI_SHORTCUT, NAVI_SHORTCUT_LONG, MAP_SHORTCUT): starts its service or broadcasts it | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
+| `framework.mode_key_dispatcher.context` | field | `mContext`: android.content.Context |  | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
+| `framework.mode_manager_state` | class | `com.hkmc.micom.ModeManagerState` | the car's modes (radio, media sources, navigation, phone projection) and which are available | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
+| `framework.mode_key_dispatcher.mode_state` | field | `mModeManagerState`: framework.mode_manager_state |  | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
+| `framework.mode_info` | class | `com.hkmc.micom.ModeManagerState$ModeInfo` | one of the car's modes | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
+| `framework.mode_manager_state.get_mode_info` | method | `getModeInfo(int)` → framework.mode_info | a mode by number (0x74 Android Auto, 0x73 CarPlay) | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
+| `framework.mode_info.is_available` | method | `isAvailable()` → boolean | the mode can be used now (Android Auto: connected, set by GPM's setMediaAvailable) | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
 | `framework.mode_manager_service.intercept_key_dispatching` | method | `interceptKeyBeforeDispatching(android.view.InputChannel, int, int, int, int, int, int, int, int)` → int |  | all |
 | `framework.car_services.bcm` | field | `static BCM_SERVICE`: String |  | all |
 | `framework.car_services.usm` | field | `static USM_SERVICE`: String |  | all |

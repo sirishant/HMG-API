@@ -688,8 +688,22 @@
     "ret": "com.hkmc.micom.IMicomDataService",
     "static": true
   },
+  "framework.mode_info": {
+    "class": "com.hkmc.micom.ModeManagerState$ModeInfo"
+  },
+  "framework.mode_info.is_available": {
+    "method": "isAvailable",
+    "params": [],
+    "ret": "boolean",
+    "static": false
+  },
   "framework.mode_key_dispatcher": {
     "class": "com.hkmc.micom.ModeKeyDispatcher"
+  },
+  "framework.mode_key_dispatcher.context": {
+    "field": "mContext",
+    "type": "android.content.Context",
+    "static": false
   },
   "framework.mode_key_dispatcher.intercept_key": {
     "method": "interceptKeyFromAndroid",
@@ -705,6 +719,34 @@
       "int"
     ],
     "ret": "int",
+    "static": false
+  },
+  "framework.mode_key_dispatcher.mode_state": {
+    "field": "mModeManagerState",
+    "type": "com.hkmc.micom.ModeManagerState",
+    "static": false
+  },
+  "framework.mode_key_dispatcher.request_shortcut": {
+    "method": "requestBroadcastShortcutEvent",
+    "params": [
+      "java.lang.String",
+      "int",
+      "int"
+    ],
+    "ret": "void",
+    "static": false
+  },
+  "framework.mode_key_dispatcher.send_broadcast_key_event": {
+    "method": "sendBroadcastKeyEvent",
+    "params": [
+      "int",
+      "int",
+      "int",
+      "int",
+      "int",
+      "boolean"
+    ],
+    "ret": "void",
     "static": false
   },
   "framework.mode_manager_service": {
@@ -740,6 +782,17 @@
       "int"
     ],
     "ret": "int",
+    "static": false
+  },
+  "framework.mode_manager_state": {
+    "class": "com.hkmc.micom.ModeManagerState"
+  },
+  "framework.mode_manager_state.get_mode_info": {
+    "method": "getModeInfo",
+    "params": [
+      "int"
+    ],
+    "ret": "com.hkmc.micom.ModeManagerState$ModeInfo",
     "static": false
   },
   "framework.navigation_cluster": {
