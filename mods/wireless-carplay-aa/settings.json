@@ -16,13 +16,6 @@
       "apply": "rebuild"
     },
     {
-      "key": "carplay_rules",
-      "type": "toggle",
-      "default": true,
-      "apply": "restart",
-      "title": "CarPlay: retry stuck starts, end with the car (test)"
-    },
-    {
       "key": "audio",
       "type": "toggle",
       "default": true,

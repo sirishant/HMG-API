@@ -61,8 +61,6 @@ final class Bridge {
     static final String ACTION_ACC = "com.hkmc.intent.action.ACTION_ACC_STATUS_CHANGED";
     static final String EXTRA_ACC = "android.ibox.mode.EXTRA_ACC_STATUS";
     static final int ACC_ON = 0, ACC_DELAY = 6, ACC_PRE_OFF = 7, ACC_OFF = 0xff;
-    /** settings: the session watchdog, and CarPlay off with the car */
-    static volatile boolean sWatchdog = true, sCarOffRule = true;
     static volatile boolean sCarOff;
     /** an iPhone whose CarPlay was ended on request (DISCONNECT_CARPLAY): not started again until it reconnects */
     static volatile String sHeld;
@@ -235,7 +233,6 @@ final class Bridge {
 
     /** CarPlay's Bluetooth start: if no session comes, the phone gets the hotspot again, then the attempt ends */
     static void watch(final String addr) {
-        if (!sWatchdog) return;
         final int id = ++sWatchId;
         handler().postDelayed(new Runnable() {
             @Override
@@ -284,7 +281,7 @@ final class Bridge {
 
     /** the car's power: wireless CarPlay ends at delay mode or off, and starts again only once the car is on */
     static void watchPower(Context c) {
-        if (!sCarOffRule || c == null) return;
+        if (c == null) return;
         try {
             Intent last = c.registerReceiver(new BroadcastReceiver() {
                 @Override
