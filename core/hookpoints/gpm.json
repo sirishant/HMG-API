@@ -303,6 +303,26 @@
       "about": "a key for Android Auto (action, flags, _, keyCode, _, metaState, _, isViewHandled); Call (5) sends the phone key, Search first while the assistant runs"
     },
     {
+      "id": "gpm.key_listener.all_keys",
+      "kind": "method",
+      "of": "gpm.key_listener",
+      "find": {
+        "name": "onAllKeyForService",
+        "params": [
+          "int",
+          "int",
+          "int",
+          "int",
+          "int",
+          "int",
+          "int",
+          "boolean"
+        ],
+        "ret": "void"
+      },
+      "about": "every car key, wherever it went (action, flags, ?, keyCode, scanCode, metaState, repeatCount, isViewHandled: a screen took it)"
+    },
+    {
       "id": "gpm.main_activity",
       "kind": "class",
       "find": {
@@ -323,6 +343,17 @@
         "ret": "boolean"
       },
       "about": "a car key released on Android Auto's screen (true: handled, so the car skips that button's own action); Media (251) pops up the car's media screen, NAV (255) and MAP (260) go on to the car's navigation"
+    },
+    {
+      "id": "gpm.main_activity.on_resume",
+      "kind": "method",
+      "of": "gpm.main_activity",
+      "find": {
+        "name": "onResume",
+        "params": [],
+        "ret": "void"
+      },
+      "about": "Android Auto's screen comes to the front (also when a car button's shortcut brings it up)"
     },
     {
       "id": "gpm.receiver_service.on_create",

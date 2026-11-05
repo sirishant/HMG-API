@@ -13,16 +13,16 @@ use one. A point a car's map lacks is off on that car, and the HMG-API app says 
 How points are described and found: [core/hookpoints/README.md](../core/hookpoints/README.md).
 Need one that isn't here? Open a "New hook point" issue.
 
-438 hook points. **Cars** (`maps/`):
+440 hook points. **Cars** (`maps/`):
 
 | Car | Map | Points |
 |---|---|---|
-| Hyundai Creta Electric IND 260430 | mapped from stock files | 438 of 438 |
-| Hyundai Ioniq 5 CAN 260206 | mapped from stock files | 343 of 438 |
-| Hyundai Ioniq 5 USA 260507 | mapped from stock files | 343 of 438 |
-| Hyundai Ioniq 5 USA 260903 | mapped on cars by HMG-API's own mapper | 325 of 438 |
-| Kia EV6 CAN 260206 | mapped from stock files | 343 of 438 |
-| Kia EV6 USA 260507 | checked on a car | 343 of 438 |
+| Hyundai Creta Electric IND 260430 | mapped from stock files | 440 of 440 |
+| Hyundai Ioniq 5 CAN 260206 | mapped from stock files | 343 of 440 |
+| Hyundai Ioniq 5 USA 260507 | mapped from stock files | 343 of 440 |
+| Hyundai Ioniq 5 USA 260903 | mapped on cars by HMG-API's own mapper | 325 of 440 |
+| Kia EV6 CAN 260206 | mapped from stock files | 343 of 440 |
+| Kia EV6 USA 260507 | checked on a car | 343 of 440 |
 
 In the tables, **Cars** is "all" when every car above has the point, otherwise the cars without it.
 
@@ -405,8 +405,10 @@ App `com.google.android.projection.sink`.
 | `gpm.util.spec_step` | method | `static ?()` → int | ro.product.opt.stepofspec, the head unit's spec level: below 31 the Call key sends Android Auto's phone key | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
 | `gpm.key_listener` | class | a class in `com.google.android.projection.service` (no fixed name) | GPM's key listener: head unit and steering wheel keys while Android Auto is up | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
 | `gpm.key_listener.key_for_service` | method | `onKeyForService(int, int, int, int, int, int, int, boolean)` → void | a key for Android Auto (action, flags, _, keyCode, _, metaState, _, isViewHandled); Call (5) sends the phone key, Search first while the assistant runs | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
+| `gpm.key_listener.all_keys` | method | `onAllKeyForService(int, int, int, int, int, int, int, boolean)` → void | every car key, wherever it went (action, flags, ?, keyCode, scanCode, metaState, repeatCount, isViewHandled: a screen took it) | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
 | `gpm.main_activity` | class | `com.google.android.projection.sink.ui.MainActivity` | Android Auto's screen | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
 | `gpm.main_activity.on_key_up` | method | `onKeyUp(int, android.view.KeyEvent)` → boolean | a car key released on Android Auto's screen (true: handled, so the car skips that button's own action); Media (251) pops up the car's media screen, NAV (255) and MAP (260) go on to the car's navigation | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
+| `gpm.main_activity.on_resume` | method | `onResume()` → void | Android Auto's screen comes to the front (also when a car button's shortcut brings it up) | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
 | `gpm.receiver_service.on_create` | method | `onCreate()` → void | GPM's service starts (once per GPM process) | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
 | `gpm.receiver_service.start_navi_view` | method | `onStartNaviView()` → void | sends Android Auto's navigation key (KEYCODE_NAVIGATION): the phone's navigation app | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
 | `gpm.receiver_service.start_music_view` | method | `onStartMusicView()` → void | brings Android Auto forward and sends its media key (KEYCODE_MEDIA): the phone's media screen | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |

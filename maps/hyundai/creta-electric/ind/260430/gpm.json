@@ -15,6 +15,21 @@
   "gpm.key_listener": {
     "class": "com.google.android.projection.service.GalReceiverService$6"
   },
+  "gpm.key_listener.all_keys": {
+    "method": "onAllKeyForService",
+    "params": [
+      "int",
+      "int",
+      "int",
+      "int",
+      "int",
+      "int",
+      "int",
+      "boolean"
+    ],
+    "ret": "void",
+    "static": false
+  },
   "gpm.key_listener.key_for_service": {
     "method": "onKeyForService",
     "params": [
@@ -40,6 +55,12 @@
       "android.view.KeyEvent"
     ],
     "ret": "boolean",
+    "static": false
+  },
+  "gpm.main_activity.on_resume": {
+    "method": "onResume",
+    "params": [],
+    "ret": "void",
     "static": false
   },
   "gpm.navigation_status": {
