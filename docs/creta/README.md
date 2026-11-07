@@ -53,7 +53,10 @@ The app's title bar now says "Hooks on (map checked)", and HMG-API has a tile in
 ## 3. Connect your phone
 
 - **Android:** connect wireless Android Auto from the car's phone connection screen.
-- **iPhone:** pair it from the same screen and allow CarPlay.
+- **iPhone:** pair it from the same screen and allow CarPlay. For Apple Maps EV routing, after
+  installing or updating CarPlay EV routing, delete the pairing on both the car and the iPhone and
+  pair again (iOS keeps what the car offered at the first pairing), then add the car in Apple Maps
+  (your picture, then Vehicles).
 
 Keep USB drives out of the port unless you're logging.
 
