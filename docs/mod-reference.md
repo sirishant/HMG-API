@@ -28,7 +28,7 @@ setting). It never edits your code.
 | your own APK | `"apps": [{"apk": "…", "package": "…"}]`: installed with the signature workaround, data kept on update, turned off with the mod, removed with it |
 | a tile in the app menu | `"provides": {"launcher": [{"package": "pkg", "class": ".Main"}]}`, with optional day/night pictures (`icon`, `icon_night`) and greyed-out ones (`icon_disabled`, `icon_disabled_night`); `tools/mkicon.sh <picture> <dir>` makes all four in the stock style from any shape (PNG or SVG; add a size and the shape's colour for a logo on its own background, e.g. `66 '#41ae45'`) |
 | to change how the car's own apps behave | `"hooks": {"jar": "hooks.jar", "entry": "my.Entry"}`: your code runs in their processes and hooks them by stable hook point names, mapped per car; the list, and which cars have each: [hook-points.md](hook-points.md) (example: `mods/examples/hello`) |
-| a background process | `"services": [{"name": "…", "script": "…", "user": "root\|system\|app"}]`, or `{"jar": "x.jar", "class": "my.Main", "args": […]}` (`BOOTCLASSPATH` already set); `"restart": true` (default) or `false`; `"start": "android"` (default), `"boot"`, or `"manual"` (only when your app or `hmgapid service-start` asks) |
+| a background process | `"services": [{"name": "…", "script": "…", "user": "root\|system\|app"}]`, or `{"jar": "x.jar", "class": "my.Main", "args": […]}` (`BOOTCLASSPATH` already set; in this repo, a mod's `service/` sources build to `service.jar` with the client API inside, e.g. `mods/climate-creta`); `"restart": true` (default) or `false`; `"start": "android"` (default), `"boot"`, or `"manual"` (only when your app or `hmgapid service-start` asks) |
 | files and settings on the unit | `patches.json` changes (`add`, `lines`, `props`, `setting`, `codecs`, …): merged with other mods, put back on removal |
 | a folder on a USB stick | `"usb": ["MyFolder"]`: your apps get `hmgapi.intent.action.USB_FOLDER`; services ask `hmgapid usb` |
 | to read the car | `"vehicle": {"read": ["battery12v.soc", "gear.park", "hv.soc"]}`, then `hmgapid vehicle <name>…` or `api.vehicle(…)`: no root, one read shared by every mod (see Vehicle readings) |
@@ -98,6 +98,10 @@ the HMG-API app, and hooks see new values at once.
 | `seat_state.<seat>` | raw | that step: 2 off, 3-5 ventilation, 6-8 heat |
 | `outside_temp`, `outside_temp_f` | °C, °F | climate control's outside temperature (pushed by the car; converted on a car that shows the other unit) |
 | `parking_brake` | 0/1 | the electronic parking brake engaged |
+| `ignition` | 0/1 | body control, ignition on (accessory reads off) |
+| `belt.driver`, `belt.passenger` | 0/1 | telematics CAN service, seat belt buckled (the passenger's reads 0 with the ignition off) |
+| `climate.on`, `climate.sync`, `climate.driver_only` | 0/1 | climate control's status (pushed): the front climate on, Sync, Driver Only |
+| `climate.driver_temp`, `climate.passenger_temp` | °C (as the climate shows it) | climate control's set temperatures (pushed) |
 
 Each value is read through the car's own interface, by method name from the car's
 hook map, and kept for a short time (100 ms for steering and pedals, up to 60 s

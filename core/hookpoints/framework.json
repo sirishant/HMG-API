@@ -1077,6 +1077,28 @@
       "about": "12V battery state of charge, %"
     },
     {
+      "id": "framework.hscan_service.driver_belt",
+      "kind": "method",
+      "of": "framework.hscan_service",
+      "find": {
+        "name": "getDrvStBltSwSta",
+        "params": [],
+        "ret": "int"
+      },
+      "about": "driver's seat belt switch: 1 buckled"
+    },
+    {
+      "id": "framework.hscan_service.passenger_belt",
+      "kind": "method",
+      "of": "framework.hscan_service",
+      "find": {
+        "name": "getAsstStBltSwSta",
+        "params": [],
+        "ret": "int"
+      },
+      "about": "front passenger's seat belt switch: 1 buckled (0 with the ignition off, Ioniq 5)"
+    },
+    {
       "id": "framework.hscan_service.hv_health",
       "kind": "method",
       "of": "framework.hscan_service",
@@ -2076,6 +2098,17 @@
       "about": "onDatcStatus(DatcStatus): the climate status, sent on registration and on change"
     },
     {
+      "id": "framework.datc_listener_stub.temperature",
+      "kind": "field",
+      "of": "framework.datc_listener_stub",
+      "find": {
+        "name": "TRANSACTION_onTemperatureInformation",
+        "type": "int",
+        "static": true
+      },
+      "about": "onTemperatureInformation(8 x float, int): the set temperatures (the driver's first, the passenger's third); a status alone keeps the old ones"
+    },
+    {
       "id": "framework.datc_service.register_listener",
       "kind": "method",
       "of": "framework.datc_service",
@@ -2087,6 +2120,20 @@
         ],
         "ret": "void"
       }
+    },
+    {
+      "id": "framework.datc_service.front_control",
+      "kind": "method",
+      "of": "framework.datc_service",
+      "find": {
+        "name": "setFrontClimateControl",
+        "params": [
+          "int",
+          "int"
+        ],
+        "ret": "void"
+      },
+      "about": "one front climate control as the climate screen sends it (DATCFlag.DATCControl flag, value): SYNC 22, DRIVER_ONLY 24, TEMP_DR_UPDN 50; passed to the climate unit as it is"
     },
     {
       "id": "framework.datc_status",
@@ -2136,6 +2183,61 @@
         "ret": "int"
       },
       "about": "255: the Celsius value isn't valid (a US car fills Fahrenheit)"
+    },
+    {
+      "id": "framework.datc_status.operation",
+      "kind": "method",
+      "of": "framework.datc_status",
+      "find": {
+        "name": "getOperationStatus",
+        "params": [],
+        "ret": "int"
+      },
+      "about": "DatcOperationState: 0 off, 1 normal (on), 2 system off, 3 self-diagnosis, 4 AQS, 7 invalid"
+    },
+    {
+      "id": "framework.datc_status.sync",
+      "kind": "method",
+      "of": "framework.datc_status",
+      "find": {
+        "name": "getSyncDisp",
+        "params": [],
+        "ret": "int"
+      },
+      "about": "Sync shown: 1 on"
+    },
+    {
+      "id": "framework.datc_status.driver_only",
+      "kind": "method",
+      "of": "framework.datc_status",
+      "find": {
+        "name": "getDriverOnly",
+        "params": [],
+        "ret": "int"
+      },
+      "about": "Driver Only shown: 1 on"
+    },
+    {
+      "id": "framework.datc_status.driver_temp_c",
+      "kind": "method",
+      "of": "framework.datc_status",
+      "find": {
+        "name": "getDrTempC",
+        "params": [],
+        "ret": "float"
+      },
+      "about": "the driver's set temperature, Celsius"
+    },
+    {
+      "id": "framework.datc_status.passenger_temp_c",
+      "kind": "method",
+      "of": "framework.datc_status",
+      "find": {
+        "name": "getPsTempC",
+        "params": [],
+        "ret": "float"
+      },
+      "about": "the front passenger's set temperature, Celsius"
     },
     {
       "id": "framework.bcm_service.drv_seat_heat_option",
@@ -2189,6 +2291,17 @@
         "ret": "int"
       },
       "about": "battery conditioning indicator: 1 conditioning, 0 not (as Launchpad reads it)"
+    },
+    {
+      "id": "framework.bcm_service.ignition",
+      "kind": "method",
+      "of": "framework.bcm_service",
+      "find": {
+        "name": "getIGNStatus",
+        "params": [],
+        "ret": "boolean"
+      },
+      "about": "ignition on (accessory reads off)"
     },
     {
       "id": "framework.hev_flag.batt_cond_failure",

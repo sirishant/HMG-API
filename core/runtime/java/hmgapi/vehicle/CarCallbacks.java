@@ -36,6 +36,15 @@ final class CarCallbacks {
     /** the ambient light's last status: r, g, b (2 bytes each), brightness, dimmed while driving, drive mode; null until heard */
     volatile byte[] sml;
 
+    /**
+     * The front climate as climate control last reported it (onDatcStatus, and
+     * onTemperatureInformation for the set temperatures: a status alone keeps the old ones):
+     * operation status (1 on), Sync and Driver Only (1 on); MIN_VALUE / NaN until heard,
+     * or on a car whose map lacks the points
+     */
+    volatile int climateOp = Integer.MIN_VALUE, climateSync = Integer.MIN_VALUE, climateDriverOnly = Integer.MIN_VALUE;
+    volatile float driverTemp = Float.NaN, passengerTemp = Float.NaN;
+
     private Listener system, bcm, cluster;
     private String lastFailure, lastBcmFailure, lastClusterFailure;   // logged once, not every tick
     private boolean lightAsked;
@@ -148,11 +157,28 @@ final class CarCallbacks {
             try {
                 Object svc = Hub.datc();
                 if (svc != null) {
-                    int code = (Integer) Points.get(null, "framework.datc_listener_stub.status", null);
+                    final int code = (Integer) Points.get(null, "framework.datc_listener_stub.status", null);
+                    // the climate state (Creta map): optional, so a car without these points keeps its outside temperature
+                    final boolean state = Points.has("framework.datc_status.operation") && Points.has("framework.datc_status.sync")
+                            && Points.has("framework.datc_status.driver_only") && Points.has("framework.datc_status.driver_temp_c")
+                            && Points.has("framework.datc_status.passenger_temp_c");
+                    final int temps = Points.has("framework.datc_listener_stub.temperature")
+                            ? (Integer) Points.get(null, "framework.datc_listener_stub.temperature", null) : -1;
                     final Object creator = Points.get(null, "framework.datc_status.creator", null);
-                    Listener l = new Listener(Points.cls(null, "framework.datc_listener").getName(), code) {
+                    Listener l = new Listener(Points.cls(null, "framework.datc_listener").getName(), code, temps) {
                         @Override
                         void got(int c, Parcel d) {
+                            if (c == temps && c != code) {
+                                // the set temperatures: the driver's first, the front passenger's third (8 float, int pairs)
+                                float dr = d.readFloat();
+                                d.readInt();
+                                d.readFloat();
+                                d.readInt();
+                                float ps = d.readFloat();
+                                driverTemp = dr;
+                                passengerTemp = ps;
+                                return;
+                            }
                             if (d.readInt() == 0) return;   // a null status
                             Object st = ((android.os.Parcelable.Creator<?>) creator).createFromParcel(d);
                             float f = (Float) Points.call(null, "framework.datc_status.ambient_f", st);
@@ -162,6 +188,17 @@ final class CarCallbacks {
                             outsideF10 = Math.round(f * 10);
                             outsideC10 = stateC == 255 ? Integer.MIN_VALUE : Math.round(cc * 10);   // 255: Celsius not valid (a US car)
                             if (first) System.out.println("vehicle: climate status, first outside temperature: " + f + " F, " + cc + " C (state " + stateC + ")");
+                            if (!state) return;
+                            boolean firstState = climateOp == Integer.MIN_VALUE;
+                            climateOp = (Integer) Points.call(null, "framework.datc_status.operation", st);
+                            climateSync = (Integer) Points.call(null, "framework.datc_status.sync", st);
+                            climateDriverOnly = (Integer) Points.call(null, "framework.datc_status.driver_only", st);
+                            if (Float.isNaN(driverTemp) || temps < 0) {   // until a temperature report, the status's own
+                                driverTemp = (Float) Points.call(null, "framework.datc_status.driver_temp_c", st);
+                                passengerTemp = (Float) Points.call(null, "framework.datc_status.passenger_temp_c", st);
+                            }
+                            if (firstState) System.out.println("vehicle: climate status, first: operation " + climateOp + ", sync " + climateSync
+                                    + ", driver only " + climateDriverOnly + ", " + driverTemp + " / " + passengerTemp);
                         }
                     };
                     Object proxy = Points.call(null, "framework.datc_listener_stub.as_interface", null, l);

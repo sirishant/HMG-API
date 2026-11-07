@@ -198,6 +198,19 @@ public final class Hub {
             if ("outside_temp_f".equals(name)) return dec(f10 / 10f);
             return dec(c10 != Integer.MIN_VALUE ? c10 / 10f : (f10 / 10f - 32f) * 5f / 9f);
         }
+        if ("ignition".equals(name)) return bool(Boolean.TRUE.equals(call(bcm(), "framework.bcm_service.ignition")));
+        if ("belt.driver".equals(name)) return valid(num(call(hscan(), "framework.hscan_service.driver_belt")), 0, 1);
+        if ("belt.passenger".equals(name)) return valid(num(call(hscan(), "framework.hscan_service.passenger_belt")), 0, 1);
+        if (name.startsWith("climate.")) {
+            // climate control's status and set temperatures (pushed; CarCallbacks)
+            if (callbacks.climateOp == Integer.MIN_VALUE) return null;
+            if ("climate.on".equals(name)) return bool(callbacks.climateOp == 1);
+            if ("climate.sync".equals(name)) return bool(callbacks.climateSync == 1);
+            if ("climate.driver_only".equals(name)) return bool(callbacks.climateDriverOnly == 1);
+            if ("climate.driver_temp".equals(name)) return dec(callbacks.driverTemp);
+            if ("climate.passenger_temp".equals(name)) return dec(callbacks.passengerTemp);
+            return null;
+        }
         if ("odometer".equals(name)) {
             int tenths = hev("framework.hev_flag.odometer");
             return tenths < 0 ? null : dec(tenths / 10f);
@@ -305,6 +318,7 @@ public final class Hub {
                 if ("vr".equals(what)) return must(vr(), what);
                 if ("hev".equals(what)) return must(hev(), what);
                 if ("factory".equals(what)) return must(factory(), what);
+                if ("datc".equals(what)) return must(datc(), what);
                 return must(system(), what);
             } catch (RuntimeException e) {
                 throw e;
@@ -406,6 +420,22 @@ public final class Hub {
         public void hideStartupNotice() { run(get("factory"), "framework.factory_service.hide_consent_screen"); }
 
         public boolean noticeAllowed() { return new java.io.File("/data/hmgapi/settings/allow/startup_notice").isFile(); }   // hmgapid allow
+
+        public int ignition() {
+            try {
+                Object v = call(get("bcm"), "framework.bcm_service.ignition");
+                return v instanceof Boolean ? ((Boolean) v ? 1 : 0) : -1;
+            } catch (RuntimeException e) {
+                return -1;
+            }
+        }
+
+        public int climateStatus() {
+            int op = callbacks.climateOp;
+            return op == Integer.MIN_VALUE ? -1 : op;
+        }
+
+        public void climate(int flag, int value) { run(get("datc"), "framework.datc_service.front_control", flag, value); }
 
         public boolean lightBlocked() { return new java.io.File("/data/hmgapi/settings/allow/block_ambient_light").isFile(); }
 

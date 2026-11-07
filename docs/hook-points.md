@@ -13,16 +13,16 @@ use one. A point a car's map lacks is off on that car, and the HMG-API app says 
 How points are described and found: [core/hookpoints/README.md](../core/hookpoints/README.md).
 Need one that isn't here? Open a "New hook point" issue.
 
-448 hook points. **Cars** (`maps/`):
+458 hook points. **Cars** (`maps/`):
 
 | Car | Map | Points |
 |---|---|---|
-| Hyundai Creta Electric IND 260430 | mapped from stock files | 448 of 448 |
-| Hyundai Ioniq 5 CAN 260206 | mapped from stock files | 343 of 448 |
-| Hyundai Ioniq 5 USA 260507 | mapped from stock files | 343 of 448 |
-| Hyundai Ioniq 5 USA 260903 | mapped on cars by HMG-API's own mapper | 325 of 448 |
-| Kia EV6 CAN 260206 | mapped from stock files | 343 of 448 |
-| Kia EV6 USA 260507 | checked on a car | 343 of 448 |
+| Hyundai Creta Electric IND 260430 | mapped from stock files | 458 of 458 |
+| Hyundai Ioniq 5 CAN 260206 | mapped from stock files | 343 of 458 |
+| Hyundai Ioniq 5 USA 260507 | mapped from stock files | 343 of 458 |
+| Hyundai Ioniq 5 USA 260903 | mapped on cars by HMG-API's own mapper | 325 of 458 |
+| Kia EV6 CAN 260206 | mapped from stock files | 343 of 458 |
+| Kia EV6 USA 260507 | checked on a car | 343 of 458 |
 
 In the tables, **Cars** is "all" when every car above has the point, otherwise the cars without it.
 
@@ -130,6 +130,8 @@ Android framework and the car's service interfaces (any process).
 | `framework.hscan_service.accel_pedal` | method | `getAccelPdlVal()` → float |  | all |
 | `framework.hscan_service.brake_pressure` | method | `getCylPrsrVal()` → float |  | all |
 | `framework.hscan_service.battery_12v_soc` | method | `getBatSoc()` → int | 12V battery state of charge, % | all |
+| `framework.hscan_service.driver_belt` | method | `getDrvStBltSwSta()` → int | driver's seat belt switch: 1 buckled | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
+| `framework.hscan_service.passenger_belt` | method | `getAsstStBltSwSta()` → int | front passenger's seat belt switch: 1 buckled (0 with the ignition off, Ioniq 5) | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
 | `framework.hscan_service.hv_health` | method | `getXEV_Bms_GDS_SOH()` → int |  | all |
 | `framework.hscan_service.charging_status` | method | `getChargingStatus()` → int |  | all |
 | `framework.car_services` | class | `com.hkmc.Service` | the car services' registered names | all |
@@ -223,17 +225,25 @@ Android framework and the car's service interfaces (any process).
 | `framework.datc_listener_stub` | class | `com.hkmc.datc.IDATCListener$Stub` |  | all |
 | `framework.datc_listener_stub.as_interface` | method | `static asInterface(android.os.IBinder)` → framework.datc_listener |  | all |
 | `framework.datc_listener_stub.status` | field | `static TRANSACTION_onDatcStatus`: int | onDatcStatus(DatcStatus): the climate status, sent on registration and on change | all |
+| `framework.datc_listener_stub.temperature` | field | `static TRANSACTION_onTemperatureInformation`: int | onTemperatureInformation(8 x float, int): the set temperatures (the driver's first, the passenger's third); a status alone keeps the old ones | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
 | `framework.datc_service.register_listener` | method | `registerDATCListener(framework.datc_listener, android.os.IBinder)` → void |  | all |
+| `framework.datc_service.front_control` | method | `setFrontClimateControl(int, int)` → void | one front climate control as the climate screen sends it (DATCFlag.DATCControl flag, value): SYNC 22, DRIVER_ONLY 24, TEMP_DR_UPDN 50; passed to the climate unit as it is | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
 | `framework.datc_status` | class | `com.hkmc.datc.DatcStatus` |  | all |
 | `framework.datc_status.creator` | field | `static CREATOR`: android.os.Parcelable$Creator |  | all |
 | `framework.datc_status.ambient_f` | method | `getAmbientTempF()` → float | outside temperature, Fahrenheit (what the cluster shows on a US car: 73.0 for 73 F) | all |
 | `framework.datc_status.ambient_c` | method | `getAmbientTempC()` → float |  | all |
 | `framework.datc_status.ambient_state_c` | method | `getAmbientTempStateC()` → int | 255: the Celsius value isn't valid (a US car fills Fahrenheit) | all |
+| `framework.datc_status.operation` | method | `getOperationStatus()` → int | DatcOperationState: 0 off, 1 normal (on), 2 system off, 3 self-diagnosis, 4 AQS, 7 invalid | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
+| `framework.datc_status.sync` | method | `getSyncDisp()` → int | Sync shown: 1 on | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
+| `framework.datc_status.driver_only` | method | `getDriverOnly()` → int | Driver Only shown: 1 on | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
+| `framework.datc_status.driver_temp_c` | method | `getDrTempC()` → float | the driver's set temperature, Celsius | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
+| `framework.datc_status.passenger_temp_c` | method | `getPsTempC()` → float | the front passenger's set temperature, Celsius | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
 | `framework.bcm_service.drv_seat_heat_option` | method | `getDrvSeatHeatOption()` → int | what the seat has: 1 heater with 2 levels (HEATER_ONLY_2STEP), 2 heater with 3, 6 heater and ventilation (EV6 front) | all |
 | `framework.bcm_service.ast_seat_heat_option` | method | `getAstSeatHeatOption()` → int |  | all |
 | `framework.bcm_service.rl_seat_heat_option` | method | `getRLSeatHeatOption()` → int | 1 on the EV6: 2 levels, no ventilation | all |
 | `framework.bcm_service.rr_seat_heat_option` | method | `getRRSeatHeatOption()` → int |  | all |
 | `framework.bcm_service.batt_cond_indicator` | method | `getBattCondIndSta()` → int | battery conditioning indicator: 1 conditioning, 0 not (as Launchpad reads it) | not on Hyundai Ioniq 5 USA 260903 |
+| `framework.bcm_service.ignition` | method | `getIGNStatus()` → boolean | ignition on (accessory reads off) | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
 | `framework.hev_flag.batt_cond_failure` | field | `static BMS_BATTCONDFAILPOPUP`: int | battery conditioning failure popup (raw; -1 seen when nothing's wrong) | not on Hyundai Ioniq 5 USA 260903 |
 | `framework.car_services.cluster` | field | `static CLUSTER_SERVICE`: String |  | not on Hyundai Ioniq 5 USA 260903 |
 | `framework.cluster_service` | class | `com.hkmc.cluster.IClusterService` |  | not on Hyundai Ioniq 5 USA 260903 |
