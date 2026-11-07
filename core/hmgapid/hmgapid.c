@@ -44,7 +44,7 @@ typedef unsigned int u32;
 typedef unsigned char u8;
 typedef long sl;
 
-#define VERSION "1.0.6"
+#define VERSION "1.0.7"
 
 #ifndef ROOTDIR
 #define ROOTDIR "/data/hmgapi"

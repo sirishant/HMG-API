@@ -53,6 +53,14 @@ final class CarCallbacks {
     abstract static class Listener extends Binder {
         final String descriptor;
         final int[] codes;
+        /**
+         * The interface's callbacks whose one parameter is an array: the car's caller reads that
+         * array back from the answer (an AIDL inout/out parameter). An answer without it makes
+         * the caller's Parcel.readByteArray throw "bad array lengths" on the car's service thread
+         * and system_server dies: the Creta's BCM onDigitalKeyDataChanged with a digital key
+         * (2026-11-07), and onModemInfoChanged. Code -> the array's element type.
+         */
+        final java.util.Map<Integer, Class<?>> arrays = new java.util.HashMap<Integer, Class<?>>();
 
         Listener(String descriptor, int... codes) {
             this.descriptor = descriptor;
@@ -60,6 +68,51 @@ final class CarCallbacks {
             // KitKat's Binder.queryLocalInterface (asInterface asks it) throws without a descriptor;
             // no local interface: asInterface wraps this binder in the car's own proxy
             attachInterface(null, descriptor);
+            try {
+                Class<?> iface = Class.forName(descriptor, false, Hub.class.getClassLoader());
+                Class<?> stub = Class.forName(descriptor + "$Stub", false, iface.getClassLoader());
+                for (java.lang.reflect.Method m : iface.getMethods()) {
+                    Class<?>[] p = m.getParameterTypes();
+                    if (p.length != 1 || !p[0].isArray() || !p[0].getComponentType().isPrimitive()) continue;
+                    try {
+                        java.lang.reflect.Field f = stub.getDeclaredField("TRANSACTION_" + m.getName());
+                        f.setAccessible(true);
+                        arrays.put(f.getInt(null), p[0].getComponentType());
+                    } catch (Throwable t) {
+                        System.out.println("vehicle: " + descriptor + "." + m.getName() + ": no transaction code (" + t + ")");
+                    }
+                }
+            } catch (Throwable t) {
+                System.out.println("vehicle: " + descriptor + ": callbacks not read (" + t + ")");
+            }
+        }
+
+        /** the array parameter sent back as it came in (inout) or as the size asked for (out) */
+        static void echo(Class<?> type, Parcel data, Parcel reply) {
+            int pos = data.dataPosition(), n = data.readInt();
+            int size = type == byte.class ? 1 : type == long.class || type == double.class ? 8 : 4;   // Parcel packs bytes; booleans and chars are ints
+            boolean in = n >= 0 && data.dataAvail() >= (long) n * size;
+            data.setDataPosition(pos);
+            reply.writeNoException();
+            if (n < 0) {
+                reply.writeInt(-1);
+            } else if (type == byte.class) {
+                reply.writeByteArray(in ? data.createByteArray() : new byte[n]);
+            } else if (type == int.class) {
+                reply.writeIntArray(in ? data.createIntArray() : new int[n]);
+            } else if (type == long.class) {
+                reply.writeLongArray(in ? data.createLongArray() : new long[n]);
+            } else if (type == float.class) {
+                reply.writeFloatArray(in ? data.createFloatArray() : new float[n]);
+            } else if (type == double.class) {
+                reply.writeDoubleArray(in ? data.createDoubleArray() : new double[n]);
+            } else if (type == boolean.class) {
+                reply.writeBooleanArray(in ? data.createBooleanArray() : new boolean[n]);
+            } else if (type == char.class) {
+                reply.writeCharArray(in ? data.createCharArray() : new char[n]);
+            } else {
+                reply.writeInt(-1);
+            }
         }
 
         abstract void got(int code, Parcel data);
@@ -69,6 +122,18 @@ final class CarCallbacks {
             if (c == INTERFACE_TRANSACTION) {
                 if (reply != null) reply.writeString(descriptor);
                 return true;
+            }
+            Class<?> array = arrays.get(c);
+            if (array != null && reply != null) {
+                try {
+                    data.enforceInterface(descriptor);
+                    echo(array, data, reply);
+                    return true;
+                } catch (Throwable t) {
+                    System.out.println("vehicle: callback " + c + " (an array): " + t);
+                    reply.setDataSize(0);
+                    reply.setDataPosition(0);
+                }
             }
             try {
                 for (int code : codes) {
@@ -91,7 +156,7 @@ final class CarCallbacks {
             Hub.services.remove("framework.car_services.bcm");
             bcm = null;
         }
-        if (bcm == null) {
+        if (bcm == null && Hub.wanted("wheel_heat", "defogger")) {   // nothing else needs the car calling us back
             try {
                 Object svc = Hub.bcm();
                 if (svc != null) {

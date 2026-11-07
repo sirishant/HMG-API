@@ -277,6 +277,20 @@ public final class Hub {
     static Commands commands;
     static final CarCallbacks callbacks = new CarCallbacks();
 
+    /** a reading some enabled mod declared (state/vehicle.txt: "<mod> <reading>") */
+    static boolean wanted(String... readings) {
+        try {
+            for (String l : hmgapi.engine.Engine.read(new java.io.File("/data/hmgapi/state/vehicle.txt")).split("\n")) {
+                String[] w = l.trim().split(" ");
+                if (w.length != 2) continue;
+                for (String r : readings) if (r.equals(w[1])) return true;
+            }
+        } catch (Exception e) {
+            // none
+        }
+        return false;
+    }
+
     /** state/commands.txt: mod -> the commands it declared (enabled mods only) */
     static Map<String, java.util.Set<String>> declared() {
         Map<String, java.util.Set<String>> m = new HashMap<String, java.util.Set<String>>();
