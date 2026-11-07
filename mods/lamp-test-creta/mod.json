@@ -1,0 +1,36 @@
+{
+  "id": "lamp-test-creta",
+  "name": "Lamp test (Creta, one-off)",
+  "version": "1.0.0",
+  "hmgapi": ">=1.0.5",
+  "authors": [
+    "sirishant"
+  ],
+  "repo": "https://github.com/sirishant/HMG-API",
+  "license": "AGPL-3.0",
+  "description": "Creta Electric India only. Once, parked: turns the ambient light red for 15 s, then puts the car's own blue back. Remove it after the test.",
+  "system": {
+    "model": [
+      "SU2IEV"
+    ],
+    "region": "IND",
+    "firmware": "260430"
+  },
+  "services": [
+    {
+      "name": "lamp-test",
+      "script": "svc/lamp-test.sh",
+      "user": "system",
+      "start": "android",
+      "restart": false
+    }
+  ],
+  "vehicle": {
+    "read": [
+      "gear.park"
+    ],
+    "commands": [
+      "ambient_light"
+    ]
+  }
+}
