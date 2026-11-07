@@ -1,7 +1,7 @@
 {
   "id": "climate-creta",
   "name": "Climate (Creta)",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "hmgapi": ">=1.0.6",
   "authors": [
     "sirishant"

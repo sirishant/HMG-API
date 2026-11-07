@@ -40,10 +40,19 @@ public final class Main {
         String boot = bootId();
         p.stage = loadStage(stage, boot);
         say("Climate: started (this drive's stage " + p.stage + ")");
+        String seen = null, failed = null;
         while (true) {
             long sleep = OFF_MS;
             try {
                 Map<String, String> v = api.vehicle(READ);
+                // what it reads, in the drive log whenever any of it changes ("-": HMG-API can't tell)
+                StringBuilder s = new StringBuilder("Climate: reads");
+                for (String r : READ) s.append(' ').append(r).append('=').append(v.get(r) == null ? "-" : v.get(r));
+                if (!s.toString().equals(seen)) {
+                    seen = s.toString();
+                    say(seen);
+                }
+                failed = null;
                 Policy.Car c = new Policy.Car();
                 c.ignition = num(v.get("ignition"));
                 c.belt = num(v.get("belt.passenger"));
@@ -69,6 +78,9 @@ public final class Main {
                 if (c.ignition == 1) sleep = ON_MS;
             } catch (Exception e) {
                 sleep = AWAY_MS;   // HMG-API restarting: try again
+                String why = String.valueOf(e);
+                if (!why.equals(failed)) say("Climate: can't read the car (" + why + "); trying again");
+                failed = why;
             }
             Thread.sleep(sleep);
         }
