@@ -116,7 +116,12 @@ final class AaKeys {
                     if (sDownCode == code && sHeld) return;   // held: the car's own
                     sPendingCode = -1;   // the listener hears every key before the screen does
                 }
-                if (aaKey(mod, cl, code)) m.setResult(Boolean.TRUE);
+                if (aaKey(mod, cl, code)) {
+                    m.setResult(Boolean.TRUE);
+                    if (code == KEYCODE_NAVI && sService instanceof android.content.Context) {
+                        NavKeys.tellNemesis((android.content.Context) sService);
+                    }
+                }
             }
         });
         mod.hook(cl, "gpm.key_listener.all_keys", new MethodHook() {

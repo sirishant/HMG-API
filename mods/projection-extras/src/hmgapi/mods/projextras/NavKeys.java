@@ -34,6 +34,16 @@ final class NavKeys {
     static final String GPM_SCREEN = "com.google.android.projection.sink.ui.MainActivity";
     /** FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_NO_ANIMATION, as GPM's own startMainActivity */
     static final int SCREEN_FLAGS = 0x10010000;
+    /**
+     * NEMESIS Manager opens on three NAV presses: it counts the car's NAVI_SHORTCUT broadcasts
+     * (SetupReceiver). A NAV press taken for Android Auto still counts there: the same broadcast,
+     * to NEMESIS Manager only (the car's navigation doesn't get it).
+     */
+    static final String NEMESIS = "com.nemesis.manager";
+
+    static void tellNemesis(Context c) {
+        if (c != null) c.sendBroadcast(new Intent(NAVI_SHORTCUT).setPackage(NEMESIS));
+    }
 
     /** the button being handled now, on the dispatcher's thread (sendBroadcastKeyEvent) */
     private static final ThreadLocal<Integer> sKey = new ThreadLocal<Integer>();
@@ -91,6 +101,7 @@ final class NavKeys {
                     if (!androidAuto(cl, p.thisObject)) return;
                     Context c = (Context) Points.get(cl, "framework.mode_key_dispatcher.context", p.thisObject);
                     c.startActivity(new Intent().setClassName(GPM, GPM_SCREEN).addFlags(SCREEN_FLAGS));
+                    if (code == KEYCODE_NAVI) tellNemesis(c);
                 } catch (Throwable t) {
                     mod.error("NAV and MAP keys", t);
                     return;   // the car's own navigation, as stock
