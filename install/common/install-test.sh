@@ -20,7 +20,7 @@ printf '#!/bin/sh\nexit 0\n' > $T/bin/chown
 # Android's tools, for the app's install and open.sh: what they're asked goes to calls.log
 printf '#!/bin/sh\necho "${FAKE_BOOT:-0}"\n' > $T/bin/getprop
 printf '#!/bin/sh\necho "setprop $*" >> "%s/calls.log"\n' "$T" > $T/bin/setprop
-printf '#!/bin/sh\necho "pm $*" >> "%s/calls.log"\ncase "$1" in path) [ -n "$FAKE_HAVE_APP" ] && echo package:/data/app/hmgapi.app-1.apk ;; install) echo "${FAKE_PM:-Success}" ;; esac\nexit 0\n' "$T" > $T/bin/pm
+printf '#!/bin/sh\necho "pm $*" >> "%s/calls.log"\ncase "$1 $2" in path*) [ -n "$FAKE_HAVE_APP" ] && echo package:/data/app/hmgapi.app-1.apk ;; "install -r") echo "${FAKE_PM_R:-${FAKE_PM:-Success}}" ;; install*) echo "${FAKE_PM:-Success}" ;; esac\nexit 0\n' "$T" > $T/bin/pm
 printf '#!/bin/sh\necho "am $*" >> "%s/calls.log"\n' "$T" > $T/bin/am
 chmod +x $T/bin/*
 calls() { cat $T/calls.log 2>/dev/null || true; : > $T/calls.log; }
@@ -124,6 +124,15 @@ has "... a toast on the screen" "Restart the head unit to try again, or use Laun
 FAKE_BOOT=1 HMGAPI_TEST_ANDROID=1 run $P/install.sh $P
 has "app install works: said" "installed the HMG-API app" "$out"
 check "... nothing left waiting" no "$([ -f $R/data/hmgapi/public/HmgApi.apk ] && echo yes || echo no)"
+calls >/dev/null
+FAKE_BOOT=1 FAKE_PM_R='Failure [INSTALL_FAILED_UPDATE_INCOMPATIBLE]' HMGAPI_TEST_ANDROID=1 run $P/install.sh $P
+has "app signed with another key: put in fresh" "the HMG-API app was signed with another key: put in fresh" "$out"
+has "... uninstalled, then installed, with sys.boot_completed 0" "setprop sys.boot_completed 0
+pm install -r $P/HmgApi.apk
+pm uninstall hmgapi.app
+pm install $P/HmgApi.apk
+setprop sys.boot_completed 1" "$(calls)"
+has "... and said installed" "installed the HMG-API app" "$out"
 
 # open.sh: open the app, installing it first if it's missing
 calls >/dev/null

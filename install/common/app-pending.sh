@@ -26,6 +26,13 @@ done
 sleep 20   # let the launcher and the projection apps start first
 setprop sys.boot_completed 0
 r=$(pm install -r "$A" 2>&1)
+case "$r" in
+    *INSTALL_FAILED_UPDATE_INCOMPATIBLE*)
+        # the installed app is signed with another key (a test build's): put in fresh
+        pm uninstall hmgapi.app >/dev/null 2>&1
+        r=$(pm install "$A" 2>&1)
+        echo "the HMG-API app was signed with another key: put in fresh" >> "$LOG" ;;
+esac
 setprop sys.boot_completed 1
 case "$r" in
     *Success*) rm -f "$A"; echo "installed the HMG-API app (Android is up now)" >> "$LOG" ;;

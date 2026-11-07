@@ -205,6 +205,14 @@ fi
 if { [ -z "$ROOT" ] || [ "$HMGAPI_TEST_ANDROID" = 1 ]; } && [ "$(getprop sys.boot_completed)" = 1 ]; then
     setprop sys.boot_completed 0
     r=$(pm install -r "$P/HmgApi.apk" 2>&1)
+    case "$r" in
+        *INSTALL_FAILED_UPDATE_INCOMPATIBLE*)
+            # the installed app is signed with another key (a test build's): it holds nothing
+            # of the owner's (settings are HMG-API's), so it's put in fresh
+            pm uninstall hmgapi.app >/dev/null 2>&1
+            r=$(pm install "$P/HmgApi.apk" 2>&1)
+            log "the HMG-API app was signed with another key: put in fresh" ;;
+    esac
     setprop sys.boot_completed 1
     case "$r" in
         *Success*) rm -f "$D/public/HmgApi.apk"; log "installed the HMG-API app" ;;
