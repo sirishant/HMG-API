@@ -1,7 +1,7 @@
 {
   "id": "lamp-test-creta",
   "name": "Lamp test (Creta, one-off)",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "hmgapi": ">=1.0.5",
   "authors": [
     "sirishant"
