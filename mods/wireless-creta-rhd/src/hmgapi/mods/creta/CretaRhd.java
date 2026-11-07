@@ -49,7 +49,8 @@ final class CretaRhd implements TurnDisplay {
     private static final String ROUNDABOUT_PREFIX = "At the roundabout, ";
     // Maps' step with no direction (a roundabout's exit with no side, or an unknown one): type 64,
     // which this cluster draws as its loader. A straight card shows instead (seen on a short step
-    // just after a roundabout; an educated guess at what fits best).
+    // just after a roundabout; an educated guess at what fits best), in the turn frame and in the
+    // turn list the far card is drawn from (the list had kept 64: drives of 6 and 7 Nov 2026).
     private static final int TYPE_NO_DIRECTION = 0x40, TYPE_STRAIGHT = 0x41;
     private static final long FRESH_MS = 3000;
     // The car sends road names only when they change; Leafia's path repeated the same
@@ -250,6 +251,7 @@ final class CretaRhd implements TurnDisplay {
      */
     @Override
     public int roundaboutType(int type) {
+        if (type == TYPE_NO_DIRECTION) return TYPE_STRAIGHT;
         if ((type & FAMILY_MASK) != ROUNDABOUT_RIGHT_FAMILY) return type;
         int t = FAMILY_ROUNDABOUT | (type & 0x0f);
         return t == TABLE_SLIGHT_LEFT ? ROUNDABOUT_SLIGHT_LEFT : t;

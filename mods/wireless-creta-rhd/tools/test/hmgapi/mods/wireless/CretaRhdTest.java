@@ -204,6 +204,17 @@ public final class CretaRhdTest {
         check(list, "turn list keeps code 0x46 near: " + c.calls);
         c.calls.clear();
 
+        // a roundabout's exit with no side (Maps' 64, the cluster's loader): straight, in the list too
+        newRoute();
+        second(12, UNSPEC, 0, "NH748", 100, "100", METERS, 5000);
+        boolean straight = false, loader = false;
+        for (String l : c.calls) {
+            straight |= l.startsWith("hud f201" + "41");
+            loader |= l.startsWith("hud f201" + "40");
+        }
+        check(straight && !loader, "turn list has straight (0x41), not 0x40: " + c.calls);
+        frame("roundabout exit, no side: straight", 0x41, 65535, 0, 0, -1);
+
         // the trap frame: on a change, repeated on the approach, never far
         newRoute();
         second(TURN, LEFT, 0, "Main", 900, "900", METERS, 5000);
