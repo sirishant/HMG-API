@@ -39,6 +39,10 @@ public final class CommandsTest {
         public void setGuideLines(int state) { calls.add("lines " + state); lines = state; }
         public void hideStartupNotice() { calls.add("notice hidden"); }
         public boolean noticeAllowed() { return allowed; }
+        int ignition = 1, climate = 1;
+        public int ignition() { return ignition; }
+        public int climateStatus() { return climate; }
+        public void climate(int flag, int value) { calls.add("climate " + flag + "," + value); }
         boolean lightBlocked;
         public boolean lightBlocked() { return lightBlocked; }
         boolean askFirst;
@@ -321,6 +325,39 @@ public final class CommandsTest {
         check("MICOM watch: numbers kept", "0a1b2c", Scrub.hex(new byte[] { 0x0a, 0x1b, 0x2c }));
         check("MICOM watch: a VIN-like run blanked", "00" + "__________________________________" + "ff", Scrub.hex(("\0" + "KNDC4DLC5N5012345" + "\u00ff").getBytes(java.nio.charset.StandardCharsets.ISO_8859_1)));
         check("MICOM watch: short text kept (codes, units)", "4b4d4800", Scrub.hex("KMH\0".getBytes(java.nio.charset.StandardCharsets.ISO_8859_1)));
+        // front climate: the climate screen's own presses
+        check("climate: Driver Only on", "ok climate driver_only on", c.handle("clim", "climate", new String[] { "driver_only", "on" }));
+        check("... flag 24, value 1", "climate 24,1", calls(car));
+        check("3 a second at most", "refused: 3 changes a second at most", c.handle("clim", "climate", new String[] { "sync", "on" }));
+        car.now += 300;
+        check("Sync on", "ok climate sync on", c.handle("clim", "climate", new String[] { "sync", "on" }));
+        check("... flag 22, value 2", "climate 22,2", calls(car));
+        car.now += 300;
+        c.handle("clim", "climate", new String[] { "sync", "off" });
+        check("Sync off: value 1", "climate 22,1", calls(car));
+        car.now += 300;
+        c.handle("clim", "climate", new String[] { "driver_temp", "down" });
+        check("driver temperature down: flag 50, value 2", "climate 50,2", calls(car));
+        car.now += 300;
+        c.handle("clim", "climate", new String[] { "driver_temp", "up" });
+        check("... up: value 1", "climate 50,1", calls(car));
+        car.now += 300;
+        c.handle("clim", "climate", new String[] { "driver_only", "off" });
+        check("Driver Only off: value 0", "climate 24,0", calls(car));
+        car.now += 300;
+        check("other controls refused", "refused: climate sync on|off, driver_only on|off, driver_temp up|down",
+                c.handle("clim", "climate", new String[] { "fan", "up" }));
+        car.ignition = 0;
+        check("ignition off: refused", "refused: the car isn't on (ignition)", c.handle("clim", "climate", new String[] { "sync", "on" }));
+        car.ignition = -1;
+        check("ignition unknown: refused", "refused: the car isn't on (ignition)", c.handle("clim", "climate", new String[] { "sync", "on" }));
+        car.ignition = 1;
+        car.climate = 0;
+        check("climate off: refused", "refused: the climate is off", c.handle("clim", "climate", new String[] { "sync", "on" }));
+        car.climate = -1;
+        check("climate not heard yet: refused", "refused: the climate is off", c.handle("clim", "climate", new String[] { "sync", "on" }));
+        car.climate = 1;
+        check("... none of those reached the car", "", calls(car));
         // the owner's OK before a mod's first command
         FakeCar o = new FakeCar();
         o.askFirst = true;

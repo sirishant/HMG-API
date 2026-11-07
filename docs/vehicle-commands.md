@@ -25,6 +25,7 @@ charge_door open` or `api.command("charge_door", "open")`.
 | `ambient_light` | `color <rrggbb>` / `brightness <0-10>` / `release` / `owner_change release\|keep` |
 | `guide_lines` | `on` / `off` / `restore` (cars with a plain rear camera; a 360-view car draws its own and refuses, EV6 2026-10-31) |
 | `startup_notice` | `dismiss` (only after the owner turns on "Startup notice" in the HMG-API app, or `hmgapid allow startup_notice on`) |
+| `climate` | `sync on` / `sync off` / `driver_only on` / `driver_only off` / `driver_temp up` / `driver_temp down` (Creta owner's request, 2026-11-07; see 9) |
 
 To check on a car: `charge_door open` sends `false` (what Charge Port Button sends and
 reports opening the door); `close` sends `true`, not yet seen. Ambient light: the car
@@ -184,3 +185,26 @@ P (`ISystemService.getGearPStatus`, 36), HEV status flags (`IHEVService.getHEVSt
   seat: turning one on turns the other off, as on the climate screen. Checked on the
   EV6 (2026-10-31): `seat_vent driver medium` / `low` ventilate the seat; rear seat
   heat `high` sets step 8 on a two-level seat.
+
+## 9. Front climate: Sync, Driver Only, the driver's temperature (Creta owner's request, 2026-11-07)
+
+- **What stock does:** the climate screen's buttons go through
+  `IDATCService.setFrontClimateControl(flag, value)` (`DATCManager` in-process), which
+  the climate service passes to the climate unit as it is (`HU_DATC_SyncSet`,
+  `HU_DATC_DrvOnlySet`, `HU_DATC_DrTempUpDn`). Flags (`DATCFlag.DATCControl`, Creta 260430):
+  `SYNC` 22, `DRIVER_ONLY` 24, `TEMP_DR_UPDN` 50.
+- **Values:** Sync 2 on / 1 off, Driver Only 1 on / 0 off, the driver's temperature 1 up /
+  2 down, one step a press. From Tilepad's notes on the US Ioniq 5 (the framework doesn't
+  encode them); the Creta owner took them without an on-car check. Turning Driver Only off
+  is how the climate screen goes back to Sync.
+- **Risk:** low; the same presses as the climate screen. A wrong value would reach the
+  climate unit as it is, which is why only these three controls and these values are
+  offered.
+- **Guard:** only those controls and values; the car on (body control `getIGNStatus`;
+  accessory reads off, and a value that can't be read refuses) and the climate on
+  (`DatcStatus.getOperationStatus` 1, pushed); 3 a second at most; logged with the mod.
+- **Readings alongside:** `ignition`, `belt.driver` and `belt.passenger` (telematics CAN
+  `getDrvStBltSwSta` / `getAsstStBltSwSta`: 1 buckled), and `climate.on`, `climate.sync`,
+  `climate.driver_only`, `climate.driver_temp`, `climate.passenger_temp` from climate
+  control's status and `onTemperatureInformation` (pushed; a status alone keeps the old
+  temperatures). Mapped on the Creta only so far.

@@ -24,6 +24,7 @@ public class AskActivity extends Activity {
         { "guide_lines", "turn the parking guide lines on or off" },
         { "rear_camera", "show the rear camera" },
         { "startup_notice", "dismiss the startup notice" },
+        { "climate", "press Sync, Driver Only and the driver's temperature on the climate" },
     };
 
     @Override

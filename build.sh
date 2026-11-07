@@ -63,6 +63,17 @@ mods() {
             "$D8" --release --min-api 19 --lib "$ANDROID_JAR" --classpath "$OUT/classes" $(for d in $(echo "$deps" | tr ':' ' '); do printf -- '--classpath %s ' "$d"; done) \
                 --output "$OUT/mods/$id/hooks.jar" $(find "$OUT/mod-classes/$id" -name '*.class')
         fi
+        # service/: a Java service's sources, built to service.jar with hmgapi-client.jar inside (a "jar" service
+        # runs with only its own jar as CLASSPATH)
+        if [ -d "$m/service" ]; then
+            [ -f "$OUT/hmgapi-client.jar" ] || client
+            W="$OUT/mod-service/$id"
+            rm -rf "$W" && mkdir -p "$W/classes"
+            javac --release 8 -Xlint:-options -nowarn -cp "$ANDROID_JAR:$OUT/hmgapi-client.jar" -d "$W/classes" $(find "$m/service" -name '*.java')
+            (cd "$W/classes" && jar xf "$OUT/hmgapi-client.jar" hmgapi)
+            "$D8" --release --min-api 19 --lib "$ANDROID_JAR" --output "$OUT/mods/$id/service.jar" $(find "$W/classes" -name '*.class')
+            echo "mod $id: service.jar"
+        fi
         # app/: the mod's own APK (AndroidManifest.xml, res/, java/), with hmgapi-client.jar inside; built to the
         # mod's first "apps" entry. Signed with an example key made here (real mods sign with their author's key).
         if [ -f "$m/app/AndroidManifest.xml" ]; then

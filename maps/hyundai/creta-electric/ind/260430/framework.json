@@ -88,6 +88,12 @@
     "ret": "int",
     "static": false
   },
+  "framework.bcm_service.ignition": {
+    "method": "getIGNStatus",
+    "params": [],
+    "ret": "boolean",
+    "static": false
+  },
   "framework.bcm_service.register_listener": {
     "method": "registerBCMListener",
     "params": [
@@ -297,8 +303,22 @@
     "type": "int",
     "static": true
   },
+  "framework.datc_listener_stub.temperature": {
+    "field": "TRANSACTION_onTemperatureInformation",
+    "type": "int",
+    "static": true
+  },
   "framework.datc_service": {
     "class": "com.hkmc.datc.IDATCService"
+  },
+  "framework.datc_service.front_control": {
+    "method": "setFrontClimateControl",
+    "params": [
+      "int",
+      "int"
+    ],
+    "ret": "void",
+    "static": false
   },
   "framework.datc_service.register_listener": {
     "method": "registerDATCListener",
@@ -345,6 +365,36 @@
     "field": "CREATOR",
     "type": "android.os.Parcelable$Creator",
     "static": true
+  },
+  "framework.datc_status.driver_only": {
+    "method": "getDriverOnly",
+    "params": [],
+    "ret": "int",
+    "static": false
+  },
+  "framework.datc_status.driver_temp_c": {
+    "method": "getDrTempC",
+    "params": [],
+    "ret": "float",
+    "static": false
+  },
+  "framework.datc_status.operation": {
+    "method": "getOperationStatus",
+    "params": [],
+    "ret": "int",
+    "static": false
+  },
+  "framework.datc_status.passenger_temp_c": {
+    "method": "getPsTempC",
+    "params": [],
+    "ret": "float",
+    "static": false
+  },
+  "framework.datc_status.sync": {
+    "method": "getSyncDisp",
+    "params": [],
+    "ret": "int",
+    "static": false
   },
   "framework.destination_name": {
     "class": "com.hkmc.cluster.NavigationCluster$DestinationName"
@@ -598,6 +648,12 @@
     "ret": "int",
     "static": false
   },
+  "framework.hscan_service.driver_belt": {
+    "method": "getDrvStBltSwSta",
+    "params": [],
+    "ret": "int",
+    "static": false
+  },
   "framework.hscan_service.hv_health": {
     "method": "getXEV_Bms_GDS_SOH",
     "params": [],
@@ -608,6 +664,12 @@
     "method": "IsCarMoving",
     "params": [],
     "ret": "boolean",
+    "static": false
+  },
+  "framework.hscan_service.passenger_belt": {
+    "method": "getAsstStBltSwSta",
+    "params": [],
+    "ret": "int",
     "static": false
   },
   "framework.hscan_service.steering_angle": {

@@ -68,6 +68,15 @@ final class Commands {
         /** the owner's switch (HMG-API app, or hmgapid allow startup_notice on) */
         boolean noticeAllowed();
 
+        /** ignition (body control getIGNStatus; accessory reads off): 1 on, 0 off, -1 unknown */
+        int ignition();
+
+        /** the front climate's operation status as it last reported it (1 normal, i.e. on); -1 not heard yet */
+        int climateStatus();
+
+        /** one front climate control, as the climate screen sends it (setFrontClimateControl flag, value) */
+        void climate(int flag, int value);
+
         /** the owner's switch that keeps every mod off the ambient light (HMG-API app, or hmgapid allow block_ambient_light on) */
         boolean lightBlocked();
 
@@ -93,6 +102,15 @@ final class Commands {
     static final java.util.List<String> SEATS = java.util.Arrays.asList("driver", "passenger", "rear_left", "rear_right");
     static final int LINES_OFF = 1, LINES_ON = 2;
     static final long DOOR_GAP_MS = 5000, LIGHT_GAP_MS = 100, KEEP_MS = 5000;
+    /**
+     * Front climate controls (DATCFlag.DATCControl) and their values, as the climate
+     * screen sends them (Tilepad's, Ioniq 5 260507; the owner took them for the Creta
+     * without an on-car check, 2026-11-07): Sync 2 on / 1 off, Driver Only 1 on / 0 off,
+     * the driver's temperature 1 up / 2 down, one step a press.
+     */
+    static final int CLIMATE_SYNC = 22, CLIMATE_DRIVER_ONLY = 24, CLIMATE_DRIVER_TEMP = 50;
+    static final int CLIMATE_ON = 1;   // DatcOperationState NORMAL
+    static final long CLIMATE_GAP_MS = 300;
     /**
      * Conditioning's route values when a mod gives none (Launchpad's), and the most the
      * car's navigation sends (2047 km and 1023 min mean "no route"): the BMS times the
@@ -129,7 +147,7 @@ final class Commands {
     };
 
     final Car car;
-    long doorAt = -DOOR_GAP_MS, lightAt = -LIGHT_GAP_MS, keptAt;
+    long doorAt = -DOOR_GAP_MS, lightAt = -LIGHT_GAP_MS, climateAt = -CLIMATE_GAP_MS, keptAt;
     String conditioningBy, lightBy, linesBy, cameraBy;
     boolean manualStop, noticeDone;
     /** the conditioning request in force: an automatic one (auto-start), and its route values */
@@ -293,6 +311,21 @@ final class Commands {
             if (cameraBy != null && !cameraBy.equals(mod)) return "refused: " + cameraBy + " has the rear camera";
             cameraBy = mod;
             return "ok rear camera is yours (the car's reverse view still comes first: let go on reverse or CAMERA_APP_START)";
+        }
+        if ("climate".equals(cmd)) {
+            // a press of one of the climate screen's own buttons: Sync, Driver Only, the driver's temperature
+            boolean on = "on".equals(a1) || "up".equals(a1);
+            boolean known = ("sync".equals(a0) || "driver_only".equals(a0)) && ("on".equals(a1) || "off".equals(a1))
+                    || "driver_temp".equals(a0) && ("up".equals(a1) || "down".equals(a1));
+            if (!known) return "refused: climate sync on|off, driver_only on|off, driver_temp up|down";
+            if (car.ignition() != 1) return "refused: the car isn't on (ignition)";
+            if (car.climateStatus() != CLIMATE_ON) return "refused: the climate is off";
+            if (car.now() - climateAt < CLIMATE_GAP_MS) return "refused: 3 changes a second at most";
+            climateAt = car.now();
+            if ("sync".equals(a0)) car.climate(CLIMATE_SYNC, on ? 2 : 1);
+            else if ("driver_only".equals(a0)) car.climate(CLIMATE_DRIVER_ONLY, on ? 1 : 0);
+            else car.climate(CLIMATE_DRIVER_TEMP, on ? 1 : 2);
+            return "ok climate " + a0 + " " + a1;
         }
         if ("startup_notice".equals(cmd)) {
             if (!"dismiss".equals(a0)) return "refused: startup_notice dismiss";

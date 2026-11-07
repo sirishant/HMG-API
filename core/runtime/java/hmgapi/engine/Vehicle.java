@@ -63,6 +63,14 @@ public final class Vehicle {
         add(m, "outside_temp", "C", 1000, "outside temperature, Celsius (climate control's; converted on a car that shows Fahrenheit)");
         add(m, "outside_temp_f", "F", 1000, "outside temperature, Fahrenheit (climate control's, what the cluster shows)");
         add(m, "guide_lines", "raw", 1000, "rear camera guide lines (1 off, 2 on)");
+        add(m, "ignition", "0/1", 500, "ignition on (body control; accessory reads off)");
+        add(m, "belt.driver", "0/1", 500, "driver's seat belt buckled (telematics CAN service)");
+        add(m, "belt.passenger", "0/1", 500, "front passenger's seat belt buckled (telematics CAN service; 0 with the ignition off)");
+        add(m, "climate.on", "0/1", 100, "the front climate is on (climate control's status, pushed)");
+        add(m, "climate.sync", "0/1", 100, "Sync is on (climate control's status, pushed)");
+        add(m, "climate.driver_only", "0/1", 100, "Driver Only is on (climate control's status, pushed)");
+        add(m, "climate.driver_temp", "C", 100, "the driver's set temperature, as the climate shows it (pushed)");
+        add(m, "climate.passenger_temp", "C", 100, "the front passenger's set temperature, as the climate shows it (pushed)");
         READINGS = Collections.unmodifiableMap(m);
     }
 
@@ -89,6 +97,7 @@ public final class Vehicle {
         cmd(m, "ambient_light", "color <rrggbb>|brightness <0-10>|release|owner_change release|keep", "one mod at a time (the first to ask holds it until it releases or is turned off); the owner's light is put back on release, including a change made in the car's menu meanwhile (owner_change release: such a change ends the hold instead); the owner's switch block_ambient_light keeps every mod off it; 10 changes a second at most");
         cmd(m, "guide_lines", "on|off|restore", "the state before the first change comes back when the mod restores, releases or is turned off");
         cmd(m, "rear_camera", "take|release", "one mod at a time (coordination: the car's reverse view always comes first); free again when the mod is turned off");
+        cmd(m, "climate", "sync on|off|driver_only on|off|driver_temp up|down", "the climate screen's own presses only (Sync, Driver Only, the driver's temperature one step); the car on (ignition) and the climate on; 3 a second at most");
         cmd(m, "startup_notice", "dismiss", "only if the owner allowed it (HMG-API app, or hmgapid allow startup_notice on); gear in P; once per start; skips the notice the driver is meant to accept");
         COMMANDS = Collections.unmodifiableMap(m);
     }
