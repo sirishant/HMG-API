@@ -1,0 +1,41 @@
+{
+  "id": "climate-creta",
+  "name": "Climate (Creta)",
+  "version": "1.0.0",
+  "hmgapi": ">=1.0.6",
+  "authors": [
+    "sirishant"
+  ],
+  "repo": "https://github.com/sirishant/HMG-API",
+  "license": "AGPL-3.0",
+  "description": "Creta Electric India only. Driver Only at each start until the passenger buckles up, then Sync; Sync kept when the passenger's knob drops it.",
+  "system": {
+    "model": [
+      "SU2IEV"
+    ],
+    "region": "IND",
+    "firmware": "260430"
+  },
+  "services": [
+    {
+      "name": "climate",
+      "jar": "service.jar",
+      "class": "hmgapi.mods.climate.Main",
+      "user": "system"
+    }
+  ],
+  "vehicle": {
+    "read": [
+      "ignition",
+      "belt.passenger",
+      "climate.on",
+      "climate.sync",
+      "climate.driver_only",
+      "climate.driver_temp",
+      "climate.passenger_temp"
+    ],
+    "commands": [
+      "climate"
+    ]
+  }
+}
