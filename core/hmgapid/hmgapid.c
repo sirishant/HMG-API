@@ -44,7 +44,7 @@ typedef unsigned int u32;
 typedef unsigned char u8;
 typedef long sl;
 
-#define VERSION "1.0.7"
+#define VERSION "1.0.8"
 
 #ifndef ROOTDIR
 #define ROOTDIR "/data/hmgapi"
@@ -1465,7 +1465,7 @@ static int op_vehicle(int fd, const char *mod, int argc, char **argv)
     static char want[8192], req[1024], buf[4096];
     struct sun a;
     int alen = sockaddr_of(&a, VEHICLE_SOCK), i;
-    sl s, n;
+    sl s, n = 0;
     struct { sl sec, usec; } tv = { 3, 0 };
     path3(req, sizeof req, "read", "", "");
     if (mod && read_small(ROOTDIR "/state/vehicle.txt", want, sizeof want) < 0) want[0] = 0;
@@ -1492,9 +1492,20 @@ static int op_vehicle(int fd, const char *mod, int argc, char **argv)
     x_setsockopt((int)s, 1 /* SOL_SOCKET */, 20 /* SO_RCVTIMEO */, &tv, sizeof tv);
     if (x_connect(s, &a, alen) < 0) { x_close(s); say(fd, "the vehicle service isn't running (yet)\n"); return 69; }
     if (wall((int)s, req, slen(req))) { x_close(s); return 1; }
-    while ((n = x_read((int)s, buf, sizeof buf)) > 0) if (frame(fd, 'O', buf, (u32)n)) break;
-    x_close(s);
-    return n < 0 ? 1 : 0;
+    /* the answer is one line per reading: done once they're all in, without waiting for the
+       vehicle service to close (on the Creta 2026-11-07 the close didn't come within the
+       timeout and every read ended as a failure, though the whole answer had arrived) */
+    {
+        int lines = 0, want_lines = argc - 1, ended = 1, k;
+        while (lines < want_lines && (n = x_read((int)s, buf, sizeof buf)) > 0) {
+            for (k = 0; k < n; k++) if (buf[k] == '\n') lines++;
+            ended = buf[n - 1] == '\n';
+            if (frame(fd, 'O', buf, (u32)n)) break;
+        }
+        x_close(s);
+        if (lines >= want_lines) return 0;
+        return n < 0 && !(lines > 0 && ended) ? 1 : 0;   /* a complete answer, then no close: still an answer */
+    }
 }
 
 /* A vehicle command (hmgapi.engine.Vehicle.COMMANDS) through HMG-API's vehicle service,

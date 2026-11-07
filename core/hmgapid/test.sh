@@ -222,18 +222,26 @@ python3 - "hmgapi-vehicle-test-$$" "$T/vehicle.req" <<'PY' &
 import socket, sys
 s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
 s.bind("\0" + sys.argv[1]); s.listen(4); s.settimeout(30)
-for _ in range(6):
+import time, threading
+for _ in range(7):
     try: c, _ = s.accept()
     except socket.timeout: break
     line = c.makefile().readline()
     open(sys.argv[2], "a").write(line)
     if line.startswith("do "): c.sendall(("ok %s\n" % line.strip()).encode()); c.close(); continue
-    c.sendall("".join("%s 42\n" % n for n in line.split()[1:]).encode()); c.close()
+    c.sendall("".join("%s 42\n" % n for n in line.split()[1:]).encode())
+    if "hold" in line.split():   # answers, then keeps the connection open for 5 s (the Creta, 2026-11-07)
+        threading.Thread(target=lambda c=c: (time.sleep(5), c.close())).start(); continue
+    c.close()
 PY
 VP=$!
 sleep 0.5
 printf 'demo speed\ndemo gear.park\nother hv.soc\n' > "$T/mod/root/state/vehicle.txt"
 check "vehicle: mod reads what it declared" "speed 42 gear.park 42" "$(run mod vehicle speed gear.park | tr '\n' ' ' | sed 's/ $//')"
+check "vehicle: a good read ends with code 0 (a Java client takes any other code as a failure)" 0 "$(code mod vehicle speed gear.park)"
+t0=$(date +%s)
+check "vehicle: the whole answer, then no close: done at once, code 0" "0 hold 42" "$(set +e; o=$("$T/root/hmgapid" vehicle hold 2>&1); echo "$? $o")"
+check "... without waiting for the vehicle service's timeout" yes "$([ $(($(date +%s) - t0)) -lt 3 ] && echo yes || echo no)"
 check "vehicle: request passed on" "read speed gear.park" "$(head -1 "$T/vehicle.req")"
 check "vehicle: not declared refused" 13 "$(code mod vehicle hv.soc)"
 check "vehicle: bad name refused" 2 "$(code mod vehicle 'speed;x')"
@@ -263,7 +271,7 @@ check "allow: block_ambient_light on" on "$(run root allow block_ambient_light o
 run root allow block_ambient_light off >/dev/null
 check "allow: off again" no "$(run root allow startup_notice off >/dev/null; [ -f "$T/root/root/settings/allow/startup_notice" ] && echo yes || echo no)"
 kill $VP 2>/dev/null || true; wait $VP 2>/dev/null || true
-check "vehicle: nothing reached the service for refused asks" 4 "$(wc -l < "$T/vehicle.req" | tr -d ' ')"
+check "vehicle: nothing reached the service for refused asks" 6 "$(wc -l < "$T/vehicle.req" | tr -d ' ')"
 
 : > "$T/mod/root/state/apps.txt"
 check "mod turned off: its app is anyone again" 13 "$(code mod whoami)"
