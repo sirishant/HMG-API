@@ -11,7 +11,7 @@ FOLDER=creta-drive-logs
 DRIVES=${DRIVES:-/storage/usb0 /storage/usb1 /storage/usb2}
 POLL_S=${POLL_S:-5}
 SEG_BYTES=${SEG_BYTES:-20971520}
-TAGS="HMG-API:V DiPO:D iAP2:D Iap2:D IAP2:D hostapd:I dnsmasq:I SoftapController:V Tethering:D WifiStateMachine:D wpa_supplicant:I MicomD:D NAVDUMP:D ClusterService:D NavigationCluster:V GalReceiver:V AAProjection:D CarPlay_:D DipoServiceHandler:D BTCMManager:D BluetoothHfDevice:D MobisExternalCommunicator:I ModeKeyDispatcher:V AndroidRuntime:E ActivityManager:W EvCar:V EvModelSender:V EvDriveLog:V CarPlayEV:V *:S"
+TAGS="HMG-API:V DiPO:D iAP2:D Iap2:D IAP2:D hostapd:I dnsmasq:I SoftapController:V Tethering:D WifiStateMachine:D wpa_supplicant:I MicomD:D NAVDUMP:D ClusterService:D NavigationCluster:V GalReceiver:V AAProjection:D CarPlay_:D DipoServiceHandler:D BTCMManager:D BluetoothHfDevice:D MobisExternalCommunicator:I DATCService:D SystemService:D ModeKeyDispatcher:V AndroidRuntime:E ActivityManager:W EvCar:V EvModelSender:V EvDriveLog:V CarPlayEV:V *:S"
 
 toast() {
     am broadcast -a com.hkmc.intent.action.TOAST -e com.hkmc.intent.extra.TOAST_MESSAGE "$1" --ez com.hkmc.intent.extra.TOAST_POPUPSHOWING true >/dev/null 2>&1
