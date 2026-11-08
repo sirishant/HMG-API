@@ -98,17 +98,45 @@ public final class CpTurnsTest {
                 "road [Test Road]", "tbt 67 0 0.0 100.0 0 0 0 0 0",
                 "hud f201430000" + utf16("Test Road"), "2c 0 0 100 0 0 0 0 0 0");
         t.maneuver(msg(0, U16, i(1), 1, U16, i(0), 3, ENUM, i(11)));
+        expect("Google departure for the current turn is sent at once: clears prior HUD turn, head-for-route scene",
+                "2c 0 0 0 0 0 0 0 0 0", "lanes f1", "hud f2", "hud f2",
+                "road [Test Road]", "tbt 2 0 0.0 100.0 0 0 0 0 0", "2c 0 0 100 0 0 0 0 0 0");
         t.routeGuidance(msg(0, U16, i(1)));
-        expect("Google departure clears prior HUD turn and sends the head-for-route scene",
+        expect("departure again with the next update (start route clears the HUD arrow each time)",
                 "2c 0 0 0 0 0 0 0 0 0", "lanes f1", "hud f2", "hud f2",
                 "road [Test Road]", "tbt 2 0 0.0 100.0 0 0 0 0 0", "2c 0 0 100 0 0 0 0 0 0");
         t.maneuver(msg(0, U16, i(1), 1, U16, i(0), 3, ENUM, i(2)));
-        t.routeGuidance(msg(0, U16, i(1)));
-        expect("Google right without angle reaches cluster and HUD after departure",
+        expect("Google right without angle reaches cluster and HUD after departure, at once",
                 "road [Test Road]", "tbt 67 0 0.0 100.0 0 0 0 0 0",
                 "hud f201430000" + utf16("Test Road"), "2c 0 0 100 0 0 0 0 0 0");
+        t.routeGuidance(msg(0, U16, i(1)));
+        expect("and with the next update, the same HUD list not resent",
+                "road [Test Road]", "tbt 67 0 0.0 100.0 0 0 0 0 0", "2c 0 0 100 0 0 0 0 0 0");
         t.routeGuidance(msg(0, U16, i(1), 1, ENUM, i(0)));
         expect("India route stop still clears HUD", "2c 0 0 0 0 0 0 0 0 0", "lanes f1", "hud f2", "hud f2");
+    }
+
+    /** a maneuver update re-sends the turn only when it's the current one (after EPP 1.23's DiPO repush) */
+    static void repushes() {
+        c = new Cluster();
+        CpTurns t = new CpTurns(new android.content.Context(), c, null);
+        check("repush: nothing known, nothing sent", t.repush(0) == 0 && c.calls.isEmpty());
+        t.maneuver(maneuver(0, 2, 0, 0, 90, "First Rd", 300));
+        t.maneuver(maneuver(1, 1, 0, 0, -90, "Second Rd", 900));
+        expect("repush: maneuvers before any route guidance update: nothing sent");
+        t.routeGuidance(msg(0, U16, i(1), 1, ENUM, i(1), 11, STR, s("300"), 12, ENUM, i(2), 13, U16, i(0, 1)));
+        c.calls.clear();
+        t.maneuver(maneuver(1, 1, 0, 0, -90, "Second Rd", 850));
+        expect("repush: an upcoming turn's update waits for the next route guidance update");
+        t.maneuver(maneuver(0, 1, 0, 0, -90, "First Rd", 280));
+        expect("repush: the current turn changed (right to left): the cluster has it at once",
+                "road [First Rd]", "tbt 70 0 0.0 300.0 0 0 0 0 0", "hud f202464600" + utf16("First Rd"), "2c 0 0 300 0 0 0 0 0 0",
+                "list {1 70 0 [Second Rd] [] " + (850 / 1609f) + " 2}");
+        t.routeGuidance(msg(0, U16, i(1), 1, ENUM, i(0)));
+        c.calls.clear();
+        t.maneuver(maneuver(0, 2, 0, 0, 90, "First Rd", 200));
+        expect("repush: route guidance stopped (state 0): nothing sent, the HUD not blanked again");
+        check("repush: a negative index is ignored", t.repush(-1) == 0);
     }
 
     public static void main(String[] a) throws Exception {
@@ -160,11 +188,17 @@ public final class CpTurnsTest {
         Car.unit = Car.DISTANCE_MILES;
 
         t.maneuver(msg(0, U16, i(1), 1, U16, i(0), 5, U32, i(250)));
+        expect("maneuver update for the current turn: sent at once with the latest update's distance",
+                "road [Main St]", "tbt 67 0 0.0 1.5 0 0 1 0 0", "2c 1 5 1 0 0 0 0 0 0", "sub 0.4 0 2 22 13 1 1 0.0 -1 0",
+                "list {1 70 0 [Oak Ave] [] " + (800 / 1609f) + " 2} {2 72 0 [Pine St] [] " + (2000 / 1609f) + " 2}");
         t.routeGuidance(msg(0, U16, i(1), 11, STR, s("0.1"), 12, ENUM, i(MILES)));
         expect("maneuver update without optional angle retains its explicit right-turn direction",
                 "road [Main St]", "tbt 67 0 0.0 0.1 0 0 2 0 0", "2c 2 1 0 0 0 0 0 0 0", "sub 0.4 0 2 22 13 1 1 0.0 -1 0",
                 "list {1 70 0 [Oak Ave] [] " + (800 / 1609f) + " 2} {2 72 0 [Pine St] [] " + (2000 / 1609f) + " 2}");
         t.maneuver(maneuver(0, RIGHT, 0, 0, 90, "Main St", 250));
+        expect("whole maneuver for the current turn: sent at once",
+                "road [Main St]", "tbt 67 0 0.0 0.1 0 0 2 0 0", "2c 2 1 0 0 0 0 0 0 0", "sub 0.4 0 2 22 13 1 1 0.0 -1 0",
+                "list {1 70 0 [Oak Ave] [] " + (800 / 1609f) + " 2} {2 72 0 [Pine St] [] " + (2000 / 1609f) + " 2}");
 
         t.routeGuidance(msg(0, U16, i(1), 7, U32, i(100), 6, U64, l(0), 5, U64, l(0)));
         expect("trip under 161 m with miles: feet; no arrival time",
@@ -219,9 +253,11 @@ public final class CpTurnsTest {
                 "hud f201470000" + utf16("Comp 7 Rd"), "2c 2 3 0 0 0 0 0 0 0");
 
         t.maneuver(msg(1, U16, i(0), 3, ENUM, i(STRAIGHT), 4, STR, s("Any Rd"), 8, ENUM, i(0), 9, ENUM, i(0)));
+        expect("maneuver with no component ids: sent at once for the component it's current on (7), not 1 (on index 5)",
+                "road [Any Rd]", "tbt 65 0 0.0 0.3 0 0 2 0 0", "hud f201410000" + utf16("Any Rd"), "2c 2 3 0 0 0 0 0 0 0");
         t.routeGuidance(msg(1, ENUM, i(1), 11, STR, s("0.4"), 13, U16, i(0)));
         expect("no component ids: every known component gets it",
-                "road [Any Rd]", "tbt 65 0 0.0 0.4 0 0 2 0 0", "hud f201410000" + utf16("Any Rd"), "2c 2 4 0 0 0 0 0 0 0",
+                "road [Any Rd]", "tbt 65 0 0.0 0.4 0 0 2 0 0", "2c 2 4 0 0 0 0 0 0 0",
                 "road [Any Rd]", "tbt 65 0 0.0 0.4 0 0 2 0 0", "2c 2 4 0 0 0 0 0 0 0");
 
         t.routeGuidance(msg(0, U16, i(0), 1, ENUM, i(1), 11, STR, s("0.4"), 13, U16, i(0)));
@@ -301,6 +337,7 @@ public final class CpTurnsTest {
                 CpTurns.laneIcon(0) == 1 && CpTurns.laneIcon(90) == 3 && CpTurns.laneIcon(-45) == 8 && CpTurns.laneIcon(180) == 5
                         && CpTurns.laneIcon(270) == 7);
         indiaTurns();
+        repushes();
         System.exit(fail);
     }
 }

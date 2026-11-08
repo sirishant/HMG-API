@@ -265,6 +265,14 @@
   "framework.context_wrapper": {
     "class": "android.content.ContextWrapper"
   },
+  "framework.context_wrapper.start_activity": {
+    "method": "startActivity",
+    "params": [
+      "android.content.Intent"
+    ],
+    "ret": "void",
+    "static": false
+  },
   "framework.context_wrapper.send_broadcast": {
     "method": "sendBroadcast",
     "params": [

@@ -54,7 +54,7 @@ public final class Wireless extends ModEntry {
     /** NavigationCluster's turn-by-turn calls: the car navigation's own guidance, off while a phone guides */
     static final String[] NAVI_TBT = { "update_tbt_info", "update_tbt_sub_info", "update_tbt_sub_info_b", "update_tbt_sub_info2",
         "update_tbt_sub_info2_b", "update_tbt_sub_info_2c", "update_remain_dis", "update_tp_crossroad_name",
-        "update_tp_destination_name", "update_tp_turn_list", "update_tp_turn_list_new", "update_tp_lane_info" };
+        "update_tp_destination_name", "update_tp_turn_list", "update_tp_turn_list_new", "update_tp_lane_info", "update_lane_info" };
 
     @Override
     public void appLoaded(final ModContext mod, LoadedApp app) {
@@ -84,8 +84,10 @@ public final class Wireless extends ModEntry {
     /**
      * In the car navigation app, while a phone guides (Android Auto or CarPlay): its own
      * turn-by-turn calls to the cluster and HUD are skipped, so they don't fight the
-     * phone's. Its speed limit, cameras, traps, warning distances, lanes and driver-assist
-     * data still go through (phones carry none of that). Framework calls only: no app names.
+     * phone's, lanes too (both of its lane calls: the phone's lanes go out with its turns;
+     * after HMG-API #75 / hmgapi-wireless-carplay-aa #4). Its speed limit, cameras, traps,
+     * warning distances and driver-assist data still go through (phones carry none of that).
+     * With no phone guiding, the car's navigation keeps all of it. Framework calls only.
      */
     private void navigation(final ModContext mod, final LoadedApp app) {
         if (!mod.settingBoolean("tbt", true)) return;

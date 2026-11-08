@@ -2,6 +2,7 @@ package hmgapi.mods.projextras;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -24,7 +25,9 @@ import hmgapi.hook.Points;
  *  - DiPO's wired-only connection-error check cancelled for a wireless session
  *  - Siri's end handled after 300 ms, not 800
  *  - the hotspot's name and password from the hotspot itself when the iAP2 server has none
- *  - the Wi-Fi details sent again when the iPhone says wireless CarPlay is available
+ *  - the Wi-Fi details sent again when the iPhone says wireless CarPlay is available, and
+ *    the wireless mod's attempt ended at once when it says it isn't (after Enhanced Phone
+ *    Projection 1.23, NEMESIS, AGPL-3.0)
  *  - ending CarPlay on request (PhoneProjection's DISCONNECT_CARPLAY)
  */
 final class CarPlayFixes {
@@ -224,11 +227,20 @@ final class CarPlayFixes {
                 }
             }
         });
+        final Context ctx = app.context;
         mod.hook(cl, "iap2.service.set_wireless_carplay_status", new MethodHook() {
             @Override
             protected void afterHookedMethod(Param p) {
                 try {
-                    if (!available(p.args[0])) return;
+                    int status = Rules.wirelessStatus(p.args[0]);
+                    if (status == 0 && ctx != null) {
+                        // after Enhanced Phone Projection 1.23 (NEMESIS, AGPL-3.0): not available ends the
+                        // wireless bridge's attempt in DiPO at once instead of after its idle time
+                        ctx.sendBroadcast(new Intent(CARPLAY_UNAVAILABLE).setPackage(Switch.DIPO));
+                        mod.log("iAP2: the iPhone says wireless CarPlay isn't available");
+                        return;
+                    }
+                    if (status != 1) return;
                     @SuppressWarnings("unchecked")
                     BlockingQueue<Object> q = (BlockingQueue<Object>) Points.get(cl, "iap2.service.msg_queue", null);
                     if (q == null) return;
@@ -242,24 +254,8 @@ final class CarPlayFixes {
         mod.log("iAP2: hotspot details");
     }
 
-    /** DeviceWirelessCarPlayStatus: item 0 is 1 when wireless CarPlay is available */
-    static boolean available(Object msg) {
-        if (msg == null) return false;
-        try {
-            Object g = msg.getClass().getMethod("getItemGroup").invoke(msg);
-            if (g == null) return false;
-            int n = (Integer) g.getClass().getMethod("getItemCnt").invoke(g);
-            for (int k = 0; k < n; k++) {
-                Object it = g.getClass().getMethod("getObjItem", int.class).invoke(g, k);
-                if (it == null || (Integer) it.getClass().getMethod("getItemId").invoke(it) != 0) continue;
-                int[] v = (int[]) it.getClass().getMethod("getItemIntArray").invoke(it);
-                return v != null && v.length > 0 && v[0] == 1;
-            }
-        } catch (Throwable t) {
-            // not readable: not "available"
-        }
-        return false;
-    }
+    /** to the wireless mod's bridge in DiPO (Bridge.ACTION_CARPLAY_UNAVAILABLE) */
+    static final String CARPLAY_UNAVAILABLE = "hmgapi.wireless.CARPLAY_UNAVAILABLE";
 
     /** a Wi-Fi SSID or key without the one pair of quotes Android keeps around it */
     static String unquote(String s) {

@@ -65,6 +65,22 @@ final class Bridge {
     /** an iPhone whose CarPlay was ended on request (DISCONNECT_CARPLAY): not started again until it reconnects */
     static volatile String sHeld;
     static final String ACTION_DISCONNECT_CARPLAY = "com.daudio.app.dipo.DISCONNECT_CARPLAY";
+    /** the iAP2 server's own broadcast when a session fails authentication (Iap2Authentication), with its component */
+    static final String ACTION_IAP2_FAILED = "com.tcc.iap2.connectedfail", EXTRA_IAP2_COMPONENT = "com.telechips.android.iap2.component";
+    /**
+     * from the iAP2 server (projection-extras on the Creta, where its status hook is mapped): the
+     * iPhone says wireless CarPlay isn't available (DeviceWirelessCarPlayUpdate)
+     */
+    static final String ACTION_CARPLAY_UNAVAILABLE = "hmgapi.wireless.CARPLAY_UNAVAILABLE";
+    static final long AUTH_RETRY_MS = 1000, AA_RECHECK_MS = 30000;
+    /** the car's mode for Android Auto (GPM), available while it's connected */
+    static final int MODE_ANDROID_AUTO = 0x74;
+    /** after Enhanced Phone Projection 1.23: one more start of the Bluetooth session after it failed authentication */
+    private static volatile boolean sAuthRetried;
+    /** when the last BT_ATTACHED went out (elapsedRealtime; 0 none) */
+    private static volatile long sAttachAt;
+    /** an iPhone waiting for another phone's Android Auto to end before its CarPlay starts */
+    private static volatile String sAaWait;
     private static int sWatchId;
     /** retries of the same phone since it last connected or a session started: a phone that keeps closing SPP isn't hammered */
     private static int sSameTries;
@@ -347,6 +363,10 @@ final class Bridge {
 
     static void scheduleSppConnect(final String addr) {
         if (addr == null || addr.equals(sHeld) || !enabled() || sUsb || sSession || sCpWireless || sCarOff) return;
+        if (androidAutoUp()) {
+            waitForAndroidAuto(addr);
+            return;
+        }
         handler().postDelayed(new Runnable() {
             @Override
             public void run() {
@@ -366,9 +386,19 @@ final class Bridge {
         if (addr == null || sSession) return;
         sAddr = addr;
         if (sCpClient || sCpWireless || !enabled() || sUsb || sCarOff || addr.equals(sHeld)) return;
+        if (androidAutoUp()) {
+            waitForAndroidAuto(addr);
+            return;
+        }
         sSession = true;
         sCp = null;
+        sAuthRetried = false;
         watch(addr);
+        sendAttach(addr);
+    }
+
+    /** the iAP2 server's Bluetooth session for this iPhone (HMG-API's part there opens it) */
+    static void sendAttach(final String addr) {
         handler().post(new Runnable() {
             @Override
             public void run() {
@@ -386,13 +416,144 @@ final class Bridge {
                     i.putExtra("component", COMPONENT_BT_CARPLAY);
                     i.putExtra("serial", addr);
                     c.sendBroadcast(i);
+                    sAttachAt = android.os.SystemClock.elapsedRealtime();
                     log("BT_ATTACHED sent for " + addr);
                 } catch (Throwable t) {
                     sSession = false;
-                    error("onSppUp", t);
+                    error("sendAttach", t);
                 }
             }
         });
+    }
+
+    /**
+     * Another phone's Android Auto is connected (the car's Android Auto mode is available).
+     * After Enhanced Phone Projection 1.23: CarPlay doesn't start by itself next to it (with
+     * two phones in the car every start would put up the car's "which one to keep" question);
+     * the projection button still switches.
+     */
+    static boolean androidAutoUp() {
+        Context c = context;
+        if (c == null) return false;
+        try {
+            Object mm = Class.forName("com.hkmc.mode.ModeManager").getConstructor(Context.class).newInstance(c);
+            return hasMode((int[]) mm.getClass().getMethod("getAvailableMediaModes").invoke(mm), MODE_ANDROID_AUTO);
+        } catch (Throwable t) {
+            return false;   // can't tell: CarPlay isn't held back
+        }
+    }
+
+    static boolean hasMode(int[] modes, int mode) {
+        if (modes != null) for (int m : modes) if (m == mode) return true;
+        return false;
+    }
+
+    /** the iPhone's CarPlay starts once Android Auto is gone (looked at every AA_RECHECK_MS while it stays) */
+    static void waitForAndroidAuto(final String addr) {
+        if (addr.equals(sAaWait)) return;
+        sAaWait = addr;
+        log("another phone's Android Auto is up: CarPlay for " + addr + " waits for it to end");
+        handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if (!addr.equals(sAaWait)) return;
+                if (sUsb || sSession || sCpWireless || sCarOff || !enabled() || addr.equals(sHeld)) {
+                    sAaWait = null;
+                    return;
+                }
+                if (androidAutoUp()) {
+                    handler().postDelayed(this, AA_RECHECK_MS);
+                    return;
+                }
+                sAaWait = null;
+                String a = connectedIphone(sBtcm, addr);
+                if (a == null) return;
+                log("Android Auto ended: CarPlay for " + a);
+                scheduleSppConnect(a);
+            }
+        }, AA_RECHECK_MS);
+    }
+
+    /**
+     * After Enhanced Phone Projection 1.23 (NEMESIS, AGPL-3.0): a Bluetooth session that fails
+     * authentication (the iAP2 server's com.tcc.iap2.connectedfail for the Bluetooth component)
+     * is started once more a second later; a second failure ends it as before.
+     */
+    static void watchAuthFailures(Context c) {
+        if (c == null) return;
+        try {
+            c.registerReceiver(new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context x, Intent i) {
+                    onAuthFailed(i.getIntExtra(EXTRA_IAP2_COMPONENT, -1));
+                }
+            }, new IntentFilter(ACTION_IAP2_FAILED));
+        } catch (Throwable t) {
+            error("authentication failures", t);
+        }
+    }
+
+    /**
+     * The server may report the Bluetooth component disconnected before or after this
+     * broadcast, so the session flag isn't relied on: the failure counts while the phone is
+     * still on SPP (sAddr), no CarPlay session came, and our BT_ATTACHED went out within IDLE_MS.
+     */
+    static void onAuthFailed(int component) {
+        final String addr = sAddr;
+        if (!authRetryWanted(component, addr != null, sCp != null || sCpWireless, sUsb || sCarOff,
+                android.os.SystemClock.elapsedRealtime() - sAttachAt, sAttachAt > 0)) return;
+        if (sAuthRetried) {
+            log("iAP2 authentication failed again for " + addr + ": the attempt ends");
+            return;
+        }
+        sAuthRetried = true;
+        log("iAP2 authentication failed for " + addr + ": starting the Bluetooth session once more");
+        unwatch();
+        sSession = false;
+        sendDetach();
+        handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if (sSession || sCp != null || sCpWireless || sUsb || sCarOff || !enabled() || !addr.equals(sAddr)) return;
+                sSession = true;
+                watch(addr);
+                sendAttach(addr);
+            }
+        }, AUTH_RETRY_MS);
+    }
+
+    /** a failed authentication is ours to retry: the Bluetooth component, the phone on SPP, no CarPlay, our attach recent */
+    static boolean authRetryWanted(int component, boolean onSpp, boolean carPlay, boolean blocked, long sinceAttach, boolean attached) {
+        return component == COMPONENT_BT_CARPLAY && onSpp && !carPlay && !blocked && attached && sinceAttach >= 0 && sinceAttach < IDLE_MS;
+    }
+
+    /**
+     * After Enhanced Phone Projection 1.23 (NEMESIS, AGPL-3.0): the iPhone says wireless CarPlay
+     * isn't available (its DeviceWirelessCarPlayUpdate, passed on from the iAP2 server by
+     * projection-extras on cars whose map has that hook): with no CarPlay session yet, the
+     * attempt ends now instead of after IDLE_MS. Bluetooth stays.
+     */
+    static void watchUnavailable(Context c) {
+        if (c == null) return;
+        try {
+            c.registerReceiver(new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context x, Intent i) {
+                    onUnavailable();
+                }
+            }, new IntentFilter(ACTION_CARPLAY_UNAVAILABLE));
+        } catch (Throwable t) {
+            error("wireless CarPlay status", t);
+        }
+    }
+
+    static void onUnavailable() {
+        if (!sSession || sCp != null || sCpWireless || sUsb) return;
+        log("the iPhone says wireless CarPlay isn't available: ending the attempt now (Bluetooth stays)");
+        unwatch();
+        sSession = false;
+        sAttachAt = 0;   // its session's end isn't an authentication failure to retry
+        sendDetach();
     }
 
     static void onUsbGone() {
@@ -424,6 +585,7 @@ final class Bridge {
     static void onCpSessionStarted(int transport) {
         sCpWireless = transport == 1 && !sUsb;
         sSameTries = 0;
+        sAaWait = null;
         log("CarPlay session started transport=" + transport + " wireless=" + sCpWireless);
     }
 

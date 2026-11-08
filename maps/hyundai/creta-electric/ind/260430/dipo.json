@@ -400,6 +400,17 @@
     "ret": "void",
     "static": false
   },
+  "dipo.service.play_start": {
+    "method": "a",
+    "params": [
+      "boolean",
+      "int",
+      "int",
+      "boolean"
+    ],
+    "ret": "void",
+    "static": false
+  },
   "dipo.service.start_dipo_activity": {
     "method": "Z",
     "params": [

@@ -737,6 +737,24 @@
       "about": "starts the CarPlay screen (mode extra)"
     },
     {
+      "id": "dipo.service.play_start",
+      "kind": "method",
+      "of": "dipo.service",
+      "find": {
+        "params": [
+          "boolean",
+          "int",
+          "int",
+          "boolean"
+        ],
+        "ret": "void",
+        "strings": [
+          "onPlayStartCommand() isDipoActivated: false"
+        ]
+      },
+      "about": "onPlayStartCommand: CarPlay asked to play; ends by opening DipoActivity itself (startActivity, CarPlayMode and UVO_URL extras)"
+    },
+    {
       "id": "dipo.service.set_dipo_status",
       "kind": "method",
       "of": "dipo.service",
