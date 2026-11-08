@@ -359,7 +359,7 @@ public final class Dipo {
                 if (id == null || p.getResult() != null) return;
                 p.setResult(id);
                 if (id.isEmpty()) NO_ADDRESS.set(Boolean.TRUE);
-                log("bridge: no iAP2 Bluetooth address on session details, using the session's (" + (id.isEmpty() ? "none, keeping the stored one" : id) + ")");
+                log("bridge: no iAP2 Bluetooth address on session details, using the session's (" + (id.isEmpty() ? "none, keeping the stored one" : HandGuard.mask(id)) + ")");
             }
         });
         mod.hook(cl, "dipo.bt.set_carplay_bt_address", new MethodHook() {
@@ -384,7 +384,7 @@ public final class Dipo {
                 if (id == null) return;
                 try {
                     SharedPreferences sp = c.getSharedPreferences("pref_dipo", 0);
-                    if (!sp.edit().putBoolean(id, true).commit()) log("bridge: first-connect notice not saved for " + id);
+                    if (!sp.edit().putBoolean(id, true).commit()) log("bridge: first-connect notice not saved for " + HandGuard.mask(id));
                 } catch (Throwable t) {
                     error("bridge: first-connect notice", t);
                 }

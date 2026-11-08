@@ -244,10 +244,10 @@ final class Bridge {
                     String a = connectedIphone(sBtcm, prefer);
                     if (a == null) return;
                     if (a.equals(prefer) && ++sSameTries > MAX_SAME_TRIES) {
-                        log("not retrying " + a + " again until it reconnects");
+                        log("not retrying " + HandGuard.mask(a) + " again until it reconnects");
                         return;
                     }
-                    log("connected iPhone " + a + (a.equals(prefer) ? " (the same one)" : " (another one)"));
+                    log("connected iPhone " + HandGuard.mask(a) + (a.equals(prefer) ? " (the same one)" : " (another one)"));
                     scheduleSppConnect(a);
                 } catch (Throwable t) {
                     error("rescan", t);
@@ -337,7 +337,7 @@ final class Bridge {
                     @Override
                     public void run() {
                         try {
-                            log("IbtcmSppDisconnect(" + addr + ") = " + m.IbtcmSppDisconnect(addr));
+                            log("IbtcmSppDisconnect(" + HandGuard.mask(addr) + ") = " + m.IbtcmSppDisconnect(addr));
                         } catch (Throwable t) {
                             error("sppDisconnect", t);
                         }
@@ -362,7 +362,7 @@ final class Bridge {
                     if (addr == null) return;
                     sHeld = addr;
                     unwatch();
-                    log("CarPlay ended on request: " + addr + " waits for its next Bluetooth connect");
+                    log("CarPlay ended on request: " + HandGuard.mask(addr) + " waits for its next Bluetooth connect");
                 }
             }, new IntentFilter(ACTION_DISCONNECT_CARPLAY));
         } catch (Throwable t) {
@@ -383,8 +383,8 @@ final class Bridge {
                 try {
                     HfDeviceBTCMManager m = sBtcm;
                     if (m == null || sUsb || sSession || sCpWireless || sCarOff || !enabled()) return;
-                    if (m.IbtcmIsSppConnectedDevice(addr)) log("SPP already up for " + addr);
-                    else log("IbtcmSppConnect(" + addr + ") = " + m.IbtcmSppConnect(addr));
+                    if (m.IbtcmIsSppConnectedDevice(addr)) log("SPP already up for " + HandGuard.mask(addr));
+                    else log("IbtcmSppConnect(" + HandGuard.mask(addr) + ") = " + m.IbtcmSppConnect(addr));
                 } catch (Throwable t) {
                     error("sppConnect", t);
                 }
@@ -428,7 +428,7 @@ final class Bridge {
                     i.putExtra("serial", addr);
                     c.sendBroadcast(i);
                     sAttachAt = android.os.SystemClock.elapsedRealtime();
-                    log("BT_ATTACHED sent for " + addr);
+                    log("BT_ATTACHED sent for " + HandGuard.mask(addr));
                 } catch (Throwable t) {
                     sSession = false;
                     error("sendAttach", t);
@@ -463,7 +463,7 @@ final class Bridge {
     static void waitForAndroidAuto(final String addr) {
         if (addr.equals(sAaWait)) return;
         sAaWait = addr;
-        log("another phone's Android Auto is up: CarPlay for " + addr + " waits for it to end");
+        log("another phone's Android Auto is up: CarPlay for " + HandGuard.mask(addr) + " waits for it to end");
         handler().postDelayed(new Runnable() {
             @Override
             public void run() {
@@ -479,7 +479,7 @@ final class Bridge {
                 sAaWait = null;
                 String a = connectedIphone(sBtcm, addr);
                 if (a == null) return;
-                log("Android Auto ended: CarPlay for " + a);
+                log("Android Auto ended: CarPlay for " + HandGuard.mask(a));
                 scheduleSppConnect(a);
             }
         }, AA_RECHECK_MS);
@@ -514,11 +514,11 @@ final class Bridge {
         if (!authRetryWanted(component, addr != null, sCp != null || sCpWireless, sUsb || sCarOff,
                 android.os.SystemClock.elapsedRealtime() - sAttachAt, sAttachAt > 0)) return;
         if (sAuthRetried) {
-            log("iAP2 authentication failed again for " + addr + ": the attempt ends");
+            log("iAP2 authentication failed again for " + HandGuard.mask(addr) + ": the attempt ends");
             return;
         }
         sAuthRetried = true;
-        log("iAP2 authentication failed for " + addr + ": starting the Bluetooth session once more");
+        log("iAP2 authentication failed for " + HandGuard.mask(addr) + ": starting the Bluetooth session once more");
         unwatch();
         sSession = false;
         sendDetach();
@@ -617,7 +617,7 @@ final class Bridge {
     static void onCpSessionCreated(Object cp) {
         if (cp != null) sCp = cp;
         unwatch();
-        log("CarPlay session created (usb=" + sUsb + " btAddr=" + sAddr + ")");
+        log("CarPlay session created (usb=" + sUsb + " btAddr=" + HandGuard.mask(sAddr) + ")");
         if ("created".equals(prop("persist.ev6.cpwl.handover", "data")) && !sUsb && sAddr != null) {
             startCpClient("session created");
         }
@@ -875,7 +875,7 @@ final class Bridge {
                 if (isApple(d)) {
                     sSameTries = 0;
                     if (d.getAddress().equals(sHeld)) sHeld = null;
-                    log("iPhone BT connected: " + d.getAddress());
+                    log("iPhone BT connected: " + HandGuard.mask(d.getAddress()));
                     scheduleSppConnect(d.getAddress());
                 }
             } catch (Throwable t) {
@@ -889,7 +889,7 @@ final class Bridge {
             try {
                 if (!isApple(d)) return;
                 String addr = d.getAddress();
-                log("SPP status " + status + " for " + addr);
+                log("SPP status " + status + " for " + HandGuard.mask(addr));
                 if (status == SPP_CONNECTED) onSppUp(addr);
                 else if (status == SPP_DISCONNECTED) onSppDown(addr);
             } catch (Throwable t) {
