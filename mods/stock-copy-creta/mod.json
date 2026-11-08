@@ -1,0 +1,31 @@
+{
+  "id": "stock-copy-creta",
+  "name": "Stock copy (Creta, one-off)",
+  "version": "1.0.0",
+  "hmgapi": ">=1.0.5",
+  "authors": [
+    "sirishant"
+  ],
+  "repo": "https://github.com/sirishant/HMG-API",
+  "license": "AGPL-3.0",
+  "description": "Creta Electric India only. Once: copies the car's stock Bluetooth app (for mapping HMG-API hook points) to a creta-stock folder on the USB drive. Nothing from /data. Remove it afterwards.",
+  "system": {
+    "model": [
+      "SU2IEV"
+    ],
+    "region": "IND",
+    "firmware": "260430"
+  },
+  "usb": [
+    "creta-stock"
+  ],
+  "services": [
+    {
+      "name": "copy",
+      "script": "svc/copy.sh",
+      "user": "system",
+      "start": "android",
+      "restart": false
+    }
+  ]
+}
