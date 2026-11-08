@@ -1,0 +1,26 @@
+{
+  "id": "battery-test-creta",
+  "name": "12V test (Creta, one-off)",
+  "version": "1.0.0",
+  "hmgapi": ">=1.0.10",
+  "authors": [
+    "sirishant"
+  ],
+  "repo": "https://github.com/sirishant/HMG-API",
+  "license": "AGPL-3.0",
+  "description": "Creta Electric India only. Reads, never changes: logs every 12V battery and DC-DC converter value the car's telematics service holds (in the drive log), to find a working 12V reading. Remove it after a drive.",
+  "system": {
+    "model": [
+      "SU2IEV"
+    ],
+    "region": "IND",
+    "firmware": "260430"
+  },
+  "hooks": {
+    "jar": "hooks.jar",
+    "entry": "hmgapi.mods.batterytest.BatteryTest",
+    "points": {
+      "framework.hkmc_loader.automotive_service": "observe"
+    }
+  }
+}
