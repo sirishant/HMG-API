@@ -235,6 +235,15 @@
     "phoneprojection.wireless_service.pp_manager": "not mapped yet: needs this car's stock files (added for the Hyundai Creta Electric)",
     "phoneprojection.wireless_service.status": "not mapped yet: needs this car's stock files (added for the Hyundai Creta Electric)",
     "phoneprojection.wireless_util": "not mapped yet: needs this car's stock files (added for the Hyundai Creta Electric)",
-    "phoneprojection.wireless_util.show_device_change": "not mapped yet: needs this car's stock files (added for the Hyundai Creta Electric)"
+    "phoneprojection.wireless_util.show_device_change": "not mapped yet: needs this car's stock files (added for the Hyundai Creta Electric)",
+    "btsettings.btcm": "not mapped yet: needs this car's stock files (added for the Hyundai Creta Electric)",
+    "btsettings.btcm.cancel_connection": "not mapped yet: needs this car's stock files (added for the Hyundai Creta Electric)",
+    "btsettings.btcm.connect": "not mapped yet: needs this car's stock files (added for the Hyundai Creta Electric)",
+    "btsettings.btcm.disconnect": "not mapped yet: needs this car's stock files (added for the Hyundai Creta Electric)",
+    "btsettings.btcm.only_a2dp_connect": "not mapped yet: needs this car's stock files (added for the Hyundai Creta Electric)",
+    "btsettings.btcm.only_a2dp_disconnect": "not mapped yet: needs this car's stock files (added for the Hyundai Creta Electric)",
+    "btsettings.btcm.only_hfp_connect": "not mapped yet: needs this car's stock files (added for the Hyundai Creta Electric)",
+    "btsettings.btcm.only_hfp_disconnect": "not mapped yet: needs this car's stock files (added for the Hyundai Creta Electric)",
+    "btsettings.btcm.remove_device": "not mapped yet: needs this car's stock files (added for the Hyundai Creta Electric)"
   }
 }

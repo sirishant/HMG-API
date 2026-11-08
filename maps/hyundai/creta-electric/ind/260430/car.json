@@ -11,10 +11,10 @@
   "verified": null,
   "files": {
     "/system/app/HKMC_BtSettings.odex": "8531094e19fd405a7d976c7bcc29e5e0",
+    "/system/framework/com.broadcom.bt.jar": "dbf374aa8bde80fad95746a67719ce51",
     "/system/app/ButtonSettings.odex": "61914038ab617021fef76cb099ebab0f",
     "/system/app/HKMC_DiPO.odex": "2dc0e709b3af80176bb7bbf10234f0c5",
     "/system/framework/com.tcc.iap2.odex": "ec4f688b5e56625172dc6f9137263b62",
-    "/system/framework/com.broadcom.bt.jar": "dbf374aa8bde80fad95746a67719ce51",
     "/system/framework/framework.odex": "b95b09a1dd1c4bae07660b5201c11c50",
     "/system/framework/core.odex": "32356300937df9a063b09e2d03f2c6d4",
     "/system/framework/framework2.odex": "5b7d9498d4f01137e2ca2de11e54711d",
@@ -48,7 +48,8 @@
     "btsettings": {
       "package": "com.android.btsettings",
       "files": [
-        "/system/app/HKMC_BtSettings.odex"
+        "/system/app/HKMC_BtSettings.odex",
+        "/system/framework/com.broadcom.bt.jar"
       ]
     },
     "buttonsettings": {

@@ -1,4 +1,69 @@
 {
+  "btsettings.btcm": {
+    "class": "com.broadcom.bt.hfdevice.hfbtcm.HfDeviceBTCMManager"
+  },
+  "btsettings.btcm.cancel_connection": {
+    "method": "IbtcmCancelConnection",
+    "params": [],
+    "ret": "boolean",
+    "static": false
+  },
+  "btsettings.btcm.connect": {
+    "method": "IbtcmConnect",
+    "params": [
+      "java.lang.String"
+    ],
+    "ret": "boolean",
+    "static": false
+  },
+  "btsettings.btcm.disconnect": {
+    "method": "IbtcmDisconnect",
+    "params": [
+      "java.lang.String"
+    ],
+    "ret": "boolean",
+    "static": false
+  },
+  "btsettings.btcm.only_a2dp_connect": {
+    "method": "IbtcmOnlyA2dpConnect",
+    "params": [
+      "java.lang.String"
+    ],
+    "ret": "boolean",
+    "static": false
+  },
+  "btsettings.btcm.only_a2dp_disconnect": {
+    "method": "IbtcmOnlyA2dpDisconnect",
+    "params": [
+      "java.lang.String"
+    ],
+    "ret": "boolean",
+    "static": false
+  },
+  "btsettings.btcm.only_hfp_connect": {
+    "method": "IbtcmOnlyHfpConnect",
+    "params": [
+      "java.lang.String"
+    ],
+    "ret": "boolean",
+    "static": false
+  },
+  "btsettings.btcm.only_hfp_disconnect": {
+    "method": "IbtcmOnlyHfpDisconnect",
+    "params": [
+      "java.lang.String"
+    ],
+    "ret": "boolean",
+    "static": false
+  },
+  "btsettings.btcm.remove_device": {
+    "method": "IbtcmRemoveDevice",
+    "params": [
+      "android.bluetooth.BluetoothDevice"
+    ],
+    "ret": "boolean",
+    "static": false
+  },
   "btsettings.projection_helper": {
     "class": "com.android.settings2.bluetooth.iP"
   },
