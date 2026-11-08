@@ -49,12 +49,15 @@ public final class Switch extends ModEntry {
             CarPlayKeys.dipo(mod, app);
             CarPlayCalls.dipo(mod, app);
             CarPlayPopup.dipo(mod, app);
+            BtWatch.dipo(mod, app);
         } else if (PP.equals(app.packageName)) {
             phoneProjection(mod, app);
         } else if (CarPlayFixes.IAP2.equals(app.packageName)) {
             CarPlayFixes.iap2(mod, app);
         } else if (AaKeys.GPM.equals(app.packageName)) {
             AaKeys.gpm(mod, app);
+        } else if (BtWatch.BTSETTINGS.equals(app.packageName)) {
+            BtWatch.btSettings(mod, app);
         }
     }
 
