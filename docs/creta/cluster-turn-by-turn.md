@@ -4,11 +4,15 @@ Findings from the Hyundai Creta Electric India (`SU2IEV.IND`, 260430, right-hand
 left-hand traffic), for anyone sending Android Auto or CarPlay turn-by-turn to a Gen5W
 cluster. The code is in this repository (AGPL-3.0):
 
-- `mods/wireless-creta-rhd/src/hmgapi/mods/creta/CretaRhd.java`: everything below, with
-  its host test (`tools/test/.../CretaRhdTest.java`, 180 checks).
-- `mods/wireless-carplay-aa/src/hmgapi/mods/wireless/api/TurnDisplay.java`: the hook a
-  car-specific display plugs into; `AaTurns.java` and `dipo/CpTurns.java` feed it (the same
-  Leafia-era turn-by-turn lineage as other Gen5W projects).
+- [`CretaRhd.java`](../../mods/wireless-creta-rhd/src/hmgapi/mods/creta/CretaRhd.java):
+  everything below, with its host test
+  ([`CretaRhdTest.java`](../../mods/wireless-creta-rhd/tools/test/hmgapi/mods/wireless/CretaRhdTest.java),
+  180 checks).
+- [`TurnDisplay.java`](../../mods/wireless-carplay-aa/src/hmgapi/mods/wireless/api/TurnDisplay.java):
+  the hook a car-specific display plugs into;
+  [`AaTurns.java`](../../mods/wireless-carplay-aa/src/hmgapi/mods/wireless/AaTurns.java) and
+  [`CpTurns.java`](../../mods/wireless-carplay-aa/src/hmgapi/mods/wireless/dipo/CpTurns.java)
+  feed it (the same Leafia-era turn-by-turn lineage as other Gen5W projects).
 
 ## How we measured
 
