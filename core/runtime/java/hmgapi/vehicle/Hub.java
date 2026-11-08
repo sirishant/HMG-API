@@ -83,14 +83,47 @@ public final class Hub {
             } catch (Throwable t) {
                 System.out.println("vehicle: " + t);
             } finally {
-                try {
-                    s.close();
-                } catch (Exception x) {
-                    // gone already
-                }
+                closeFully(s);
             }
         }
     }
+
+    /**
+     * KitKat's LocalSocket.close() leaves an accepted socket's descriptor open (LocalSocketImpl
+     * closes only descriptors it created itself): the peer never saw the end of an answer and
+     * every request leaked one, until "Too many open files" ended the service every few
+     * minutes on the Creta (2026-11-07, the climate mod reading several times a second).
+     * Shut both ways, close the descriptor ourselves, then the socket.
+     */
+    static void closeFully(LocalSocket s) {
+        try {
+            s.shutdownOutput();
+        } catch (Exception x) {
+            // gone already
+        }
+        try {
+            s.shutdownInput();
+        } catch (Exception x) {
+            // gone already
+        }
+        try {
+            java.io.FileDescriptor fd = s.getFileDescriptor();
+            if (fd != null && fd.valid()) {
+                Object os = Class.forName("libcore.io.Libcore").getField("os").get(null);
+                os.getClass().getMethod("close", java.io.FileDescriptor.class).invoke(os, fd);
+            }
+        } catch (Throwable t) {
+            if (!closeFailedSaid) System.out.println("vehicle: can't close a connection's descriptor: " + t);
+            closeFailedSaid = true;
+        }
+        try {
+            s.close();
+        } catch (Exception x) {
+            // gone already
+        }
+    }
+
+    static boolean closeFailedSaid;
 
     static void serve(LocalSocket s) throws Exception {
         int uid = s.getPeerCredentials().getUid();
