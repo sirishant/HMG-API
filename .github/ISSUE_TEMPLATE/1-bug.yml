@@ -1,5 +1,5 @@
 name: Something doesn't work
-description: A bug in HMG-API or one of its mods.
+description: A bug in HMG-API, or in a mod you're not sure about (the wireless mod has its own repo).
 title: "Bug: "
 labels: [bug]
 body:
@@ -19,7 +19,7 @@ body:
     id: supported
     attributes:
       label: Is your car supported?
-      description: See [Supported cars](https://github.com/VysseCodes/HMG-API/wiki/Supported-cars). Only each region's newest head unit software is supported; on older software, updating often fixes it.
+      description: See [Supported cars](https://github.com/Open-HMG/HMG-API/wiki/Supported-cars). Only each region's newest head unit software is supported; on older software, updating often fixes it.
       options:
         - Listed, with the software version shown there
         - Listed, but my head unit has older software

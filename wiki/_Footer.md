@@ -1,1 +1,1 @@
-This wiki is published from the [`wiki/` folder](https://github.com/VysseCodes/HMG-API/tree/main/wiki) of the main repository: to change a page, edit it there (a pull request is welcome). Edits made here are replaced at the next update.
+This wiki is published from the [`wiki/` folder](https://github.com/Open-HMG/HMG-API/tree/main/wiki) of the main repository: to change a page, edit it there (a pull request is welcome). Edits made here are replaced at the next update.

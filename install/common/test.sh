@@ -61,11 +61,15 @@ rm "$D/installed.txt"
 HC > /dev/null
 check "hook-check: HMG-API not installed: nothing put back" "0" "$(grep -c HMGAPI_HOOK "$T/system/etc/install-recovery.sh")"
 echo "version 1.0.0" > "$D/installed.txt"
-cp "$(command -v sleep)" "$T/hook-check"; "$T/hook-check" 30 & sp=$!   # stands in for one already running
-echo $sp > "$D/state/hook-check.pid"
-HC > /dev/null
-check "hook-check: another one running: this one does nothing" "0" "$(grep -c HMGAPI_HOOK "$T/system/etc/install-recovery.sh")"
-kill $sp 2>/dev/null; wait $sp 2>/dev/null || true
+if [ -f /proc/self/cmdline ]; then   # hook-check tells one is running from /proc/<pid>/cmdline, as on the unit
+    cp "$(command -v sleep)" "$T/hook-check"; "$T/hook-check" 30 & sp=$!   # stands in for one already running
+    echo $sp > "$D/state/hook-check.pid"
+    HC > /dev/null
+    check "hook-check: another one running: this one does nothing" "0" "$(grep -c HMGAPI_HOOK "$T/system/etc/install-recovery.sh")"
+    kill $sp 2>/dev/null; wait $sp 2>/dev/null || true
+else
+    echo "skip  hook-check: another one running (no /proc here)"
+fi
 echo 999999 > "$D/state/hook-check.pid"
 HC > /dev/null
 check "hook-check: a stale lock (after a restart) doesn't stop it" "1" "$(grep -c 'HMGAPI_HOOK begin' "$T/system/etc/install-recovery.sh")"

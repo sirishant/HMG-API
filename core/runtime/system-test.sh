@@ -4,7 +4,7 @@
 set -e
 cd "$(dirname "$0")/../.."
 CP=$(mktemp -d)
-javac --release 8 -Xlint:-options -nowarn -d "$CP" core/runtime/java/hmgapi/engine/*.java
+sh tools/engine-classes.sh "$CP"
 T=$(mktemp -d)
 trap 'rm -rf "$T" "$CP"' EXIT
 R=$T/root

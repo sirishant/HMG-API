@@ -131,7 +131,6 @@
     "dipo.activity_handler.handle_message": "not mapped yet: needs this car's stock files (added for the Hyundai Creta Electric)",
     "dipo.call_utils": "not mapped yet: needs this car's stock files (added for the Hyundai Creta Electric)",
     "dipo.call_utils.is_bt_call": "not mapped yet: needs this car's stock files (added for the Hyundai Creta Electric)",
-    "dipo.carplay.force_key_frame": "not mapped yet: needs this car's stock files (added for the Hyundai Creta Electric)",
     "dipo.carplay_listener": "not mapped yet: needs this car's stock files (added for the Hyundai Creta Electric)",
     "dipo.carplay_listener.decode_failure": "not mapped yet: needs this car's stock files (added for the Hyundai Creta Electric)",
     "dipo.carplay_listener.owner": "not mapped yet: needs this car's stock files (added for the Hyundai Creta Electric)",

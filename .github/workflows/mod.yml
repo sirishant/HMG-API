@@ -1,0 +1,203 @@
+# A HMG-API mod's CI, for mod repos to call (docs/mod-repos.md section 9):
+#
+#   jobs:
+#     mod:
+#       uses: Open-HMG/HMG-API/.github/workflows/mod.yml@<HMG-API commit SHA>   # @v1.0.3 from 1.0.3
+#
+# It reads the mod repo's hmgapi-sdk.json, the HMG-API mod SDK it builds with:
+#   {"ref": "<HMG-API commit SHA>"}           HMG-API checked out there, ./build.sh sdk (the only
+#                                             form until a release carries an SDK: 1.0.3)
+#   {"version": "1.0.3", "sha256": "<hex>"}   the release's hmgapi-mod-sdk-<version>.zip, refused
+#                                             unless its sha256 is this one
+# Then, for each mod: its "hmgapi" floor and hook points (bin/check-points.py), the build
+# (bin/build-mod.sh), its test.sh and tools/*/test.sh (with HMGAPI_SDK and HMGAPI_MOD_BUILD),
+# check-scripts, and the package and NEMESIS package, signed with a throwaway key (a test
+# build: releases are signed by the mod repo's own release workflow, with its MOD_KEY).
+# With ndk: that Android NDK (sdkmanager's version) installed first, in NDK and ANDROID_NDK_HOME,
+# for a mod whose build.sh compiles native code (hmgapi-adbd: 21.4.7075529, r21e, for API 19).
+# HMG-API's own CI runs it on mods/examples/hello (ci.yml, mod-workflow; weekly with an NDK too).
+name: Mod
+
+on:
+  workflow_call:
+    inputs:
+      mods:
+        description: "Mod folders, space-separated (default: every top-level folder with a mod.json)"
+        type: string
+        default: ""
+      sdk:
+        description: "The SDK pin as JSON, instead of the repo's hmgapi-sdk.json"
+        type: string
+        default: ""
+      hmgapi-repo:
+        description: "Where HMG-API is (the SDK's source and releases)"
+        type: string
+        default: Open-HMG/HMG-API
+      ndk:
+        description: "An Android NDK to install, as sdkmanager names it (21.4.7075529 is r21e); NDK and ANDROID_NDK_HOME point at it (default: none)"
+        type: string
+        default: ""
+
+permissions:
+  contents: read
+
+jobs:
+  mod:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-java@77dd5b2ce225ea11469928ac317850245a74ae78 # v6.2.0
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12"
+
+      - name: Tools (clang and lld build the SDK's lpatch from a commit)
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -yq clang lld zip unzip mksh
+
+      - name: NDK
+        if: inputs.ndk != ''
+        env:
+          NDK_VERSION: ${{ inputs.ndk }}
+        run: |
+          echo "$NDK_VERSION" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+$' || { echo "ndk: sdkmanager's version (21.4.7075529), not $NDK_VERSION"; exit 1; }
+          printf 'y\n' | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --install "ndk;$NDK_VERSION" > /dev/null
+          N="$ANDROID_HOME/ndk/$NDK_VERSION"
+          [ -d "$N/toolchains" ] || { echo "no NDK at $N"; exit 1; }
+          echo "NDK=$N" >> "$GITHUB_ENV"
+          echo "ANDROID_NDK_HOME=$N" >> "$GITHUB_ENV"
+          echo "NDK $NDK_VERSION" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Which SDK
+        id: pin
+        env:
+          PIN: ${{ inputs.sdk }}
+          REPO: ${{ inputs.hmgapi-repo }}
+        run: |
+          python3 - <<'PY'
+          import json, os, re, sys
+          pin = os.environ["PIN"]
+          if not pin:
+              if not os.path.isfile("hmgapi-sdk.json"):
+                  sys.exit('no hmgapi-sdk.json: add one, {"ref": "<HMG-API commit SHA>"} or {"version": "...", "sha256": "..."}')
+              pin = open("hmgapi-sdk.json").read()
+          p = json.loads(pin)
+          if not re.fullmatch(r"[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+", os.environ["REPO"]):
+              sys.exit("hmgapi-repo: %r isn't owner/name" % os.environ["REPO"])
+          out = open(os.environ["GITHUB_OUTPUT"], "a")
+          if set(p) == {"ref"}:
+              if not re.fullmatch(r"[0-9a-f]{40}", p["ref"]):
+                  sys.exit('hmgapi-sdk.json: "ref" is a full HMG-API commit SHA (40 hex digits), not %r' % p["ref"])
+              out.write("form=ref\nref=%s\n" % p["ref"])
+              print("SDK: built from %s at %s" % (os.environ["REPO"], p["ref"]))
+          elif set(p) == {"version", "sha256"}:
+              if not re.fullmatch(r"\d+\.\d+\.\d+(-[0-9A-Za-z.]+)?", p["version"]) or not re.fullmatch(r"[0-9a-f]{64}", p["sha256"]):
+                  sys.exit('hmgapi-sdk.json: "version" is a release (1.0.3), "sha256" 64 hex digits')
+              out.write("form=release\nversion=%s\nsha256=%s\n" % (p["version"], p["sha256"]))
+              print("SDK: release %s" % p["version"])
+          else:
+              sys.exit('hmgapi-sdk.json: wanted {"ref": ...} or {"version": ..., "sha256": ...}, got keys %s' % sorted(p))
+          PY
+
+      - name: HMG-API at the pinned commit
+        if: steps.pin.outputs.form == 'ref'
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: ${{ inputs.hmgapi-repo }}
+          ref: ${{ steps.pin.outputs.ref }}
+          path: .hmgapi-src
+          persist-credentials: false
+
+      - name: The SDK
+        env:
+          FORM: ${{ steps.pin.outputs.form }}
+          VERSION: ${{ steps.pin.outputs.version }}
+          SHA256: ${{ steps.pin.outputs.sha256 }}
+          REPO: ${{ inputs.hmgapi-repo }}
+        run: |
+          S="$RUNNER_TEMP/hmgapi-sdk"
+          if [ "$FORM" = ref ]; then
+            (cd .hmgapi-src && ./build.sh sdk)
+            Z=$(ls .hmgapi-src/out/dist/hmgapi-mod-sdk-*.zip)
+          else
+            Z="$RUNNER_TEMP/hmgapi-mod-sdk-$VERSION.zip"
+            curl -fsSL -o "$Z" "https://github.com/$REPO/releases/download/v$VERSION/hmgapi-mod-sdk-$VERSION.zip"
+            echo "$SHA256  $Z" | sha256sum -c - || { echo "the SDK zip isn't the one hmgapi-sdk.json pins"; exit 1; }
+          fi
+          rm -rf "$S" && mkdir -p "$S" && unzip -q "$Z" -d "$S"
+          rm -rf .hmgapi-src
+          echo "HMGAPI_SDK=$S" >> "$GITHUB_ENV"
+          echo "### HMG-API mod SDK $(cat "$S/VERSION") ($(cat "$S/BUILD"))" >> "$GITHUB_STEP_SUMMARY"
+          pip install --require-hashes -r "$S/requirements.txt"
+
+      - name: Which mods
+        env:
+          MODS: ${{ inputs.mods }}
+        run: |
+          if [ -z "$MODS" ]; then
+            for d in */; do [ -f "$d/mod.json" ] && MODS="$MODS ${d%/}"; done
+          fi
+          for m in $MODS; do
+            case $m in /*|*..*) echo "$m: a folder in this repo, please"; exit 1 ;; esac
+            [ -f "$m/mod.json" ] || { echo "$m has no mod.json"; exit 1; }
+          done
+          [ -n "$MODS" ] || { echo "no mod folders (a folder with a mod.json)"; exit 1; }
+          echo "MODS=$(echo $MODS)" >> "$GITHUB_ENV"
+          echo "Mods: $MODS" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: HMG-API floor and hook points
+        env:
+          REPO: ${{ inputs.hmgapi-repo }}
+        run: python3 "$HMGAPI_SDK/bin/check-points.py" $MODS --repo "$REPO"
+
+      - name: Build
+        run: |
+          cp=""
+          for m in $MODS; do
+            id=$(basename "$m")
+            # mods built before this one are on the classpath (a mod that requires another in this repo)
+            HMGAPI_MOD_CP="$cp" sh "$HMGAPI_SDK/bin/build-mod.sh" "$m" "out/build/$id" "out/work/$id"
+            if [ -d "out/work/$id/classes" ]; then cp="${cp:+$cp:}$PWD/out/work/$id/classes"; fi
+          done
+
+      - name: Tests
+        run: |
+          rc=0
+          for m in $MODS; do
+            for t in "$m/test.sh" "$m"/tools/*/test.sh; do
+              [ -f "$t" ] || continue
+              echo "::group::$t"
+              HMGAPI_MOD_BUILD="$PWD/out/build/$(basename "$m")" sh "$t" || { echo "::error::$t failed"; rc=1; }
+              echo "::endgroup::"
+            done
+          done
+          exit $rc
+
+      - name: Scripts only use what the head unit has
+        run: sh "$HMGAPI_SDK/bin/check-scripts.sh" $MODS
+
+      - name: Packages (throwaway key)
+        run: |
+          java -cp "$HMGAPI_SDK/lib/hmgapi-engine.jar" hmgapi.engine.Signing keygen "$RUNNER_TEMP/throwaway.key"
+          for m in $MODS; do
+            out=$(HMGAPI_MOD_BUILD="$PWD/out/build/$(basename "$m")" sh "$HMGAPI_SDK/bin/mkmodpkg.sh" "$m" "$RUNNER_TEMP/throwaway.key")
+            echo "$out"
+            sh "$HMGAPI_SDK/bin/mknemesismod.sh" "$(echo "$out" | tail -1)"   # its last line: the zip
+          done
+          rm -f "$RUNNER_TEMP"/throwaway.key*
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: mod-test-packages
+          path: |
+            out/packages/*.zip
+            out/dist/*.zip
+          retention-days: 14

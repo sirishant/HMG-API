@@ -25,8 +25,8 @@ between them). Turn it on where you choose the panel's pages in the car's settin
 
 ## Car readings and commands
 
-Mods can read things like the gear, speed, battery charge, 12V battery and seat
-heat, and send a few reviewed commands: open the charge door (only in Park), seat
+Mods can read things like the gear, speed, battery charge, the 12V battery and
+its sensor, and seat heat, and send a few reviewed commands: open the charge door (only in Park), seat
 and steering wheel heat, battery conditioning, ambient light colour, parking guide
 lines. Each command has a limit (Park only, one mod at a time, and so on), shown in
 the plan.

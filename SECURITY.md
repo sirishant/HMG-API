@@ -3,9 +3,9 @@
 ## Reporting a problem
 
 Please report security problems **privately**: on GitHub, the repository's
-**Security** tab → **Report a vulnerability**. If that isn't available, contact the
-maintainer (VysseCodes) and ask for a private channel before sharing details. Please
-don't open a public issue for a security problem.
+**Security** tab → **Report a vulnerability**. If that isn't available, email
+openhmg@gmail.com and ask for a private channel before sharing details. Please don't
+open a public issue for a security problem.
 
 Supported: the newest release (including betas). Fixes go into the next one.
 

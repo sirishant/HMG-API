@@ -1,20 +1,9 @@
 #!/bin/sh
-# Off-car test of native patches in memory (hmgapi.engine.MemRecipe): synthetic
-# libraries, and, where the private stock trees are here, the Wireless mod's Android
-# Auto recipes on the real stock libraries against the file-patched builds.
+# Off-car test of native patches in memory (hmgapi.engine.MemRecipe) on synthetic
+# libraries. A mod's own recipes on real stock libraries are the mod's test (MemRecipeTest
+# with <stock> <patched> <recipe> triples; the mod SDK has it in test/hmgapi-engine-test.jar).
 set -e
 cd "$(dirname "$0")/../.."
 CP=$(mktemp -d); trap 'rm -rf "$CP"' EXIT
-javac --release 8 -Xlint:-options -nowarn -d "$CP" core/runtime/java/hmgapi/engine/*.java core/runtime/test/hmgapi/engine/MemRecipeTest.java 2>/dev/null
-H=$HOME/hmg-private; R=mods/wireless-carplay-aa/recipes
-set --
-[ -f $H/stock/ev6/lib/libautoreceiver_infobank.so ] && set -- "$@" $H/stock/ev6/lib/libautoreceiver_infobank.so $H/builds/2_tbt/files/libautoreceiver_infobank.so $R/aa-tbt-48ee793a.recipe
-[ -f $H/stock/neev-can-260206/lib/libautoreceiver_infobank.so ] && set -- "$@" $H/stock/neev-can-260206/lib/libautoreceiver_infobank.so $H/builds-neev_ca/2_tbt/files_neev_ca/libautoreceiver_infobank.so $R/aa-tbt-a0bea1c4.recipe
-# the CarPlay recipes (lpatch recipes, used as they are): against lpatch's own result on the file
-L=out/lpatch-host; [ -x $L ] || L=tools/lpatch/lpatch-host
-for x in core:carplay-core-wifi audio:carplay-audio-formats utils:carplay-utils-converter; do
-    lib=$H/stock/ev6/lib/libCarPlay$(echo ${x%%:*} | sed 's/^./\U&/').so; rc=mods/wireless-carplay-aa/recipes/${x#*:}.recipe
-    [ -f "$lib" ] && [ -x $L ] || continue
-    $L apply $rc "$lib" "$CP/${x#*:}.so" >/dev/null && set -- "$@" "$lib" "$CP/${x#*:}.so" $rc
-done
-exec java -cp "$CP" hmgapi.engine.MemRecipeTest "$@"
+sh tools/engine-classes.sh "$CP" && javac --release 8 -Xlint:-options -nowarn -cp "$CP" -d "$CP" core/runtime/test/hmgapi/engine/MemRecipeTest.java 2>/dev/null
+exec java -cp "$CP" hmgapi.engine.MemRecipeTest

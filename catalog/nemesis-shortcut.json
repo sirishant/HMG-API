@@ -8,8 +8,8 @@
   "license": "AGPL-3.0",
   "uuid": "7251ce71-a146-8a1e-958b-dbffc6af7359",
   "version": "1.1.0",
-  "repo": "https://github.com/VysseCodes/HMG-API/tree/main/mods/examples/nemesis-shortcut",
-  "download": "https://github.com/VysseCodes/HMG-API/releases/download/v1.0.0-beta.6/nemesis-shortcut-1.1.0.zip",
-  "sha256": "6d5a1058f92aa152cf163c23488f63af19ec822bd8d5d1083c8b84fa690d47b4",
+  "repo": "https://github.com/Open-HMG/hmgapi-nemesis-shortcut",
+  "download": "https://github.com/Open-HMG/HMG-API/releases/download/v1.0.2/nemesis-shortcut-1.1.0.zip",
+  "sha256": "44b35831370faa87d2b561fe246878da61edff9bef5b957f1c2b3866417c4816",
   "hmgapi": ">=0.1.0"
 }

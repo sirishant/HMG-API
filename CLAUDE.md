@@ -38,7 +38,7 @@ Owners get to decide for their own units. Follow these by default. If the user a
 | `core/runtime` | `hmgapi-hook.jar`: `Bridge`, `Hooks`, `MethodHook`, `ModEntry`/`ModContext`/`LoadedApp` (mod API), `Mods` (loader), launcher/editor hooks (`HMG-API`), ★ choices (`StarKey`). |
 | `core/app` | `hmgapi.app`: status + mod list (from `HmgApiStatus.json`, set by the hooks). |
 | `install/` | `adb/`, `nemesis/` (`mod/`: the template for a mod as a NEMESIS package, `tools/mknemesismod.sh`), `usb/`, `common/` (planned); `dev/`: the scripts used to bring up the core on a car. |
-| `mods/examples` | `hello`, `nemesis-shortcut`. |
+| `mods/examples` | `hello` and the other API examples. The shipped mods (wireless, `adb`, `adbd`, `nemesis-shortcut`) are in their own Open-HMG repos (`docs/mod-repos.md`); the release bundles them from `catalog/` (`tools/release-mods.txt`). |
 | `tools/` | `lpatch`, `mkrecipe.py`, `mkdelta.py`, `mkicon.sh` (stock-style tile pictures; `mkicon-hmgapi.sh` makes HMG-API's own from the logo), `env.sh`, `push-dev.sh`, `test-all.sh`; `map-car.py` (partial maps), `test-hooks.py` (points × cars, `maps/coverage.json`), `probe-test.py` (on-car mapper vs map-car.py); cars in `tools/hook-trees.local` (private). |
 
 ## Gotchas learned the hard way
@@ -73,5 +73,5 @@ Owners get to decide for their own units. Follow these by default. If the user a
 
 ## Testing without a car
 
-`tools/test-all.sh`: hmgapid (real daemon/client under qemu-arm), zygote wrapper, lpatch, and the dev install scripts (needs an ARM busybox and a stock `app_process`). Stock trees and full builds stay out of the repo (`~/hmg-private`).
+`tools/test-all.sh`: hmgapid (real daemon/client under qemu-arm), zygote wrapper, lpatch, the engine, the installers and the tools; `--fast` for the ones that need no build or ARM toolchain. Stock trees and full builds stay out of the repo (`~/hmg-private`).
 

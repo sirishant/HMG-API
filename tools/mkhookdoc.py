@@ -69,6 +69,9 @@ def render():
          'use one. A point a car\'s map lacks is off on that car, and the HMG-API app says so.', '',
          'How points are described and found: [core/hookpoints/README.md](../core/hookpoints/README.md).',
          'Need one that isn\'t here? Open a "New hook point" issue.', '',
+         'Every point and map lives here, in HMG-API, including the ones only a mod in its own repo',
+         'uses (the wireless mod\'s, for one): a mod gets new points through an HMG-API release and its',
+         'mod SDK ([mod-repos.md](mod-repos.md), section 4).', '',
          '%d hook points. **Cars** (`maps/`):' % n, '',
          '| Car | Map | Points |', '|---|---|---|']
     for label, status, mapped in cs:

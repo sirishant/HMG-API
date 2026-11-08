@@ -18,7 +18,9 @@ import java.util.Set;
  *
  * The parse is a shell-word sketch, not a shell: the first word of each command
  * (after ; | & && || newlines, $( and backticks, then, do, else ...), skipping
- * assignments, redirections, words with $ or quotes, case patterns and here-documents.
+ * assignments, redirections, words with $ or quotes, case patterns (a|b) too) and
+ * here-documents. Lines ending in a backslash are read with the next one, and
+ * $((arithmetic)) is skipped whole, nested parentheses and all.
  *
  *   java hmgapi.engine.ScriptCheck <unit-commands.txt> <script|mod dir>...
  */
@@ -62,19 +64,25 @@ public final class ScriptCheck {
     /** functions: ones the script (or a script it sources) defines */
     public static List<String> missing(String script, Set<String> unit, Set<String> functions) {
         Set<String> out = new LinkedHashSet<String>();
-        String heredoc = null;
+        String heredoc = null, held = "";
         for (String raw : script.split("\n")) {
             String line = raw;
             if (heredoc != null) {
                 if (line.trim().equals(heredoc)) heredoc = null;
                 continue;
             }
+            if (continues(line)) {   // a backslash at the end: one command with the next line
+                held += line.substring(0, line.length() - 1) + " ";
+                continue;
+            }
+            line = held + line;
+            held = "";
             int h = line.indexOf("<<");
             if (h >= 0 && line.charAt(Math.min(h + 2, line.length() - 1)) != '<') {
                 String tag = line.substring(h + 2).replaceAll("^[-~]?\\s*['\"]?", "").replaceAll("['\"\\s].*$", "");
                 if (!tag.isEmpty()) heredoc = tag;
             }
-            line = line.replaceAll("\\$\\(\\([^)]*\\)\\)", "0");   // $((arithmetic))
+            line = casePatterns(arithmetic(line));
             for (String seg : commands(stripComment(line))) {
                 String cmd = first(seg);
                 if (cmd == null || SHELL.contains(cmd) || unit.contains(cmd) || functions.contains(cmd)) continue;
@@ -84,6 +92,42 @@ public final class ScriptCheck {
             }
         }
         return new ArrayList<String>(out);
+    }
+
+    /** ends in a backslash that isn't itself escaped (and isn't in a comment) */
+    static boolean continues(String line) {
+        String l = stripComment(line);
+        int n = 0;
+        for (int i = l.length() - 1; i >= 0 && l.charAt(i) == '\\'; i--) n++;
+        return n % 2 == 1 && l.length() == line.length();
+    }
+
+    /** every $((arithmetic)) as 0, its parentheses counted so nested ones stay inside */
+    static String arithmetic(String line) {
+        StringBuilder out = new StringBuilder();
+        int i = 0;
+        while (i < line.length()) {
+            int a = line.indexOf("$((", i);
+            if (a < 0) break;
+            int depth = 2, j = a + 3;
+            for (; j < line.length() && depth > 0; j++) {
+                char c = line.charAt(j);
+                if (c == '(') depth++;
+                else if (c == ')') depth--;
+            }
+            if (depth > 0) break;   // not closed on this line: leave it
+            out.append(line, i, a).append('0');
+            i = j;
+        }
+        return out.append(line.substring(i)).toString();
+    }
+
+    /** case patterns (a|A), ''|-|*[!0-9]*) ...) at the start of a line, after ;; or after "in": dropped */
+    static final java.util.regex.Pattern CASE_PATTERNS = java.util.regex.Pattern
+            .compile("(^\\s*|;;\\s*|\\bin\\s+)[^\\s;()|]+(?:\\s*\\|\\s*[^\\s;()|]+)*\\s*\\)");
+
+    static String casePatterns(String line) {
+        return CASE_PATTERNS.matcher(line).replaceAll("$1");
     }
 
     /** a line's simple commands: split at ; | & && || outside quotes; $( and ` start one, even inside "..." */

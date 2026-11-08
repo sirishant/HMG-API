@@ -251,8 +251,8 @@ final class SettingsTab {
         }
         fact("HMG-API", v);
         fact("License", "AGPL-3.0 (mods have their own)");
-        fact("Source and help", "github.com/VysseCodes/HMG-API");
-        fact("Guides", "github.com/VysseCodes/HMG-API/wiki");
+        fact("Source and help", "github.com/Open-HMG/HMG-API");
+        fact("Guides", "github.com/Open-HMG/HMG-API/wiki");
         fact("Support the project", "ko-fi.com/vyssecodes");
         Ui.text(page, "HMG-API installs through NEMESIS, adb or a USB stick, and every change it makes to the head unit can be "
                 + "put back to stock.", 16, false, Ui.GREY);

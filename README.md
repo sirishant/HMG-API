@@ -23,13 +23,13 @@ changed when it's removed.
 
 ## Install
 
-Download the zip for your route from [Releases](https://github.com/VysseCodes/HMG-API/releases):
+Download the zip for your route from [Releases](https://github.com/Open-HMG/HMG-API/releases):
 a **USB stick** (no computer), **NEMESIS**, or **adb**. Step by step:
-[Installing HMG-API](https://github.com/VysseCodes/HMG-API/wiki/Installing-HMG-API).
+[Installing HMG-API](https://github.com/Open-HMG/HMG-API/wiki/Installing-HMG-API).
 
 HMG-API runs on any Gen5W navigation head unit. Cars with a hook map get everything;
 on others, mods still install and run, and the app's **Car Report** sends what's
-needed to add your car ([Supported cars](https://github.com/VysseCodes/HMG-API/wiki/Supported-cars)).
+needed to add your car ([Supported cars](https://github.com/Open-HMG/HMG-API/wiki/Supported-cars)).
 
 | Car | Region | Software | Hook map |
 |---|---|---|---|
@@ -39,9 +39,9 @@ needed to add your car ([Supported cars](https://github.com/VysseCodes/HMG-API/w
 
 ## Help and requests
 
-[Open an issue](https://github.com/VysseCodes/HMG-API/issues/new/choose): something
+[Open an issue](https://github.com/Open-HMG/HMG-API/issues/new/choose): something
 doesn't work, car or firmware support (the Car Report's QR code fills it in), a new
-hook point, or an idea. Guides are in the [wiki](https://github.com/VysseCodes/HMG-API/wiki).
+hook point, or an idea. Guides are in the [wiki](https://github.com/Open-HMG/HMG-API/wiki).
 
 > **Status: 1.0.2.** Tested on a US Kia EV6 (260507): the hook runtime,
 > mods, the app, buttons, the side panel, Android Auto turn-by-turn and projection
@@ -64,7 +64,7 @@ hook point, or an idea. Guides are in the [wiki](https://github.com/VysseCodes/H
 | `core/client` | `hmgapi-client.jar`: for mods' own apps and services (settings, services, USB folders, notices) |
 | `install/` | installers: `adb/`, `nemesis/`, `usb/` (DSP OTA), shared `common/`; `dev/` has the scripts used while building the core |
 | `core/hookpoints`, `maps/` | the hook point catalogue (stable names; every point and the cars that have it: [docs/hook-points.md](docs/hook-points.md)) and each car's map (`maps/coverage.json`: which points every car has) |
-| `mods/` | `wireless-carplay-aa`, `adb`, `adbd`; `examples/`: `hello`, `hello-service`, `side-panel`, `car-check`, `nemesis-shortcut` and more |
+| `mods/examples` | API examples and test fixtures: `hello`, `hello-service`, `side-panel`, `car-check` and more. The mods HMG-API ships live in their own repos: [Wireless CarPlay + Android Auto](https://github.com/Open-HMG/hmgapi-wireless-carplay-aa), [ADB](https://github.com/Open-HMG/hmgapi-adb), [adbd](https://github.com/Open-HMG/hmgapi-adbd), [NEMESIS in the app menu](https://github.com/Open-HMG/hmgapi-nemesis-shortcut) ([docs/mod-repos.md](docs/mod-repos.md)) |
 | `docs/` | `mod-reference.md` (the `mod.json` reference; `tools/mod-draft.py` drafts one from an existing package), `api-plan.md` (what each community project uses), `vehicle-commands.md`, `micom-map.md`, `car-test.md` (the on-car test session) |
 | `wiki/` | the owners' wiki (GitHub wiki pages: installing, mods, the app, troubleshooting) |
 | `tools/` | `lpatch`, patch makers, build settings |
@@ -90,13 +90,15 @@ Uninstalling puts every file and setting HMG-API or a mod changed back to the st
 
 Everything goes to `out/`. Needs clang + lld, a JDK and the Android SDK (build-tools, a platform `android.jar`). No manufacturer files: the loader links against stand-ins for the head unit's libraries (`core/loader/syslib-stubs.sh`, the same bytes as linking the unit's own). Without HMG-API's signing key (`HMGAPI_KEY`) the app is signed with a throwaway key.
 
-GitHub Actions: `ci.yml` builds and runs every off-car test on each push and pull request; `release.yml` turns a version tag (`v1.0.0-beta.1`) into a signed draft release (keys in repository secrets; bundled mods in `tools/release-mods.txt`); `wiki.yml` publishes `wiki/` to the GitHub wiki.
+GitHub Actions: `ci.yml` builds and runs the off-car tests a push or pull request touches (`tools/test-select.py`; every one weekly), and the fast tier on macOS; `release.yml` turns a version tag (`v1.0.0-beta.1`) into a signed draft release (keys in the `release` environment; the bundled mods, by catalogue id in `tools/release-mods.txt`, come from their catalogue entries' downloads, SHA-256 and signature checked); `wiki.yml` publishes `wiki/` to the GitHub wiki.
 
 ```
 tools/test-all.sh
 ```
 
-Runs the off-car tests under qemu-arm. With stock trees listed in `tools/hook-trees.local`
+Runs the off-car tests, several at once (`-j N`; ARM code under qemu-arm).
+`tools/test-all.sh --fast` runs the ones that need no build and no ARM toolchain,
+on Linux or macOS. With stock trees listed in `tools/hook-trees.local`
 (private), it also tests every hook point on every car (`tools/test-hooks.py`) and the
 on-car mapper against `tools/map-car.py` (`tools/probe-test.py`).
 

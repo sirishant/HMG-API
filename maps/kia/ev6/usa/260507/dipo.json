@@ -24,6 +24,28 @@
   "dipo.carplay": {
     "class": "com.daudio.app.dipo.telechips.CarPlayService"
   },
+  "dipo.carplay.decode_failure": {
+    "method": "onNotifyDecodeFailure",
+    "params": [
+      "int"
+    ],
+    "ret": "void",
+    "static": false
+  },
+  "dipo.carplay.disable_bluetooth": {
+    "method": "onDisableBluetooth",
+    "params": [
+      "java.lang.String"
+    ],
+    "ret": "void",
+    "static": false
+  },
+  "dipo.carplay.force_key_frame": {
+    "method": "forceKeyFrame",
+    "params": [],
+    "ret": "com.daudio.app.dipo.telechips.CarPlayReturn",
+    "static": false
+  },
   "dipo.carplay.iap_message": {
     "method": "oniAPSendMessage",
     "params": [
@@ -40,6 +62,12 @@
       "int"
     ],
     "ret": "int",
+    "static": false
+  },
+  "dipo.carplay.screen_timeout": {
+    "method": "onScreenTimeout",
+    "params": [],
+    "ret": "void",
     "static": false
   },
   "dipo.carplay.session_created": {

@@ -1,5 +1,46 @@
 # Changelog
 
+## Unreleased
+
+### For mod authors
+
+- **The mod SDK** (`hmgapi-mod-sdk-<version>.zip` on each release from 1.0.3, or
+  `./build.sh sdk`): build, test and package a mod in its own repository, with HMG-API's
+  reusable mod workflow (`.github/workflows/mod.yml`) as its CI. See "Building a mod outside
+  this repo" in `docs/mod-reference.md`.
+- **`"nemesis_conflicts"` in mod.json:** the NEMESIS packages a mod's own NEMESIS package
+  refuses to be installed with. HMG-API's NEMESIS sync uses it too, when it lists a mod
+  installed through HMG-API in NEMESIS.
+- **The mods HMG-API ships have their own repos:**
+  [Wireless CarPlay + Android Auto](https://github.com/Open-HMG/hmgapi-wireless-carplay-aa),
+  [ADB](https://github.com/Open-HMG/hmgapi-adb), [adbd](https://github.com/Open-HMG/hmgapi-adbd)
+  and [NEMESIS in the app menu](https://github.com/Open-HMG/hmgapi-nemesis-shortcut). A
+  HMG-API release still carries the wireless, ADB and NEMESIS-menu mods, taken from their
+  catalogue entries (same files, signature checked).
+- **`mknemesismod.sh` and HMG-API's downloads give the same zip bytes on any machine.**
+  Outside UTC and the C locale, the times inside the zip and the order of its files changed.
+- **The mod workflow can install an Android NDK** (`with: ndk: "21.4.7075529"`), for a mod
+  whose `build.sh` compiles native code.
+- **`tools/test-all.sh --fast`:** the off-car tests that need no build and no ARM
+  toolchain, in under a minute on Linux or macOS. The full run is several tests at once
+  (`-j`), and a test that skipped everything shows as `skip`.
+
+### Fixes
+
+- **The head unit no longer restarts at car start when a car sends Digital Key data.** The
+  vehicle service answered the car's `out` array callbacks without the array, which crashed
+  system_server. This could happen with any mod that reads the car (US Niro EV 260507).
+
+### For mod authors
+
+- **Readings for the 12V battery sensor:** `battery12v.sensor_state`,
+  `battery12v.sensor_invalid` and `battery12v.sensor_error` (the sensor's flags) and
+  `battery12v.saver` (the Auxiliary Battery Saver option), raw until their values are
+  understood, and read unsigned as the car sends them (0-255; the getters return a byte).
+  On the US and Canada EV6 and Ioniq 5; `-` on cars whose map lacks them.
+- **The script check reads more shell forms:** continued lines, `a|b)` case patterns and
+  nested parentheses in `$(( ))` no longer show up as missing commands.
+
 ## 1.0.2 (2026-11-04)
 
 ### Fixes

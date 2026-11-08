@@ -35,7 +35,8 @@ import java.util.zip.ZipOutputStream;
  * uninstall.sh unlists everything itself (the engine is gone by then). It never fails
  * an install or a remove: what it can't do it says, and the next sync tries again.
  * The scripts and the incompatible-package list come from /data/hmgapi/nemesis
- * (install.sh, from the payload). ROOT (HMGAPI_ROOT) prefixes every path, for tests.
+ * (install.sh, from the payload); a mod's own list is its mod.json "nemesis_conflicts",
+ * as tools/mknemesismod.sh reads it. ROOT (HMGAPI_ROOT) prefixes every path, for tests.
  */
 final class NemesisSync {
     static final String NEED = "hmgapi@>=1.0";   // mods as NEMESIS packages are new in HMG-API 1.0.0
@@ -90,7 +91,7 @@ final class NemesisSync {
             d.put("package-version", pv);
             d.put("short-desc", "Mod manager for Gen5W head units: hooks, mods, Car Report.");
             d.put("detailed-desc", "HMG-API " + Engine.HMGAPI_VERSION + ", listed here by HMG-API. Uninstalling it here or in HMG-API uninstalls HMG-API.");
-            d.put("depends", depends("hmgapi", "", conflicts));
+            d.put("depends", depends("hmgapi", "", conflicts, null));
             d.put("postinstall", "scripts/postinstall.sh");
             d.put("preuninstall", "scripts/preuninstall.sh");
             if (list(e, nemesis, "hmgapi", descriptor(d), new File(tpl, "scripts"), null, listed.containsKey("hmgapi"))) listed.put("hmgapi", pv);
@@ -126,7 +127,12 @@ final class NemesisSync {
             d.put("package-version", mpv);
             d.put("short-desc", text("HMG-API mod: " + name, 64));
             d.put("detailed-desc", text(name + " " + mver + ", a HMG-API mod, listed here by HMG-API. Uninstalling it here or in HMG-API removes the mod.", 256));
-            d.put("depends", depends(pkg, NEED, conflicts));
+            String dep = depends(pkg, NEED, conflicts, own(e, id, mj.get("nemesis_conflicts")));
+            if (dep.length() > 511) {   // native/meta.c: depends[512] (tools/nemesis-meta.py refuses the same)
+                e.out.add("NEMESIS sync: " + id + ": \"nemesis_conflicts\" makes depends= longer than NEMESIS takes, left out");
+                dep = depends(pkg, NEED, conflicts, null);
+            }
+            d.put("depends", dep);
             d.put("preinstall", "scripts/preinstall.sh");
             d.put("postinstall", "scripts/postinstall.sh");
             d.put("preuninstall", "scripts/preuninstall.sh");
@@ -261,12 +267,41 @@ final class NemesisSync {
         return (x - 1) + ".99." + n;
     }
 
-    /** depends=: the needs, then "!<id>" for each package conflicts.txt lists against this one */
-    static String depends(String pkg, String needs, Map<String, String> conflicts) {
-        StringBuilder b = new StringBuilder(needs);
+    /**
+     * depends=: the needs, then "!<id>" for each package conflicts.txt lists against this one,
+     * then each of the mod's own (mod.json "nemesis_conflicts") not listed yet
+     */
+    static String depends(String pkg, String needs, Map<String, String> conflicts, List<String> own) {
+        List<String> ids = new ArrayList<String>();
         String c = conflicts.get(pkg);
-        if (c != null) for (String id : c.split(",")) if (!id.isEmpty()) b.append(b.length() == 0 ? "" : ",").append('!').append(id);
+        if (c != null) for (String id : c.split(",")) if (!id.isEmpty() && !ids.contains(id)) ids.add(id);
+        if (own != null) for (String id : own) if (!ids.contains(id)) ids.add(id);
+        StringBuilder b = new StringBuilder(needs);
+        for (String id : ids) b.append(b.length() == 0 ? "" : ",").append('!').append(id);
         return b.toString();
+    }
+
+    /**
+     * a mod's "nemesis_conflicts": NEMESIS package ids (tools/nemesis-meta.py's rule). The engine
+     * doesn't check the field at install, so one that isn't an id, or would refuse HMG-API or the
+     * mod itself, is left out here and said.
+     */
+    static List<String> own(Engine e, String id, Object v) {
+        List<String> out = new ArrayList<String>();
+        if (v == null) return out;
+        if (!(v instanceof List)) {
+            e.out.add("NEMESIS sync: " + id + ": \"nemesis_conflicts\" isn't a list, left out");
+            return out;
+        }
+        for (Object o : (List<?>) v) {
+            String s = o instanceof String ? (String) o : null;
+            if (s == null || !s.matches("[A-Za-z0-9_][A-Za-z0-9_.-]{0,63}") || s.contains("..") || s.equals("hmgapi") || s.equals("hmgapi." + id)) {
+                e.out.add("NEMESIS sync: " + id + ": \"nemesis_conflicts\": " + o + " left out (not a NEMESIS package id it can refuse)");
+                continue;
+            }
+            if (!out.contains(s)) out.add(s);
+        }
+        return out;
     }
 
     /** install/nemesis/conflicts.txt: "<package id> <ids,comma-separated>" per line, # comments */

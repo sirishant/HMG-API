@@ -89,6 +89,22 @@
   "dipo.carplay": {
     "class": "com.daudio.app.dipo.telechips.CarPlayService"
   },
+  "dipo.carplay.decode_failure": {
+    "method": "onNotifyDecodeFailure",
+    "params": [
+      "int"
+    ],
+    "ret": "void",
+    "static": false
+  },
+  "dipo.carplay.disable_bluetooth": {
+    "method": "onDisableBluetooth",
+    "params": [
+      "java.lang.String"
+    ],
+    "ret": "void",
+    "static": false
+  },
   "dipo.carplay.force_key_frame": {
     "method": "forceKeyFrame",
     "params": [],
@@ -111,6 +127,12 @@
       "int"
     ],
     "ret": "int",
+    "static": false
+  },
+  "dipo.carplay.screen_timeout": {
+    "method": "onScreenTimeout",
+    "params": [],
+    "ret": "void",
     "static": false
   },
   "dipo.carplay.session_created": {
@@ -334,6 +356,17 @@
     "ret": "void",
     "static": false
   },
+  "dipo.service.play_start": {
+    "method": "a",
+    "params": [
+      "boolean",
+      "int",
+      "int",
+      "boolean"
+    ],
+    "ret": "void",
+    "static": false
+  },
   "dipo.service.player": {
     "field": "fH",
     "type": "com.daudio.app.dipo.e.b",
@@ -395,17 +428,6 @@
   "dipo.service.start_carplay_session": {
     "method": "I",
     "params": [
-      "boolean"
-    ],
-    "ret": "void",
-    "static": false
-  },
-  "dipo.service.play_start": {
-    "method": "a",
-    "params": [
-      "boolean",
-      "int",
-      "int",
       "boolean"
     ],
     "ret": "void",

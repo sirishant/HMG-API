@@ -76,8 +76,9 @@ public final class MemRecipeTest {
         return (b[o] & 0xff) | (b[o + 1] & 0xff) << 8 | (b[o + 2] & 0xff) << 16 | (b[o + 3] & 0xff) << 24;
     }
 
+    /** no arguments: the synthetic libraries; else <stock lib> <patched lib> <recipe> triples (a mod's real recipes) */
     public static void main(String[] a) throws Exception {
-        synthetic();
+        if (a.length == 0) synthetic();
         for (int k = 0; k + 2 < a.length; k += 3) real(a[k], a[k + 1], a[k + 2]);
         System.exit(fail);
     }

@@ -86,6 +86,8 @@ the HMG-API app, and hooks see new values at once.
 | `steering.angle` | degrees, left negative | telematics CAN service (`getSasAngleVal`) |
 | `pedal.accel`, `brake.pressure` | raw | telematics CAN service |
 | `battery12v.soc` | % | telematics CAN service (`getBatSoc`) |
+| `battery12v.sensor_state`, `battery12v.sensor_invalid`, `battery12v.sensor_error` | raw | the 12V battery sensor's flags, telematics CAN service (`getBATSNSRState`, `getBATSNSRInvalid`, `getBATSNSRError`); meanings not worked out yet |
+| `battery12v.saver` | raw | the Auxiliary Battery Saver option, telematics CAN service (`get_BAT_AuxBattOpt`) |
 | `hv.soc` | %, 0.5 steps | HEV service, `DISPLAY_SOC` |
 | `hv.health`, `hv.ready`, `hv.conditioning`, `charging` | raw | telematics CAN / HEV service |
 | `hv.conditioning_active` | 0/1 | the car's battery conditioning indicator (body control `getBattCondIndSta`): conditioning now |
@@ -325,6 +327,12 @@ when its mod is turned off ...): the list, arguments and guards are in
 tools/mkmodpkg.sh my-mod <your key>
 ```
 
+A mod that clashes with a NEMESIS package (both change the same files or settings) lists
+it: `"nemesis_conflicts": ["wireless.projection"]`. The mod's NEMESIS package
+(`tools/mknemesismod.sh`) then refuses to install while that package is there, and the
+other way round. A mod installed through HMG-API gets the same refusal when HMG-API lists
+it in NEMESIS (engine `nemesis-sync`). The engine's own install ignores the field.
+
 Your key (`java -cp out/engine-host hmgapi.engine.Signing keygen <file>`) signs every
 version. The mod's id comes with a UUID made from it, and only packages signed
 with the same key update it. Owners install from a USB stick (`HMGAPI/updates/`)
@@ -338,3 +346,42 @@ optional `"repo": "https://…"` in `mod.json` is the link the catalogue shows f
 your source. Keep your key private and backed up: a lost key
 means a new UUID, and owners would have to remove the old mod before installing
 yours again.
+
+## Building a mod outside this repo
+
+A mod in its own repository builds with the HMG-API mod SDK, `hmgapi-mod-sdk-<version>.zip`
+on each HMG-API release from 1.0.3 (or `./build.sh sdk` here, into `out/dist`). Put the
+mod in a folder named by its id (`my-mod/mod.json`), with `README.md`, `LICENSE` and
+`.github/` at the repository root: everything in the mod folder but `build.sh`,
+`test.sh`, `src`, `tools` and `native` goes into the package.
+
+Pin the SDK in `hmgapi-sdk.json` at the root, and call HMG-API's mod workflow from
+`.github/workflows/ci.yml` (`jobs: mod: uses: Open-HMG/HMG-API/.github/workflows/mod.yml@<same pin>`):
+
+| Pin | `hmgapi-sdk.json` | Workflow at |
+|---|---|---|
+| until 1.0.3 | `{"ref": "<HMG-API commit SHA>"}`: built from that commit | `@<that SHA>` |
+| from 1.0.3 | `{"version": "1.0.3", "sha256": "<the zip's, from SHA256SUMS>"}` | `@v1.0.3` |
+
+The workflow checks the mod's `"hmgapi"` floor (at or below the SDK; every
+`hooks.points` entry in that release's points), builds it, runs its `test.sh` and
+`tools/*/test.sh`, checks its scripts, and packages it with a throwaway key. Your
+release workflow signs with your own key. A new hook point is a HMG-API pull request
+first (`docs/mod-repos.md`, section 4).
+
+A mod whose `build.sh` compiles native code can ask for an Android NDK with
+`with: ndk: "<version>"`, as `sdkmanager` names it (hmgapi-adbd: `21.4.7075529`, r21e).
+The workflow installs it before the build, with `NDK` and `ANDROID_NDK_HOME` pointing at it.
+
+On your machine, with the SDK unpacked in `$HMGAPI_SDK` and the Android SDK in `ANDROID_HOME`:
+
+```
+$HMGAPI_SDK/bin/build-mod.sh my-mod out/build/my-mod
+HMGAPI_SDK=$HMGAPI_SDK HMGAPI_MOD_BUILD=out/build/my-mod sh my-mod/test.sh
+$HMGAPI_SDK/bin/check-scripts.sh my-mod
+$HMGAPI_SDK/bin/mkmodpkg.sh my-mod <your key>
+```
+
+A `test.sh` sources `$HMGAPI_SDK/test/lib.sh` for `check`, `has`, `eng` (the engine on
+your machine, on a fake head unit in `$R`) and `tree`. `mods/examples/hello/test.sh` is
+the template. The README in the SDK lists the rest.

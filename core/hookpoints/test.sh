@@ -6,7 +6,7 @@
 cd "$(dirname "$0")/../.."
 python3 tools/check-maps.py --rebuild || exit 1
 python3 tools/mkhookdoc.py --check || exit 1
-[ -f tools/hook-trees.local ] || { echo "ok    no tools/hook-trees.local: coverage and the on-car mapper not tested"; exit 0; }
+[ -f tools/hook-trees.local ] || { echo "skip  coverage and the on-car mapper (no tools/hook-trees.local)"; exit 0; }
 python3 tools/test-hooks.py || exit 1
 echo "ok    hook coverage on every car"
 python3 tools/probe-test.py || exit 1

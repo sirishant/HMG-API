@@ -7,7 +7,7 @@ set -e
 cd "$(dirname "$0")/../.."
 SH=${UNIT_SH:-sh}
 CP=$(mktemp -d); T=$(mktemp -d); trap 'rm -rf "$T" "$CP"' EXIT
-javac --release 8 -Xlint:-options -nowarn -d "$CP" core/runtime/java/hmgapi/engine/*.java 2>/dev/null
+sh tools/engine-classes.sh "$CP" 2>/dev/null
 R=$T/root S=$T/stick
 fail=0
 check() { if [ "$2" = "$3" ]; then echo "ok    $1"; else echo "FAIL  $1: wanted [$2], got [$3]"; fail=1; fi; }
@@ -68,10 +68,10 @@ nem() { set +e; out=$(cd $T && env PATH="$T/bin:$PATH" ROOT=$R UNIT_SH="$SH" HMG
 sig keygen $T/author.key > /dev/null
 sig keygen $T/other.key > /dev/null
 EV6='[{"model": ["CVEV"], "region": "USA", "firmware": "260507"}]'
-mk() {   # mk <version> <prop value> <key> [system json]
+mk() {   # mk <version> <prop value> <key> [system json] [more mod.json fields, each ending in ", "]
     rm -rf $T/m; mkdir -p $T/m/files
-    printf '{"id": "demo", "name": "Demo \\"quoted\\" mod", "version": "%s", "hmgapi": ">=0.1.0", "description": "A test mod.", "system": %s}\n' \
-        "$1" "${4:-$EV6}" > $T/m/mod.json
+    printf '{"id": "demo", "name": "Demo \\"quoted\\" mod", "version": "%s", "hmgapi": ">=0.1.0", "description": "A test mod.", %s"system": %s}\n' \
+        "$1" "$5" "${4:-$EV6}" > $T/m/mod.json
     printf '{"changes": [{"type": "props", "path": "/system/build.prop", "set": {"persist.demo": "%s"}, "stock": "any"},\n {"type": "add", "path": "/system/etc/permissions/demo.xml", "src": "files/demo.xml"}]}\n' "$2" > $T/m/patches.json
     echo "<permissions/>" > $T/m/files/demo.xml
     sig sign $T/m $3 > /dev/null
@@ -92,9 +92,21 @@ printf 'hmgapi.demo  hmgapi\n' > $T/conflicts.txt
 set +e; o=$(HMGAPI_NEMESIS_CONFLICTS=$T/conflicts.txt tools/mknemesismod.sh $T/demo.zip $T/dist 2>&1); r=$?; set -e
 has "a mod package refusing the HMG-API it needs: refused" "both needs and refuses hmgapi" "$o"
 check "... and it fails" 1 "$([ $r -ne 0 ] && echo 1)"
-check "the real list: the wireless mod refuses wireless.projection and projection.tbt" "hmgapi@>=1.0,!wireless.projection,!projection.tbt" \
-    "$(tools/nemesis-meta.py depends hmgapi.wireless-carplay-aa 'hmgapi@>=1.0')"
-check "... the adb mod refuses adb.tcp" "hmgapi@>=1.0,!adb.tcp" "$(tools/nemesis-meta.py depends hmgapi.adb 'hmgapi@>=1.0')"
+# a mod's own list: mod.json "nemesis_conflicts" (inside the signed package, so every build of it agrees)
+NC='"nemesis_conflicts": ["mine.pkg", "other.pkg"], '
+mk 1.0.0 on $T/author.key "$EV6" "$NC"
+check "the mod's nemesis_conflicts go in depends as !id" "hmgapi@>=1.0,!mine.pkg,!other.pkg" "$(val depends)"
+printf 'hmgapi.demo  other.pkg,legacy.pkg\n' > $T/conflicts.txt
+check "... with conflicts.txt's: both, each once" "hmgapi@>=1.0,!other.pkg,!legacy.pkg,!mine.pkg" \
+    "$(HMGAPI_NEMESIS_CONFLICTS=$T/conflicts.txt tools/mknemesismod.sh $T/demo.zip $T/dist > /dev/null; val depends)"
+for bad in '"nemesis_conflicts": ["not an id"], ' '"nemesis_conflicts": "one.pkg", '; do
+    mk 1.0.0 on $T/author.key "$EV6" "$bad" 2>/dev/null || true
+    set +e; o=$(tools/mknemesismod.sh $T/demo.zip $T/dist 2>&1); r=$?; set -e
+    has "nemesis_conflicts $bad: refused" "nemesis_conflicts" "$o"
+done
+mk 1.0.0 on $T/author.key "$EV6" '"nemesis_conflicts": ["hmgapi"], ' 2>/dev/null || true
+set +e; o=$(tools/mknemesismod.sh $T/demo.zip $T/dist 2>&1); r=$?; set -e
+has "... refusing the HMG-API it needs: refused" "both needs and refuses hmgapi" "$o"
 mk 1.0.0 on $T/author.key
 check "os from the mod's system" "CVEV.USA.*.260507" "$(val os)"
 check "name, with no double quotes left in it" "Demo 'quoted' mod" "$(val name)"
@@ -109,14 +121,14 @@ check "the stick says how to uninstall" yes "$(unzip -p $T/dist/demo-1.0.0-nemes
 check "a mod with no system: os any" any "$(mk 1.0.0 on $T/author.key '[]'; val os)"
 check "system as one object, platform only: os any" any "$(mk 1.0.0 on $T/author.key '{"platform": ["tcc803x"]}'; val os)"
 check "product prefixes: os globs" "CVEV.USA.*,NEEV.CAN.*" "$(mk 1.0.0 on $T/author.key '{"product": ["CVEV.USA.", "NEEV.CAN."]}'; val os)"
-set +e; o=$(tools/mknemesismod.sh mods/adb/mod.json $T/dist 2>&1); r=$?; set -e
+set +e; o=$(tools/mknemesismod.sh mods/examples/hello/mod.json $T/dist 2>&1); r=$?; set -e
 check "not a zip mod package: refused" 1 "$([ $r -ne 0 ] && echo 1)"
 rm -rf $T/u; mkdir $T/u; cp mods/examples/hello/mod.json $T/u/; (cd $T/u && zip -q $T/u.zip mod.json)
 set +e; o=$(tools/mknemesismod.sh $T/u.zip $T/dist 2>&1); r=$?; set -e
 has "an unsigned mod: refused" "isn't signed" "$o"
 
-# ---- install
-mk 1.0.0 on $T/author.key
+# ---- install (a mod.json with nemesis_conflicts: the engine ignores the field)
+mk 1.0.0 on $T/author.key "$EV6" "$NC"
 mv $R/system/bin/hmgapid $R/system/bin/hmgapid.keep
 nem install $P
 check "no HMG-API: preinstall refuses" 1 $rc
@@ -163,12 +175,17 @@ check "... its settings kept" '{"keep": true}' "$(cat $R/data/hmgapi/settings/de
 check "... package gone" "" "$(ls $R/data/nemesis/apps)"
 
 # an uninstall with a stage left by an interrupted install still uninstalls
-nem install $P
-mkdir -p $R/data/local/tmp/nemesis/stage/hmgapi.demo; unzip -q -o $P -d $R/data/local/tmp/nemesis/stage/hmgapi.demo
-nem uninstall hmgapi.demo
-check "uninstall with a stale stage: still removes the mod" "" "$(mods)"
-check "... back to stock" "$STOCK" "$(tree)"
-rm -rf $R/data/local/tmp/nemesis/stage/hmgapi.demo
+# (preuninstall tells an uninstall from an update by /proc/$PPID/cmdline, as on the unit)
+if [ -f /proc/self/cmdline ]; then
+    nem install $P
+    mkdir -p $R/data/local/tmp/nemesis/stage/hmgapi.demo; unzip -q -o $P -d $R/data/local/tmp/nemesis/stage/hmgapi.demo
+    nem uninstall hmgapi.demo
+    check "uninstall with a stale stage: still removes the mod" "" "$(mods)"
+    check "... back to stock" "$STOCK" "$(tree)"
+    rm -rf $R/data/local/tmp/nemesis/stage/hmgapi.demo
+else
+    echo "skip  uninstall with a stale stage (no /proc here)"
+fi
 
 # removed in the HMG-API app first: the package uninstalls without touching anything
 nem install $P

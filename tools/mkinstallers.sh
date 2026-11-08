@@ -13,7 +13,8 @@
 #                           (tools/mknemesismod.sh)
 # Every one carries the same payload (out/payload) and ends in install/common/install.sh.
 # HMGAPI/updates gets the signed release (tools/mkrelease.sh, if the release key is
-# here) and every signed mod package in out/packages (tools/mkmodpkg.sh).
+# here) and every signed mod package in out/packages (the release fills it with
+# tools/catalog.py fetch; tools/mkmodpkg.sh for a local build).
 set -e
 cd "$(dirname "$0")/.."
 ./build.sh payload >/dev/null
@@ -25,8 +26,10 @@ rm -f "$D/hmgapi-$V-usb.zip" "$D/hmgapi-$V-nemesis.zip" "$D/hmgapi-$V-nemesis-pa
 PV=$(tools/nemesis-version.py "$V")
 W=$(mktemp -d); trap 'rm -rf "$W"' EXIT
 
-# zipdir <dir> <zip>: fixed order and times, so the same input gives the same zip
-zipdir() { (cd "$1" && find . -type f | TZ=UTC xargs touch -d 2026-01-01T00:00:00 && find . -type f | sed 's#^\./##' | sort | zip -q -X -D "$2" -@); }
+# zipdir <dir> <zip>: fixed order and times, so the same input gives the same zip on any machine
+# (UTC and the C locale for all of it: zip writes local times, sort follows the locale).
+# tools/mknemesismod.sh has the same line (tools/sdk-test.sh checks they match)
+zipdir() { (cd "$1" && export TZ=UTC LC_ALL=C && find . -type f | xargs touch -d 2026-01-01T00:00:00 && find . -type f | sed 's#^\./##' | sort | zip -q -X -D "$2" -@); }
 readme() { sed "s/@VERSION@/$V/" "$1" > "$2"; }
 
 # the NEMESIS package (id hmgapi), and the stick that installs it: NEMESIS's USB handler

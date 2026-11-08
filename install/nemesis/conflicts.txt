@@ -3,6 +3,10 @@
 # as "!<id>" (04-Packages.md §2): NEMESIS then refuses to install either while the
 # other is installed (exit 23), and the owner uninstalls one first.
 # <package id>  <conflicting package ids, comma-separated>
+# A mod's own list is its mod.json "nemesis_conflicts"; tools/mknemesismod.sh and engine
+# nemesis-sync on the unit read both. The two mod rows below are for the mods' packages from
+# before that field (v1.0.2's wireless-carplay-aa 2.1.0 and adb 1.0.0, still the bundled and
+# catalogue versions): drop each once no version without the field is in use.
 #
 # HMG Leafia Plus 1.x: replaces app_process (HMG-API's zygote wrapper), the projection
 # apps HMG-API's hooks are mapped on, featurexml and the Wi-Fi permissions.

@@ -12,7 +12,7 @@ import subprocess, sys
 import qrcode
 from qrcode.util import QRData, MODE_8BIT_BYTE as MODE_8BIT
 fail = 0
-url = 'https://github.com/VysseCodes/HMG-API/issues/new?labels=car-report&title=Car+Report%3A+EV6+CAN+260206&body='
+url = 'https://github.com/Open-HMG/HMG-API/issues/new?labels=car-report&title=Car+Report%3A+EV6+CAN+260206&body='
 for n in (1, 10, 17, 40, 100, 150, 230, 300, 420, 600, 900):
     text = (url + 'x' * n)[:n] if n < len(url) else url + 'y' * (n - len(url))
     out = subprocess.run(['java', '-cp', sys.argv[1], 'hmgapi.app.QrCode', text], capture_output=True, text=True, check=True).stdout.split()

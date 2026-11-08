@@ -1,6 +1,6 @@
 # Getting help and asking for things
 
-Open an [issue](https://github.com/VysseCodes/HMG-API/issues/new/choose) and pick a form:
+Open an [issue](https://github.com/Open-HMG/HMG-API/issues/new/choose) and pick a form:
 
 | Form | For |
 |---|---|
@@ -17,4 +17,4 @@ Before you post:
   needs them.
 
 Security problems: please report them privately (see the
-[security policy](https://github.com/VysseCodes/HMG-API/security/policy)), not as an issue.
+[security policy](https://github.com/Open-HMG/HMG-API/security/policy)), not as an issue.

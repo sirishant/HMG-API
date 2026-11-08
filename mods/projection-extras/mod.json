@@ -2,7 +2,7 @@
   "id": "projection-extras",
   "name": "Projection extras",
   "version": "1.1.6",
-  "hmgapi": ">=1.0.5",
+  "hmgapi": ">=1.0.10",
   "authors": [
     "sirishant"
   ],

@@ -21,8 +21,13 @@ press SOS.
    tools/mkinstallers.sh
    ```
    ```
-   for m in mods/wireless-carplay-aa mods/examples/car-check mods/examples/side-panel mods/examples/hello-service; do tools/mkmodpkg.sh $m ~/hmg-private/keys/mods/vyssecodes.key; done
+   for m in mods/examples/car-check mods/examples/side-panel mods/examples/hello-service; do tools/mkmodpkg.sh $m ~/hmg-private/keys/mods/vyssecodes.key; done
    ```
+   ```
+   tools/catalog.py fetch out/packages wireless-carplay-aa
+   ```
+   The wireless mod comes from its release (its catalogue entry, SHA-256 and signature
+   checked); to test a change to it, package it in its own repo instead.
    The mod packages are in `out/packages/`, the installers in `out/dist/`.
 2. Laptop with adb over USB (the `adb` mod; adb over Wi-Fi is its own switch). Never
    the car's own ADB TCP switch (Engineering Mode, or NEMESIS's Enable ADB): it puts

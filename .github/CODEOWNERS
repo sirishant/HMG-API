@@ -1,0 +1,13 @@
+# Who reviews what. The main branch requires a code owner's review.
+# Everything else: one Open-HMG maintainer.
+*                   @Open-HMG/maintainers
+
+# Root, signing, /system writes and CI: the maintainer.
+/.github/           @VysseCodes
+/core/hmgapid/      @VysseCodes
+/core/zygote/       @VysseCodes
+/core/loader/       @VysseCodes
+/install/           @VysseCodes
+/tools/lpatch/      @VysseCodes
+/SECURITY.md        @VysseCodes
+/CLAUDE.md          @VysseCodes

@@ -8,9 +8,9 @@
   "license": "AGPL-3.0",
   "uuid": "7251ce71-a146-8a1e-958b-dbffc6af7359",
   "version": "1.0.0",
-  "repo": "https://github.com/VysseCodes/HMG-API/tree/main/mods/adb",
-  "download": "https://github.com/VysseCodes/HMG-API/releases/download/v1.0.0-beta.6/adb-1.0.0.zip",
-  "sha256": "19ed4040ec0150a770ee2db1980b489901708da9f37e30090edeae00f980da87",
+  "repo": "https://github.com/Open-HMG/hmgapi-adb",
+  "download": "https://github.com/Open-HMG/HMG-API/releases/download/v1.0.2/adb-1.0.0.zip",
+  "sha256": "e5ff1bcaf300f8b39debb877098e5b46d01235c497ee0551a5f7ba0dd095fe01",
   "hmgapi": ">=1.0.0",
   "system": {
     "platform": [

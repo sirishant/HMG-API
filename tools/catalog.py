@@ -13,6 +13,9 @@ carries the list. The wiki's Community mods page is made from the entries.
         its SHA-256 and signature and that it is the mod and version the entry says;
         --base refuses an entry whose author key changed, a version that went back, and
         changes to authors who aren't the ones the changed entries name
+  tools/catalog.py fetch <dir> <id>...
+        each entry's download into <dir>/<id>-<version>.zip, after the same checks as
+        check --download (the release bundles the mods tools/release-mods.txt names so)
   tools/catalog.py wiki <out.md>
         the Community mods page
 """
@@ -82,8 +85,12 @@ _engine = None
 
 
 def verify(moddir, uuid=None):
-    """hmgapi.engine.Signing verify, the same code the head unit runs"""
+    """hmgapi.engine.Signing verify, the same code the head unit runs (compiled once per
+    run; HMGAPI_ENGINE_CLASSES: already compiled from this repo's engine, as the tests do)"""
     global _engine
+    given = os.environ.get('HMGAPI_ENGINE_CLASSES', '')
+    if _engine is None and given and os.path.isdir(os.path.join(given, 'hmgapi', 'engine')):
+        _engine = given
     if _engine is None:
         _engine = tempfile.mkdtemp(prefix='catalog-engine-')
         src = [os.path.join(REPO, 'core/runtime/java/hmgapi/engine', f)
@@ -275,28 +282,9 @@ def cmd_check(a):
         work = tempfile.mkdtemp(prefix='catalog-dl-')
         try:
             for n in todo:
-                e = es[n]
-                z = os.path.join(work, n + '.zip')
-                try:
-                    fetch(e['download'], z)
-                except Exception as x:
-                    p.append(f'catalog/{n}.json: can\'t download {e["download"]}: {x}')
-                    continue
-                with open(z, 'rb') as f:
-                    sha = hashlib.sha256(f.read()).hexdigest()
-                if sha != e['sha256']:
-                    p.append(f'catalog/{n}.json: the download\'s SHA-256 is {sha}, the entry says {e["sha256"]}')
-                    continue
-                d = unpack(z, os.path.join(work, n))
-                ok, out = verify(d, e['uuid'])
-                if not ok:
-                    p.append(f'catalog/{n}.json: {out}')
-                    continue
-                man = load(os.path.join(d, 'META-HMGAPI', 'manifest.json'))
-                if (man['id'], man['version']) != (e['id'], e['version']):
-                    p.append(f'catalog/{n}.json: the download is {man["id"]} {man["version"]}, the entry says {e["id"]} {e["version"]}')
-                    continue
-                print(f'ok    {n} {e["version"]}: downloaded, SHA-256 and signature match (author key {e["uuid"]})')
+                z, why = download(n, es[n], work)
+                if why:
+                    p.append(why)
         finally:
             shutil.rmtree(work, ignore_errors=True)
     for x in p:
@@ -304,6 +292,56 @@ def cmd_check(a):
     if p:
         sys.exit(1)
     print(f'ok    {len(es)} catalogue entries, {len(au.get("authors", {}))} authors')
+
+
+def download(n, e, work):
+    """an entry's download in work/: its SHA-256, signature (by the entry's author key), id
+    and version checked. The zip's path, or None and why not."""
+    z = os.path.join(work, n + '.zip')
+    try:
+        fetch(e['download'], z)
+    except Exception as x:
+        return None, f'catalog/{n}.json: can\'t download {e["download"]}: {x}'
+    with open(z, 'rb') as f:
+        sha = hashlib.sha256(f.read()).hexdigest()
+    if sha != e['sha256']:
+        return None, f'catalog/{n}.json: the download\'s SHA-256 is {sha}, the entry says {e["sha256"]}'
+    d = unpack(z, os.path.join(work, n))
+    ok, out = verify(d, e['uuid'])
+    if not ok:
+        return None, f'catalog/{n}.json: {out}'
+    man = load(os.path.join(d, 'META-HMGAPI', 'manifest.json'))
+    if (man['id'], man['version']) != (e['id'], e['version']):
+        return None, f'catalog/{n}.json: the download is {man["id"]} {man["version"]}, the entry says {e["id"]} {e["version"]}'
+    print(f'ok    {n} {e["version"]}: downloaded, SHA-256 and signature match (author key {e["uuid"]})')
+    return z, None
+
+
+# ---- fetch
+
+
+def cmd_fetch(a):
+    es, authors = entries(), load(AUTHORS).get('authors', {})
+    p = [f'{n}: not in the catalogue (no catalog/{n}.json)' for n in a.ids if n not in es]
+    for n in a.ids:
+        if n in es:
+            p += check_entry(n, es[n], authors)
+    if not p:
+        os.makedirs(a.dir, exist_ok=True)
+        work = tempfile.mkdtemp(prefix='catalog-fetch-')
+        try:
+            for n in a.ids:
+                z, why = download(n, es[n], work)
+                if why:
+                    p.append(why)
+                else:
+                    shutil.copyfile(z, os.path.join(a.dir, f'{n}-{es[n]["version"]}.zip'))
+        finally:
+            shutil.rmtree(work, ignore_errors=True)
+    for x in p:
+        print('FAIL  ' + x)
+    if p:
+        sys.exit(1)
 
 
 # ---- wiki
@@ -377,6 +415,9 @@ def main():
     s = sub.add_parser('check')
     s.add_argument('--download', action='store_true')
     s.add_argument('--base')
+    s = sub.add_parser('fetch')
+    s.add_argument('dir')
+    s.add_argument('ids', nargs='+')
     s = sub.add_parser('wiki')
     s.add_argument('out')
     a = ap.parse_args()
@@ -384,8 +425,8 @@ def main():
         die('--download is an https:// link')
     if a.cmd == 'add' and a.repo and not HTTPS.match(a.repo):
         die('--repo is an https:// link')
-    {'add': cmd_add, 'check': cmd_check, 'wiki': cmd_wiki}[a.cmd](a)
-    if _engine:
+    {'add': cmd_add, 'check': cmd_check, 'fetch': cmd_fetch, 'wiki': cmd_wiki}[a.cmd](a)
+    if _engine and _engine != os.environ.get('HMGAPI_ENGINE_CLASSES'):   # ours, not the caller's
         shutil.rmtree(_engine, ignore_errors=True)
 
 

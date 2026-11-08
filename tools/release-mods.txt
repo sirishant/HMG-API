@@ -1,5 +1,8 @@
-# Mods a HMG-API release carries (signed with the mod author's key, in HMGAPI/updates
-# on the USB download and as their own downloads). Test and example mods stay in the repo.
-mods/wireless-carplay-aa
-mods/adb
-mods/examples/nemesis-shortcut
+# Mods a HMG-API release carries (in HMGAPI/updates on the USB download, in the NEMESIS
+# stick, and as their own downloads), by catalogue id. Each one's catalog/<id>.json is its
+# pin: the release fetches that entry's download and checks its SHA-256 and signature
+# (tools/catalog.py fetch). Bumping a bundled mod is the catalogue PR for its release.
+# The mods live in their own repos (docs/mod-repos.md); core signs none of them.
+wireless-carplay-aa
+adb
+nemesis-shortcut

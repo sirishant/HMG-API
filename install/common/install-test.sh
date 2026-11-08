@@ -113,7 +113,8 @@ check "update keeps the owner's settings" '{"updates": true}' "$(cat $R/data/hmg
 
 # the app's install with Android up (stand-ins for pm and the rest)
 rm -f $R/data/hmgapi/public/HmgApi.apk; calls >/dev/null
-FAKE_BOOT=1 FAKE_PM='Failure [INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES]' HMGAPI_TEST_ANDROID=1 run $P/install.sh $P
+# export, then unset: VAR=1 run (a function) leaves VAR set after it in bash 3.2's sh (macOS)
+export FAKE_BOOT=1 FAKE_PM='Failure [INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES]' HMGAPI_TEST_ANDROID=1; run $P/install.sh $P; unset FAKE_BOOT FAKE_PM HMGAPI_TEST_ANDROID
 has "app install failed: said, with the ways to fix it" "the HMG-API app didn't install: Failure [INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES]. It's tried again at the next restart; or NEMESIS Manager > HMG-API > Launch" "$out"
 check "... kept waiting, so the next restart tries again" yes "$([ -f $R/data/hmgapi/public/HmgApi.apk ] && echo yes)"
 c=$(calls)
@@ -121,7 +122,7 @@ has "... pm ran with sys.boot_completed 0" "setprop sys.boot_completed 0
 pm install -r $P/HmgApi.apk
 setprop sys.boot_completed 1" "$c"
 has "... a toast on the screen" "Restart the head unit to try again, or use Launch in NEMESIS Manager" "$c"
-FAKE_BOOT=1 HMGAPI_TEST_ANDROID=1 run $P/install.sh $P
+export FAKE_BOOT=1 HMGAPI_TEST_ANDROID=1; run $P/install.sh $P; unset FAKE_BOOT HMGAPI_TEST_ANDROID
 has "app install works: said" "installed the HMG-API app" "$out"
 check "... nothing left waiting" no "$([ -f $R/data/hmgapi/public/HmgApi.apk ] && echo yes || echo no)"
 calls >/dev/null
@@ -136,24 +137,24 @@ has "... and said installed" "installed the HMG-API app" "$out"
 
 # open.sh: open the app, installing it first if it's missing
 calls >/dev/null
-FAKE_BOOT=1 FAKE_HAVE_APP=1 run $R/data/hmgapi/open.sh
+export FAKE_BOOT=1 FAKE_HAVE_APP=1; run $R/data/hmgapi/open.sh; unset FAKE_BOOT FAKE_HAVE_APP
 check "open.sh: app there, opened (quietly: Manager would toast any output)" "" "$out"
 check "... nothing installed" "pm path hmgapi.app
 am start -n hmgapi.app/.MainActivity" "$(calls)"
 cp $P/HmgApi.apk $R/data/hmgapi/public/HmgApi.apk
-FAKE_BOOT=1 run $R/data/hmgapi/open.sh
+export FAKE_BOOT=1; run $R/data/hmgapi/open.sh; unset FAKE_BOOT
 check "open.sh: app missing, installed from the kept copy, then opened" "HMG-API: installed the app" "$out"
 has "... pm on the kept copy, then am start" "pm install -r $R/data/hmgapi/HmgApi.apk
 setprop sys.boot_completed 1
 am start -n hmgapi.app/.MainActivity" "$(calls)"
 check "... nothing left waiting" no "$([ -f $R/data/hmgapi/public/HmgApi.apk ] && echo yes || echo no)"
-FAKE_BOOT=1 FAKE_PM='Failure [X]' run $R/data/hmgapi/open.sh
+export FAKE_BOOT=1 FAKE_PM='Failure [X]'; run $R/data/hmgapi/open.sh; unset FAKE_BOOT FAKE_PM
 check "open.sh: install fails, says why" "1 HMG-API: the app didn't install: Failure [X]" "$rc $out"
 check "... once (Manager toasts the output; no toast of its own)" "" "$(calls | grep TOAST || true)"
 run $R/data/hmgapi/open.sh
 check "open.sh: Android not up" "1 HMG-API: Android isn't up yet: try again in a minute" "$rc $out"
 mv $R/data/hmgapi/HmgApi.apk $T/apk.away
-FAKE_BOOT=1 run $R/data/hmgapi/open.sh
+export FAKE_BOOT=1; run $R/data/hmgapi/open.sh; unset FAKE_BOOT
 has "open.sh: no copy of the app" "there's no copy to install: install HMG-API again" "$out"
 mv $T/apk.away $R/data/hmgapi/HmgApi.apk
 
@@ -179,7 +180,7 @@ check "waiting app removed" no "$([ -f $R/data/hmgapi/public/HmgApi.apk ] && ech
 
 run $P/install.sh $P
 mkdir -p $R/data/nemesis/apps/hmgapi/scripts; printf '[nemesis]\nid=hmgapi\n' > $R/data/nemesis/apps/hmgapi/NEMESIS.data; : > $T/nemesis.log
-HMGAPI_FROM_NEMESIS=1 run $R/data/hmgapi/uninstall.sh
+export HMGAPI_FROM_NEMESIS=1; run $R/data/hmgapi/uninstall.sh; unset HMGAPI_FROM_NEMESIS
 check "uninstall run by NEMESIS: NEMESIS isn't called (it's unlisting it already)" "" "$(cat $T/nemesis.log)"
 rm -rf $R/data/nemesis/apps/hmgapi
 run $P/install.sh $P

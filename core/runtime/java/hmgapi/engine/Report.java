@@ -33,7 +33,7 @@ import java.util.regex.Pattern;
 final class Report {
     private Report() {}
 
-    static final String REPO = "VysseCodes/HMG-API";
+    static final String REPO = "Open-HMG/HMG-API";
     static final String[] USB = { "/storage/usb0", "/storage/usb1", "/storage/usb2" };
 
     @SuppressWarnings("unchecked")

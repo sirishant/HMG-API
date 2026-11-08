@@ -7,12 +7,17 @@
 # Makes, in the out dir:
 #   <id>-<v>-nemesis.zip          for a USB stick, laid out like NEMESIS's own downloads
 #   <id>-<v>-nemesis-package.zip  the package itself (Package Store, nemesis install)
+# In the mod SDK (bin/mknemesismod.sh) the templates are its nemesis/ folder and the out dir
+# defaults to ./out/dist.
 set -e
-cd "$(dirname "$0")/.."
+HERE=$(cd "$(dirname "$0")" && pwd)
 Z=${1:?usage: mknemesismod.sh <signed mod zip> [out dir]}
 D=${2:-$PWD/out/dist}
-case $Z in /*) ;; *) Z=$OLDPWD/$Z ;; esac
-case $D in /*) ;; *) D=$OLDPWD/$D ;; esac
+case $Z in /*) ;; *) Z=$PWD/$Z ;; esac
+case $D in /*) ;; *) D=$PWD/$D ;; esac
+if [ -d "$HERE/../nemesis/mod" ]; then N_SRC=$HERE/../nemesis   # the mod SDK
+else cd "$HERE/.."; N_SRC=install/nemesis; [ -n "$2" ] || D=$PWD/out/dist   # this repo: out/dist by default
+fi
 [ -f "$Z" ] || { echo "no mod package at $Z"; exit 1; }
 W=$(mktemp -d); trap 'rm -rf "$W"' EXIT
 unzip -q "$Z" -d "$W/mod"
@@ -67,10 +72,11 @@ for k, v in (("ID", mid), ("VERSION", ver), ("PACKAGE_ID", pkg), ("NAME", name),
 PY
 var() { grep "^$1=" "$W/vars" | cut -d= -f2-; }
 ID=$(var ID); V=$(var VERSION); PKG=$(var PACKAGE_ID)
-PV=$(tools/nemesis-version.py "$V")
+PV=$("$HERE/nemesis-version.py" "$V")
 # depends=: HMG-API 1.0 or newer (mods as NEMESIS packages are new in 1.0.0), and "!<id>" for each
-# NEMESIS package that changes what this mod changes (install/nemesis/conflicts.txt)
-DEP=$(tools/nemesis-meta.py depends "$PKG" 'hmgapi@>=1.0')
+# NEMESIS package that changes what this mod changes (mod.json "nemesis_conflicts", and in this
+# repo install/nemesis/conflicts.txt)
+DEP=$("$HERE/nemesis-meta.py" depends "$PKG" 'hmgapi@>=1.0' --mod "$M/mod.json")
 echo "DEPENDS=$DEP" >> "$W/vars"
 # fill a template: @KEY@ from the vars (and PACKAGE_VERSION), any character in the values
 fill() { python3 - "$W/vars" "$PV" "$1" > "$2" <<'PY'
@@ -83,13 +89,14 @@ for k, x in v.items():
 sys.stdout.write(t)
 PY
 }
-zipdir() { (cd "$1" && find . -type f | TZ=UTC xargs touch -d 2026-01-01T00:00:00 && find . -type f | sed 's#^\./##' | sort | zip -q -X -D "$2" -@); }
+# zipdir <dir> <zip>: as tools/mkinstallers.sh (the same line: UTC and the C locale throughout)
+zipdir() { (cd "$1" && export TZ=UTC LC_ALL=C && find . -type f | xargs touch -d 2026-01-01T00:00:00 && find . -type f | sed 's#^\./##' | sort | zip -q -X -D "$2" -@); }
 
 N=$W/nemesis
 mkdir -p "$N/mod" "$N/bin"
-fill install/nemesis/mod/NEMESIS.data.in "$N/NEMESIS.data"
-cp -r install/nemesis/mod/scripts "$N/scripts"
-cp install/nemesis/bin/open.sh "$N/bin/open.sh"   # Launch: the HMG-API app
+fill "$N_SRC/mod/NEMESIS.data.in" "$N/NEMESIS.data"
+cp -r "$N_SRC/mod/scripts" "$N/scripts"
+cp "$N_SRC/bin/open.sh" "$N/bin/open.sh"   # Launch: the HMG-API app
 cp "$Z" "$N/mod/package.zip"
 printf '%s\n' "$ID" > "$N/mod/id"
 chmod 755 "$N"/scripts/*.sh "$N"/bin/*.sh
@@ -101,7 +108,7 @@ NB=$W/stick
 mkdir -p "$NB/packages"
 cp "$P" "$NB/packages/$PKG.zip"
 printf '[nemesis]\nversion=1.0\ntype=install\npath=packages/%s.zip\n' "$PKG" > "$NB/NEMESIS.data"
-fill install/nemesis/mod/README.txt "$NB/README.txt"
+fill "$N_SRC/mod/README.txt" "$NB/README.txt"
 zipdir "$NB" "$S"
 echo "$S"
 echo "$P"

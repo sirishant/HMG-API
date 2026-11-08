@@ -4,7 +4,7 @@
 set -e
 cd "$(dirname "$0")/../.."
 CP=$(mktemp -d); T=$(mktemp -d); trap 'rm -rf "$T" "$CP"' EXIT
-javac --release 8 -Xlint:-options -nowarn -d "$CP" core/runtime/java/hmgapi/engine/*.java 2>/dev/null
+sh tools/engine-classes.sh "$CP" 2>/dev/null
 R=$T/root; U=$T/usb0
 fail=0
 check() { if [ "$2" = "$3" ]; then echo "ok    $1"; else echo "FAIL  $1: wanted [$2], got [$3]"; fail=1; fi; }
@@ -56,7 +56,7 @@ has "and says why" "not a genuine HMG-API release" "$out"
 check "the scan installed nothing" "beta" "$(ls $R/data/hmgapi/mods)"
 
 mkdir -p $T/usb1/HMGAPI/updates; cp $U/HMGAPI/updates/alpha-1.0.0.zip $T/usb1/HMGAPI/updates/
-eng usb-scan; check "a stick seen at two mount points: listed once" 1 "$(printf '%s' "$out" | grep -o 'alpha-1.0.0.zip' | wc -l)"
+eng usb-scan; check "a stick seen at two mount points: listed once" 1 "$(printf '%s' "$out" | grep -o 'alpha-1.0.0.zip' | wc -l | tr -d ' ')"
 
 eng install $U/HMGAPI/updates/alpha-1.0.0.zip; check "install from the stick" 0 $rc
 eng install $U/HMGAPI/updates/beta-2.0.0.zip; check "update from the stick" 0 $rc

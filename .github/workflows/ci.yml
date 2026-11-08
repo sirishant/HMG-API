@@ -1,7 +1,9 @@
 # Off-car tests for what a change touches (tools/test-select.py: a change to the app
-# runs the app's tests, a mod its own, the build or an unknown path everything); a
-# change to documentation only (docs/, wiki/, *.md, issue forms) runs nothing.
-# Every test, weekly and on demand (Actions > CI > Run workflow).
+# runs the app's tests, a mod its own, the build or an unknown path everything), several
+# at once (tools/test-all.sh); a change to documentation only (docs/, wiki/, *.md, issue
+# forms) runs nothing. Every test, weekly and on demand (Actions > CI > Run workflow),
+# with ImageMagick for tools/mkicon-test.sh and the downloads built. The fast tier
+# (tools/test-all.sh --fast, what contributors run) on macOS too, so it keeps working there.
 # No private files: the loader links against stand-ins (core/loader/syslib-stubs.sh),
 # the app is signed with a throwaway key, tests that need stock car files skip.
 name: CI
@@ -48,7 +50,7 @@ jobs:
           echo "tests=$tests" >> "$GITHUB_OUTPUT"
           echo "### Tests: ${tests:-none (nothing they cover changed)}" >> "$GITHUB_STEP_SUMMARY"
 
-      - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
+      - uses: actions/setup-java@77dd5b2ce225ea11469928ac317850245a74ae78 # v6.2.0
         if: steps.pick.outputs.tests != ''
         with:
           distribution: temurin
@@ -61,9 +63,12 @@ jobs:
 
       - name: Tools (clang, lld, qemu for the ARM tests)
         if: steps.pick.outputs.tests != ''
+        env:
+          TESTS: ${{ steps.pick.outputs.tests }}
         run: |
+          case " $TESTS " in *" all "*|*tools/mkicon*) im=imagemagick ;; *) im= ;; esac   # mkicon-test only
           sudo apt-get update -q
-          sudo apt-get install -yq clang lld qemu-user-static binfmt-support zip unzip mksh
+          sudo apt-get install -yq clang lld qemu-user-static binfmt-support zip unzip mksh $im
           pip install --require-hashes -r tools/requirements.txt
 
       - name: Build
@@ -74,8 +79,15 @@ jobs:
         if: steps.pick.outputs.tests != ''
         env:
           TESTS: ${{ steps.pick.outputs.tests }}
+        shell: bash   # -o pipefail: a failed test fails the step through tee
         run: |
-          if [ "$TESTS" = all ]; then tools/test-all.sh; else tools/test-all.sh $TESTS; fi
+          if [ "$TESTS" = all ]; then tools/test-all.sh; else tools/test-all.sh $TESTS; fi | tee "$RUNNER_TEMP/tests.txt"
+
+      - name: Test results in the summary
+        if: always() && steps.pick.outputs.tests != ''
+        run: |
+          [ -f "$RUNNER_TEMP/tests.txt" ] || exit 0
+          { echo '```'; grep -E '^(ok|skip|FAIL) |^[0-9]+ ok' "$RUNNER_TEMP/tests.txt"; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Test downloads
         if: steps.pick.outputs.tests == 'all'
@@ -87,3 +99,47 @@ jobs:
           name: hmgapi-test-build
           path: out/dist/*.zip
           retention-days: 14
+
+  # tools/test-all.sh --fast where most contributors are: no ARM toolchain, no build
+  fast-macos:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-java@77dd5b2ce225ea11469928ac317850245a74ae78 # v6.2.0
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12"
+
+      - name: Fast tier
+        shell: bash   # -o pipefail, as above
+        run: |
+          pip install --require-hashes -r tools/requirements.txt
+          tools/test-all.sh --fast | tee "$RUNNER_TEMP/tests.txt"
+          { echo '### Fast tier (macOS)'; echo '```'; grep -E '^(ok|skip|FAIL) |^[0-9]+ ok' "$RUNNER_TEMP/tests.txt"; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+
+  # The reusable mod workflow (mod.yml), as a mod repo calls it, on mods/examples/hello,
+  # with the SDK built from this commit (the {"ref": ...} pin every mod repo uses until 1.0.3)
+  mod-workflow:
+    uses: ./.github/workflows/mod.yml
+    with:
+      mods: mods/examples/hello
+      sdk: '{"ref": "${{ github.sha }}"}'
+      hmgapi-repo: ${{ github.repository }}
+
+  # The same with an NDK (mod.yml's ndk, hmgapi-adbd's r21e): weekly and on demand, as the
+  # install is about 1 GB
+  mod-workflow-ndk:
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    uses: ./.github/workflows/mod.yml
+    with:
+      mods: mods/examples/hello
+      sdk: '{"ref": "${{ github.sha }}"}'
+      hmgapi-repo: ${{ github.repository }}
+      ndk: "21.4.7075529"

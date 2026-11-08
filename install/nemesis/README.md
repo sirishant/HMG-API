@@ -63,7 +63,7 @@ it says why, and the next sync tries again.
 `tools/mknemesismod.sh <signed mod zip>` wraps a mod (tools/mkmodpkg.sh's zip, as it
 is, in `mod/package.zip`) in a NEMESIS package from the template in `mod/`:
 `<id>-<v>-nemesis.zip` (stick) and `<id>-<v>-nemesis-package.zip` (the package). The
-release builds one for each mod in `tools/release-mods.txt`. `mod-test.sh` runs it all
+release builds one for each mod in `tools/release-mods.txt` (fetched from its catalogue entry). `mod-test.sh` runs it all
 off-car with the real engine.
 
 - id `hmgapi.<mod id>` (mod ids are at most 57 characters for this),

@@ -1,8 +1,11 @@
 blank_issues_enabled: false
 contact_links:
   - name: Install guide and help
-    url: https://github.com/VysseCodes/HMG-API/wiki
+    url: https://github.com/Open-HMG/HMG-API/wiki
     about: Installing, removing, and fixing common problems.
+  - name: A bug in Wireless CarPlay + Android Auto
+    url: https://github.com/Open-HMG/hmgapi-wireless-carplay-aa/issues/new/choose
+    about: The wireless mod has its own repo; its bugs and car requests go there.
   - name: Security problem
-    url: https://github.com/VysseCodes/HMG-API/security/policy
+    url: https://github.com/Open-HMG/HMG-API/security/policy
     about: Please report security problems privately, not as an issue.

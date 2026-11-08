@@ -2,13 +2,10 @@
 # Check that lpatch.c builds into a working lpatch with the clang you have.
 # Builds in a temp dir, runs every command on generated files, and requires the
 # ARM build (under qemu) and the host build to give identical output and files.
-# If stock EV6 files (STOCK, default ~/hmg-private/stock/ev6) and
-# patches/ev6/manifest are present, it also rebuilds the real EV6 files.
 # Needs: clang, lld, qemu-arm-static, python3 with bsdiff4.
 set -u
 cd "$(dirname "$0")" || exit 1
 LP=$PWD; REPO=$(cd ../.. && pwd)
-STOCK=${STOCK:-$HOME/hmg-private/stock/ev6}
 QEMU=${QEMU:-qemu-arm-static}
 W=$(mktemp -d); trap 'rm -rf "$W"' EXIT
 FAIL=0
@@ -102,24 +99,6 @@ run zipadd-twice zipadd out.apk ../in/classes.dex out2.apk
 
 run usage bogus
 expect_exit usage 2
-
-# ---- real EV6 stock files (optional) ----
-if [ -f "$STOCK/app/HKMC_DiPO.odex" ] && [ -f "$REPO/patches/ev6/manifest" ]; then
-    while read -r part kind name patch want; do
-        [ -n "$part" ] || continue
-        c=ev6-$part-$name
-        if [ "$kind" = app ]; then
-            run $c-dex delta "$REPO/patches/$patch" "$STOCK/app/$name.odex" $c.dex
-            run $c zipadd "$STOCK/app/$name.apk" $c.dex $c.out
-        else
-            run $c delta "$REPO/patches/$patch" "$STOCK/lib/$name" $c.out
-        fi
-        [ "$(md5sum < "$W/fresh/$c.out" 2>/dev/null | cut -d' ' -f1)" = "$want" ] && ok "$c matches the manifest" || bad "$c"
-        rm -f "$W"/*/$c.dex
-    done < "$REPO/patches/ev6/manifest"
-else
-    echo "skip  real EV6 rebuild (needs $STOCK and patches/ev6/manifest)"
-fi
 
 # ---- both builds must agree on every output and file ----
 for b in host; do

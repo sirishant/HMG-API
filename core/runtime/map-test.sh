@@ -5,7 +5,7 @@
 set -e
 cd "$(dirname "$0")/../.."
 CP=$(mktemp -d); T=$(mktemp -d); trap 'rm -rf "$T" "$CP"' EXIT
-javac --release 8 -Xlint:-options -nowarn -d "$CP" core/runtime/java/hmgapi/engine/*.java 2>/dev/null
+sh tools/engine-classes.sh "$CP" 2>/dev/null
 R=$T/root
 fail=0
 check() { if [ "$2" = "$3" ]; then echo "ok    $1"; else echo "FAIL  $1: wanted [$2], got [$3]"; fail=1; fi; }

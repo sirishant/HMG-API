@@ -2,7 +2,7 @@
 
 Takes about 10 minutes. Park the car and keep it on (the head unit restarts once).
 
-**Which download?** Get it from the [Releases](https://github.com/VysseCodes/HMG-API/releases) page:
+**Which download?** Get it from the [Releases](https://github.com/Open-HMG/HMG-API/releases) page:
 
 | You have | Use | Steps |
 |---|---|---|

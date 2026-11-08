@@ -15,7 +15,7 @@ public final class ModDexCacheTest {
         File root = new File(args[0]);
         for (String scope : new String[] {"zygote", "app"}) {
             File base = new File(root, scope);
-            File a = ModDexCache.directory(base, "wireless-carplay-aa");
+            File a = ModDexCache.directory(base, "example-a");
             File b = ModDexCache.directory(base, "ev-routing");
             File first = new File(a, "hooks.dex"), second = new File(b, "hooks.dex");
             Files.write(first.toPath(), new byte[] {1,2,3});

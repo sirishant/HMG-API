@@ -8,7 +8,7 @@ cd "$(dirname "$0")/../.."
 REPO=$PWD
 [ -x out/lpatch-host ] || { echo "run ./build.sh lpatch first"; exit 1; }
 CP=$(mktemp -d)
-javac --release 8 -Xlint:-options -nowarn -d "$CP" core/runtime/java/hmgapi/engine/*.java 2>/dev/null
+sh tools/engine-classes.sh "$CP" 2>/dev/null
 T=$(mktemp -d)
 trap 'rm -rf "$T" "$CP"' EXIT
 R=$T/root

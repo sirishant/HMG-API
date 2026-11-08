@@ -4,7 +4,7 @@ set -e
 cd "$(dirname "$0")/../.."
 CP=$(mktemp -d); T=$(mktemp -d)
 trap 'rm -rf "$T" "$CP"' EXIT
-javac --release 8 -Xlint:-options -nowarn -d "$CP" core/runtime/java/hmgapi/engine/*.java
+sh tools/engine-classes.sh "$CP"
 S() { java -cp "$CP" hmgapi.engine.Signing "$@"; }
 fail=0
 check() { if [ "$2" = "$3" ]; then echo "ok    $1"; else echo "FAIL  $1: wanted [$2], got [$3]"; fail=1; fi; }
@@ -38,11 +38,11 @@ v "$T/t4"; check "unsigned refused" 1 $rc; has "says unsigned" "not signed" "$ou
 # a forger re-signs with their own key but keeps the original uuid in the manifest
 S keygen "$T/forger.key" > /dev/null
 cp -r "$T/hello" "$T/t5"; S sign "$T/t5" "$T/forger.key" > /dev/null
-sed -i "s/\"uuid\": \"[^\"]*\"/\"uuid\": \"$U\"/" "$T/t5/META-HMGAPI/manifest.json"
+f=$T/t5/META-HMGAPI/manifest.json; sed "s/\"uuid\": \"[^\"]*\"/\"uuid\": \"$U\"/" "$f" > "$f.new" && mv "$f.new" "$f"   # no sed -i: BSD sed's differs
 v "$T/t5"; check "forged uuid refused" 1 $rc
 v "$T/t5" "$U"; check "forged uuid refused (expected uuid)" 1 $rc
 cp -r "$T/hello" "$T/t6"; S sign "$T/t6" "$T/forger.key" > /dev/null
 v "$T/t6" "$U"; check "update by another key refused" 1 $rc
-cp -r "$T/hello" "$T/t7"; sed -i 's/"version": "1.0.0"/"version": "9.9.9"/' "$T/t7/mod.json"
+cp -r "$T/hello" "$T/t7"; sed 's/"version": "1.0.0"/"version": "9.9.9"/' "$T/t7/mod.json" > "$T/t7/mod.json.new" && mv "$T/t7/mod.json.new" "$T/t7/mod.json"
 v "$T/t7"; check "edited mod.json refused" 1 $rc
 exit $fail

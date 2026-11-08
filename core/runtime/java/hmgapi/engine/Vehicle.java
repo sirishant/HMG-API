@@ -43,6 +43,12 @@ public final class Vehicle {
         add(m, "pedal.accel", "raw", 100, "accelerator pedal");
         add(m, "brake.pressure", "raw", 100, "brake cylinder pressure");
         add(m, "battery12v.soc", "%", 30000, "12V battery state of charge");
+        // the 12V battery sensor's own flags and the saver option, raw until their values are understood
+        // (asked for by Battery Watchdog, which logs them next to the charge)
+        add(m, "battery12v.sensor_state", "raw", 30000, "12V battery sensor state");
+        add(m, "battery12v.sensor_invalid", "raw", 30000, "12V battery sensor's invalid flag");
+        add(m, "battery12v.sensor_error", "raw", 30000, "12V battery sensor's error flag");
+        add(m, "battery12v.saver", "raw", 60000, "the Auxiliary Battery Saver option");
         add(m, "hv.soc", "%", 5000, "high-voltage battery state of charge, as shown (0.5 steps)");
         add(m, "hv.health", "raw", 60000, "high-voltage battery health index");
         add(m, "hv.ready", "raw", 1000, "EV ready");

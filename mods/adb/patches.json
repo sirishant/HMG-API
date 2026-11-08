@@ -1,9 +1,0 @@
-{
-  "changes": [
-    { "type": "prop", "key": "persist.service.adb.tcp.enable", "value": "0" },
-    { "type": "prop", "key": "persist.sys.usb.config", "value": "adb", "mirror": "sys.usb.config", "part": "usb" },
-    { "type": "prop", "key": "persist.sys.usb.config", "value": "host,adb", "mirror": "sys.usb.config", "part": "no_usb" },
-    { "type": "prop", "key": "persist.adb.tcp.port", "value": "5555", "restart": "adbd", "part": "tcp" },
-    { "type": "prop", "key": "persist.adb.tcp.port", "value": "", "restart": "adbd", "part": "no_tcp" }
-  ]
-}

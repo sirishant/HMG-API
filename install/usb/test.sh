@@ -156,18 +156,19 @@ mv $R/../app_process.mine $R/system/bin/app_process
 A=$R/data/nemesis/apps/hmgapi
 mkdir -p $A; unzip -q "$NZ" -d $A; rm -r $A/payload; cp -r $P $A/payload
 has "package metadata" "postinstall=scripts/postinstall.sh" "$(cat $A/NEMESIS.data)"
-CWD=$A run scripts/postinstall.sh
+# CWD set, then cleared: CWD=x run (a function) would leave it set after it in bash 3.2's sh (macOS)
+CWD=$A; run scripts/postinstall.sh; CWD=
 has "NEMESIS install: done" "installed. Restart the head unit" "$out"
 check "NEMESIS install: HMG-API is in" yes "$(installed)"
 mkdir -p $R/data/local/tmp/nemesis/stage/hmgapi
 cp $A/NEMESIS.data $R/data/local/tmp/nemesis/stage/hmgapi/   # the new package, staged by nemesis install --update
-CWD=$A run scripts/preuninstall.sh
+CWD=$A; run scripts/preuninstall.sh; CWD=
 has "NEMESIS update: preuninstall keeps HMG-API" "HMG-API stays installed" "$out"
 check "... still installed" yes "$(installed)"
-CWD=$A run scripts/postinstall.sh
+CWD=$A; run scripts/postinstall.sh; CWD=
 has "... and the new postinstall updates it" "HMG-API's wrapper is in place" "$out"
 rm $R/data/local/tmp/nemesis/stage/hmgapi/NEMESIS.data   # left over from an interrupted install: not a package
-CWD=$A run scripts/preuninstall.sh
+CWD=$A; run scripts/preuninstall.sh; CWD=
 has "NEMESIS uninstall: uninstalled (a leftover stage doesn't stop it)" "HMG-API uninstalled" "$out"
 check "/system byte-identical to stock again" "$BEFORE" "$(tree)"
 exit $fail

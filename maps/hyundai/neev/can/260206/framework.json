@@ -547,6 +547,30 @@
     "ret": "float",
     "static": false
   },
+  "framework.hscan_service.battery_12v_saver": {
+    "method": "get_BAT_AuxBattOpt",
+    "params": [],
+    "ret": "byte",
+    "static": false
+  },
+  "framework.hscan_service.battery_12v_sensor_error": {
+    "method": "getBATSNSRError",
+    "params": [],
+    "ret": "byte",
+    "static": false
+  },
+  "framework.hscan_service.battery_12v_sensor_invalid": {
+    "method": "getBATSNSRInvalid",
+    "params": [],
+    "ret": "byte",
+    "static": false
+  },
+  "framework.hscan_service.battery_12v_sensor_state": {
+    "method": "getBATSNSRState",
+    "params": [],
+    "ret": "byte",
+    "static": false
+  },
   "framework.hscan_service.battery_12v_soc": {
     "method": "getBatSoc",
     "params": [],

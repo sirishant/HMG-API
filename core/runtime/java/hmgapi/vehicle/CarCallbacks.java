@@ -51,6 +51,7 @@ final class CarCallbacks {
 
     /** a binder answering some transactions of one interface */
     abstract static class Listener extends Binder {
+        static final int MAX_OUT_ARRAY = 64 * 1024;   // a callback's array; a larger last int is something else
         final String descriptor;
         final int[] codes;
         /**
@@ -144,8 +145,23 @@ final class CarCallbacks {
             } catch (Throwable t) {
                 System.out.println("vehicle: callback " + c + ": " + t);
             }
-            if (reply != null) reply.writeNoException();
+            if (reply != null) answer(data, reply);
             return true;   // every other callback: acknowledged, ignored
+        }
+
+        /**
+         * A callback with an `out` array (the car's IBCMListener.onDigitalKeyDataChanged) sends only
+         * the array's length, as its last int, and its proxy reads an array of that length back.
+         * Without one the proxy throws, in the car's service, and takes system_server down. Callbacks
+         * without one never read past the exception, so the extra bytes don't reach them.
+         */
+        static void answer(Parcel data, Parcel reply) {
+            reply.writeNoException();
+            int end = data.dataSize();
+            if (end < 4) return;
+            data.setDataPosition(end - 4);
+            int n = data.readInt();
+            if (n >= 0 && n <= MAX_OUT_ARRAY) reply.writeByteArray(new byte[n]);
         }
     }
 

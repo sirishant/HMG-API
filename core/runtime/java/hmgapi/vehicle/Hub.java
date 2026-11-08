@@ -193,6 +193,10 @@ public final class Hub {
         if ("pedal.accel".equals(name)) return dec((Float) call(hscan(), "framework.hscan_service.accel_pedal"));
         if ("brake.pressure".equals(name)) return dec((Float) call(hscan(), "framework.hscan_service.brake_pressure"));
         if ("battery12v.soc".equals(name)) return valid(num(call(hscan(), "framework.hscan_service.battery_12v_soc")), 0, 100);
+        if ("battery12v.sensor_state".equals(name)) return mapped(hscan(), "framework.hscan_service.battery_12v_sensor_state");
+        if ("battery12v.sensor_invalid".equals(name)) return mapped(hscan(), "framework.hscan_service.battery_12v_sensor_invalid");
+        if ("battery12v.sensor_error".equals(name)) return mapped(hscan(), "framework.hscan_service.battery_12v_sensor_error");
+        if ("battery12v.saver".equals(name)) return mapped(hscan(), "framework.hscan_service.battery_12v_saver");
         if ("hv.health".equals(name)) return valid(num(call(hscan(), "framework.hscan_service.hv_health")), 0, 255);
         if ("charging".equals(name)) return String.valueOf(num(call(hscan(), "framework.hscan_service.charging_status")));
         if ("hv.soc".equals(name)) {
@@ -557,6 +561,18 @@ public final class Hub {
 
     static int num(Object o) {
         return o instanceof Number ? ((Number) o).intValue() : -1;
+    }
+
+    /** a raw number from a point this car's map may not have yet ("-" then, without a failed call) */
+    static String mapped(Object target, String id) {
+        return Points.has(id) ? raw(call(target, id)) : null;
+    }
+
+    /** a number as the car gave it; null (shown as "-") for anything else. A byte is read
+     *  unsigned (the 12V battery getters return byte: 0xFF is 255, not -1). */
+    static String raw(Object o) {
+        if (o instanceof Byte) return String.valueOf(((Byte) o).intValue() & 0xff);
+        return o instanceof Number ? String.valueOf(((Number) o).intValue()) : null;
     }
 
     static String bool(boolean b) {

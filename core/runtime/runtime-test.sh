@@ -6,7 +6,7 @@
 set -e
 cd "$(dirname "$0")/../.."
 CP=$(mktemp -d)
-javac --release 8 -Xlint:-options -nowarn -d "$CP" core/runtime/java/hmgapi/engine/*.java
+sh tools/engine-classes.sh "$CP"
 T=$(mktemp -d)
 trap 'rm -rf "$T" "$CP"' EXIT
 R=$T/root
@@ -63,7 +63,8 @@ has "plan: problems shown" "problem  game: service esc" "$out"
 
 # ---- apps
 actions >/dev/null
-HMGAPI_ANDROID_DOWN=1 eng apps
+# export, then unset: VAR=1 eng (a function) leaves VAR set after it in bash 3.2's sh (macOS)
+export HMGAPI_ANDROID_DOWN=1; eng apps; unset HMGAPI_ANDROID_DOWN
 has "Android down: waits" "waiting for Android" "$out"
 check "... and does nothing" "" "$(actions)"
 eng apps
@@ -109,9 +110,9 @@ printf '{"overrides": {"replace_apps": ["org.example.keyboard"]}}\n' > "$D/setti
 eng apps
 has "overrides.replace_apps: the mod takes it over" "org.example.keyboard updated (kb)" "$out"
 rm "$D/settings/hmgapi.json"
-HMGAPI_PM_FAIL=1 eng apps
+export HMGAPI_PM_FAIL=1; eng apps; unset HMGAPI_PM_FAIL
 echo apk1-v3 > "$D/mods/cam/app/Cam.apk"
-HMGAPI_PM_FAIL=1 eng apps
+export HMGAPI_PM_FAIL=1; eng apps; unset HMGAPI_PM_FAIL
 has "pm failure reported" "WARNING: dev.example.cam (cam) didn't install: Failure [TEST]" "$out"
 eng apps
 has "... and tried again next time" "dev.example.cam updated (cam)" "$out"

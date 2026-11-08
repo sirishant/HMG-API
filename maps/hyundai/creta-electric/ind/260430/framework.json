@@ -265,16 +265,16 @@
   "framework.context_wrapper": {
     "class": "android.content.ContextWrapper"
   },
-  "framework.context_wrapper.start_activity": {
-    "method": "startActivity",
+  "framework.context_wrapper.send_broadcast": {
+    "method": "sendBroadcast",
     "params": [
       "android.content.Intent"
     ],
     "ret": "void",
     "static": false
   },
-  "framework.context_wrapper.send_broadcast": {
-    "method": "sendBroadcast",
+  "framework.context_wrapper.start_activity": {
+    "method": "startActivity",
     "params": [
       "android.content.Intent"
     ],
@@ -614,6 +614,30 @@
     "method": "getAccelPdlVal",
     "params": [],
     "ret": "float",
+    "static": false
+  },
+  "framework.hscan_service.battery_12v_saver": {
+    "method": "get_BAT_AuxBattOpt",
+    "params": [],
+    "ret": "byte",
+    "static": false
+  },
+  "framework.hscan_service.battery_12v_sensor_error": {
+    "method": "getBATSNSRError",
+    "params": [],
+    "ret": "byte",
+    "static": false
+  },
+  "framework.hscan_service.battery_12v_sensor_invalid": {
+    "method": "getBATSNSRInvalid",
+    "params": [],
+    "ret": "byte",
+    "static": false
+  },
+  "framework.hscan_service.battery_12v_sensor_state": {
+    "method": "getBATSNSRState",
+    "params": [],
+    "ret": "byte",
     "static": false
   },
   "framework.hscan_service.battery_12v_soc": {

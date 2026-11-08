@@ -1119,6 +1119,50 @@
       }
     },
     {
+      "id": "framework.hscan_service.battery_12v_sensor_state",
+      "kind": "method",
+      "of": "framework.hscan_service",
+      "find": {
+        "name": "getBATSNSRState",
+        "params": [],
+        "ret": "byte"
+      },
+      "about": "12V battery sensor's state (raw)"
+    },
+    {
+      "id": "framework.hscan_service.battery_12v_sensor_invalid",
+      "kind": "method",
+      "of": "framework.hscan_service",
+      "find": {
+        "name": "getBATSNSRInvalid",
+        "params": [],
+        "ret": "byte"
+      },
+      "about": "12V battery sensor's invalid flag (raw)"
+    },
+    {
+      "id": "framework.hscan_service.battery_12v_sensor_error",
+      "kind": "method",
+      "of": "framework.hscan_service",
+      "find": {
+        "name": "getBATSNSRError",
+        "params": [],
+        "ret": "byte"
+      },
+      "about": "12V battery sensor's error flag (raw)"
+    },
+    {
+      "id": "framework.hscan_service.battery_12v_saver",
+      "kind": "method",
+      "of": "framework.hscan_service",
+      "find": {
+        "name": "get_BAT_AuxBattOpt",
+        "params": [],
+        "ret": "byte"
+      },
+      "about": "the Auxiliary Battery Saver option (raw)"
+    },
+    {
       "id": "framework.car_services",
       "kind": "class",
       "find": {
