@@ -52,6 +52,9 @@ time, HMG-API asks on screen whether the mod may press the climate's buttons: ta
 auto-connect (15 s apart at first, then less often). A phone you disconnect on the car's Bluetooth
 screen stays off. An iPhone you connect there for phone only or audio only doesn't start CarPlay by
 itself for 25 s (with Wireless CarPlay + Android Auto 2.5.3).
+
+**EV routing (Creta)** also gives Android Auto apps that read the car's battery, such as ABRP, the
+live battery %, range and odometer.
 3. **Remove the drive.**
 4. Open the app: NEMESIS Manager > My Packages > HMG-API > **Launch**. Tap **Restart unit**.
 5. Open the app the same way. Settings > Hook map > **Check the map on this car**. It takes about a
