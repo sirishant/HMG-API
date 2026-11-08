@@ -156,6 +156,28 @@ final class CpTurns {
         if (index < 0) return;
         maneuverStore(index, ids, msg);
         logReceived(index);
+        repush(index);
+    }
+
+    /**
+     * A maneuver update for the turn a component is on now (first in its latest list) goes
+     * to the cluster at once, not with the next RouteGuidanceUpdate: iPhones often send the
+     * turn's details after the update that made it current, which otherwise left the old
+     * turn up until the distance next changed (after Enhanced Phone Projection 1.23,
+     * NEMESIS, AGPL-3.0). Returns how many components were sent again.
+     */
+    int repush(int index) {
+        int n = 0;
+        if (index < 0 || updates.isEmpty()) return 0;
+        Integer[] ids = updates.keySet().toArray(new Integer[0]);
+        for (Integer id : ids) {
+            Update u = updates.get(id);
+            // not guiding (state 0): nothing to resend, and stop() would blank the HUD again
+            if (u == null || u.state == 0 || u.list == null || u.list.length == 0 || u.list[0] != index) continue;
+            turn(id, u);
+            n++;
+        }
+        return n;
     }
 
     private void maneuverStore(int index, int[] ids, Iap2NotiMsg msg) {
