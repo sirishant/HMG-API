@@ -48,6 +48,7 @@ public final class Switch extends ModEntry {
             CarPlayFixes.dipo(mod, app);
             CarPlayKeys.dipo(mod, app);
             CarPlayCalls.dipo(mod, app);
+            CarPlayPopup.dipo(mod, app);
         } else if (PP.equals(app.packageName)) {
             phoneProjection(mod, app);
         } else if (CarPlayFixes.IAP2.equals(app.packageName)) {

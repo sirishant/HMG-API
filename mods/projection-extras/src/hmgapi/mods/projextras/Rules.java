@@ -81,4 +81,33 @@ final class Rules {
     static boolean carOffStatus(int acc) {
         return acc >= ACC_DELAY;
     }
+
+    static final String DIPO_ACTIVITY = "DipoActivity", PP_POPUP = "WirelessAlertDialogActivity";
+
+    /** DiPO's play start opens its CarPlay screen (class name) while this is on top: held back behind PhoneProjection's popup */
+    static boolean behindPopup(String starting, String top) {
+        return starting != null && starting.endsWith(DIPO_ACTIVITY) && top != null && top.contains(PP_POPUP);
+    }
+
+    /**
+     * The iPhone's wireless CarPlay status (DeviceWirelessCarPlayUpdate, an Iap2NotiMsg read
+     * by reflection): item 0, 1 available and 0 not; -1 when it doesn't say.
+     */
+    static int wirelessStatus(Object msg) {
+        if (msg == null) return -1;
+        try {
+            Object g = msg.getClass().getMethod("getItemGroup").invoke(msg);
+            if (g == null) return -1;
+            int n = (Integer) g.getClass().getMethod("getItemCnt").invoke(g);
+            for (int k = 0; k < n; k++) {
+                Object it = g.getClass().getMethod("getObjItem", int.class).invoke(g, k);
+                if (it == null || (Integer) it.getClass().getMethod("getItemId").invoke(it) != 0) continue;
+                int[] v = (int[]) it.getClass().getMethod("getItemIntArray").invoke(it);
+                return v != null && v.length > 0 ? v[0] : -1;
+            }
+        } catch (Throwable t) {
+            // not readable
+        }
+        return -1;
+    }
 }
