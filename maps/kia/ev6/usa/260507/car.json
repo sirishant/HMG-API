@@ -175,6 +175,8 @@
     "framework.bcm_service.ignition": "not mapped yet: needs this car's stock files (added for the Hyundai Creta Electric)",
     "framework.context_wrapper": "not mapped yet: needs this car's stock files (added for the Hyundai Creta Electric)",
     "framework.context_wrapper.send_broadcast": "not mapped yet: needs this car's stock files (added for the Hyundai Creta Electric)",
+    "framework.context_wrapper.start_activity": "not mapped yet: needs this car's stock files (added for the Hyundai Creta Electric)",
+    "dipo.service.play_start": "not mapped yet: needs this car's stock files (added for the Hyundai Creta Electric)",
     "framework.datc_listener_stub.temperature": "not mapped yet: needs this car's stock files (added for the Hyundai Creta Electric)",
     "framework.datc_service.front_control": "not mapped yet: needs this car's stock files (added for the Hyundai Creta Electric)",
     "framework.datc_status.driver_only": "not mapped yet: needs this car's stock files (added for the Hyundai Creta Electric)",

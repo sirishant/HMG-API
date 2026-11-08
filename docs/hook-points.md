@@ -13,16 +13,16 @@ use one. A point a car's map lacks is off on that car, and the HMG-API app says 
 How points are described and found: [core/hookpoints/README.md](../core/hookpoints/README.md).
 Need one that isn't here? Open a "New hook point" issue.
 
-458 hook points. **Cars** (`maps/`):
+460 hook points. **Cars** (`maps/`):
 
 | Car | Map | Points |
 |---|---|---|
-| Hyundai Creta Electric IND 260430 | mapped from stock files | 458 of 458 |
-| Hyundai Ioniq 5 CAN 260206 | mapped from stock files | 343 of 458 |
-| Hyundai Ioniq 5 USA 260507 | mapped from stock files | 343 of 458 |
-| Hyundai Ioniq 5 USA 260903 | mapped on cars by HMG-API's own mapper | 325 of 458 |
-| Kia EV6 CAN 260206 | mapped from stock files | 343 of 458 |
-| Kia EV6 USA 260507 | checked on a car | 343 of 458 |
+| Hyundai Creta Electric IND 260430 | mapped from stock files | 460 of 460 |
+| Hyundai Ioniq 5 CAN 260206 | mapped from stock files | 343 of 460 |
+| Hyundai Ioniq 5 USA 260507 | mapped from stock files | 343 of 460 |
+| Hyundai Ioniq 5 USA 260903 | mapped on cars by HMG-API's own mapper | 325 of 460 |
+| Kia EV6 CAN 260206 | mapped from stock files | 343 of 460 |
+| Kia EV6 USA 260507 | checked on a car | 343 of 460 |
 
 In the tables, **Cars** is "all" when every car above has the point, otherwise the cars without it.
 
@@ -258,6 +258,7 @@ Android framework and the car's service interfaces (any process).
 | `framework.navigation_cluster.update_tbt_trap_info` | method | `updateTBTTrapInfo(int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int)` → void | speed cameras, speed limit, tolls and the countdown bar to the cluster (one frame; index 11 the bar, 12 the speed limit) | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
 | `framework.context_wrapper` | class | `android.content.ContextWrapper` |  | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
 | `framework.context_wrapper.send_broadcast` | method | `sendBroadcast(android.content.Intent)` → void | sendBroadcast(Intent) of a Service/Application; hooked in DiPO's process only, to add extras to com.daudio.app.dipo.start | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
+| `framework.context_wrapper.start_activity` | method | `startActivity(android.content.Intent)` → void | startActivity(Intent) of a Service/Application; hooked in DiPO's process only, to keep CarPlay's screen behind PhoneProjection's popup | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
 | `framework.navigation_cluster.update_tbt_trap_info_new` | method | `updateTBTTrapInfoNew(com.hkmc.cluster.NavigationCluster$NaviTbtTrapInfo)` → void | the trap frame as one object (the car's navigation sends this one): speed limit, cameras, tolls, the bar | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
 | `framework.hscan_service.drive_range` | method | `ableDriveDistance(byte)` → int | range left; argument 0 = km | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
 | `framework.hscan_service.battery_percent` | method | `remainBatteryPercentage()` → float | high-voltage battery charge, % | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
@@ -376,6 +377,7 @@ App `com.daudio.app.dipo`.
 | `dipo.service.remove_message` | method | `?(int)` → void | removes a pending DipoService handler message (-1: all) | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
 | `dipo.service.set_cp_bt_address` | method | `setCPConnectedBTAddress(String)` → void | sets the CarPlay phone's Bluetooth address (upper-cased) on PPManager and broadcasts it (null: ignored) | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
 | `dipo.service.start_dipo_activity` | method | `?(int)` → void | starts the CarPlay screen (mode extra) | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
+| `dipo.service.play_start` | method | `?(boolean, int, int, boolean)` → void | onPlayStartCommand: CarPlay asked to play; ends by opening DipoActivity itself (startActivity, CarPlayMode and UVO_URL extras) | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
 | `dipo.service.set_dipo_status` | method | `?(int)` → void | setDipoStatus: DiPOManager's connect status | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
 | `dipo.service.vui_event` | method | `?(int)` → void | voice (Siri) start/end; on end posts message 46 (800 ms) | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
 | `dipo.utils.current_iap_device` | method | `?()` → String | the last iAP2-connected device's serial (a Bluetooth address for Bluetooth sessions) | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |

@@ -2464,6 +2464,19 @@
       "about": "sendBroadcast(Intent) of a Service/Application; hooked in DiPO's process only, to add extras to com.daudio.app.dipo.start"
     },
     {
+      "id": "framework.context_wrapper.start_activity",
+      "kind": "method",
+      "of": "framework.context_wrapper",
+      "find": {
+        "name": "startActivity",
+        "params": [
+          "android.content.Intent"
+        ],
+        "ret": "void"
+      },
+      "about": "startActivity(Intent) of a Service/Application; hooked in DiPO's process only, to keep CarPlay's screen behind PhoneProjection's popup"
+    },
+    {
       "id": "framework.navigation_cluster.update_tbt_trap_info_new",
       "kind": "method",
       "of": "framework.navigation_cluster",
