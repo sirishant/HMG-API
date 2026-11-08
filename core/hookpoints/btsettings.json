@@ -2,7 +2,8 @@
   "app": "btsettings",
   "package": "com.android.btsettings",
   "files": [
-    "/system/app/HKMC_BtSettings.odex"
+    "/system/app/HKMC_BtSettings.odex",
+    "/system/framework/com.broadcom.bt.jar"
   ],
   "patterns": {
     "phone_projection_menu": {
@@ -78,6 +79,116 @@
         "ret": "void",
         "static": true
       }
+    },
+    {
+      "id": "btsettings.btcm",
+      "kind": "class",
+      "find": {
+        "name": "com.broadcom.bt.hfdevice.hfbtcm.HfDeviceBTCMManager"
+      },
+      "about": "Broadcom's Bluetooth connection manager (library com.broadcom.bt): BtSettings' connects and disconnects go through it when the driver uses the car's Bluetooth screens"
+    },
+    {
+      "id": "btsettings.btcm.connect",
+      "kind": "method",
+      "of": "btsettings.btcm",
+      "find": {
+        "name": "IbtcmConnect",
+        "params": [
+          "java.lang.String"
+        ],
+        "ret": "boolean"
+      },
+      "about": "connects a phone (handsfree and audio), by its Bluetooth address"
+    },
+    {
+      "id": "btsettings.btcm.only_hfp_connect",
+      "kind": "method",
+      "of": "btsettings.btcm",
+      "find": {
+        "name": "IbtcmOnlyHfpConnect",
+        "params": [
+          "java.lang.String"
+        ],
+        "ret": "boolean"
+      },
+      "about": "connects only a phone's handsfree"
+    },
+    {
+      "id": "btsettings.btcm.only_a2dp_connect",
+      "kind": "method",
+      "of": "btsettings.btcm",
+      "find": {
+        "name": "IbtcmOnlyA2dpConnect",
+        "params": [
+          "java.lang.String"
+        ],
+        "ret": "boolean"
+      },
+      "about": "connects only a phone's audio streaming"
+    },
+    {
+      "id": "btsettings.btcm.disconnect",
+      "kind": "method",
+      "of": "btsettings.btcm",
+      "find": {
+        "name": "IbtcmDisconnect",
+        "params": [
+          "java.lang.String"
+        ],
+        "ret": "boolean"
+      },
+      "about": "disconnects a phone"
+    },
+    {
+      "id": "btsettings.btcm.only_hfp_disconnect",
+      "kind": "method",
+      "of": "btsettings.btcm",
+      "find": {
+        "name": "IbtcmOnlyHfpDisconnect",
+        "params": [
+          "java.lang.String"
+        ],
+        "ret": "boolean"
+      },
+      "about": "disconnects only a phone's handsfree"
+    },
+    {
+      "id": "btsettings.btcm.only_a2dp_disconnect",
+      "kind": "method",
+      "of": "btsettings.btcm",
+      "find": {
+        "name": "IbtcmOnlyA2dpDisconnect",
+        "params": [
+          "java.lang.String"
+        ],
+        "ret": "boolean"
+      },
+      "about": "disconnects only a phone's audio streaming"
+    },
+    {
+      "id": "btsettings.btcm.remove_device",
+      "kind": "method",
+      "of": "btsettings.btcm",
+      "find": {
+        "name": "IbtcmRemoveDevice",
+        "params": [
+          "android.bluetooth.BluetoothDevice"
+        ],
+        "ret": "boolean"
+      },
+      "about": "deletes a paired phone"
+    },
+    {
+      "id": "btsettings.btcm.cancel_connection",
+      "kind": "method",
+      "of": "btsettings.btcm",
+      "find": {
+        "name": "IbtcmCancelConnection",
+        "params": [],
+        "ret": "boolean"
+      },
+      "about": "cancels the connection the car is making"
     }
   ]
 }

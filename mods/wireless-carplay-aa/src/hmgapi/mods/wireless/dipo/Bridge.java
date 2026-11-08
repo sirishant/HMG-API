@@ -72,6 +72,15 @@ final class Bridge {
      * iPhone says wireless CarPlay isn't available (DeviceWirelessCarPlayUpdate)
      */
     static final String ACTION_CARPLAY_UNAVAILABLE = "hmgapi.wireless.CARPLAY_UNAVAILABLE";
+    /**
+     * from BtSettings (projection-extras on the Creta, where its points are mapped): the driver
+     * connected or disconnected a phone on the car's Bluetooth screen. "what": phone (handsfree
+     * only), audio (audio only), connect (both), disconnect; "address" (none for a cancel).
+     */
+    static final String ACTION_BT_BY_HAND = "hmgapi.wireless.BT_BY_HAND";
+    static final String BY_HAND_PHONE = "phone", BY_HAND_AUDIO = "audio";
+    /** the manual connect guard: a phone connected by hand for one profile gets no automatic CarPlay start for a while */
+    static final HandGuard HAND = new HandGuard();
     static final long AUTH_RETRY_MS = 1000, AA_RECHECK_MS = 30000;
     /** the car's mode for Android Auto (GPM), available while it's connected */
     static final int MODE_ANDROID_AUTO = 0x74;
@@ -363,6 +372,7 @@ final class Bridge {
 
     static void scheduleSppConnect(final String addr) {
         if (addr == null || addr.equals(sHeld) || !enabled() || sUsb || sSession || sCpWireless || sCarOff) return;
+        if (heldByHand(addr)) return;
         if (androidAutoUp()) {
             waitForAndroidAuto(addr);
             return;
@@ -386,6 +396,7 @@ final class Bridge {
         if (addr == null || sSession) return;
         sAddr = addr;
         if (sCpClient || sCpWireless || !enabled() || sUsb || sCarOff || addr.equals(sHeld)) return;
+        if (heldByHand(addr)) return;
         if (androidAutoUp()) {
             waitForAndroidAuto(addr);
             return;
@@ -554,6 +565,36 @@ final class Bridge {
         sSession = false;
         sAttachAt = 0;   // its session's end isn't an authentication failure to retry
         sendDetach();
+    }
+
+    /** the driver's own Bluetooth actions on the car's screen: a one-profile connect starts the manual connect guard */
+    static void watchHandConnects(Context c) {
+        if (c == null) return;
+        try {
+            c.registerReceiver(new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context x, Intent i) {
+                    String what = i.getStringExtra("what"), addr = i.getStringExtra("address");
+                    if (!BY_HAND_PHONE.equals(what) && !BY_HAND_AUDIO.equals(what)) return;
+                    HAND.connectedByHand(addr, android.os.SystemClock.elapsedRealtime());
+                    log("manual connect guard: " + HandGuard.mask(addr) + " connected by hand (" + what
+                            + " only), no automatic CarPlay start for it for " + (HandGuard.WINDOW_MS / 1000) + " s");
+                }
+            }, new IntentFilter(ACTION_BT_BY_HAND));
+        } catch (Throwable t) {
+            error("manual connects", t);
+        }
+    }
+
+    /** an automatic CarPlay start for this phone is held back by the manual connect guard (logged once) */
+    static boolean heldByHand(String addr) {
+        long now = android.os.SystemClock.elapsedRealtime();
+        int c = HAND.check(addr, now);
+        if (c == HandGuard.HELD) {
+            log("manual connect guard: CarPlay not started for " + HandGuard.mask(addr) + " (connected by hand, phone or audio only; "
+                    + HAND.secondsLeft(now) + " s left), the next Bluetooth start after that goes ahead");
+        }
+        return c != HandGuard.FREE;
     }
 
     static void onUsbGone() {

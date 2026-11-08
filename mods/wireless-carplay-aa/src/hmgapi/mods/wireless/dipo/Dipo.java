@@ -259,6 +259,7 @@ public final class Dipo {
         Bridge.watchEndRequests(app.context);
         Bridge.watchAuthFailures(app.context);
         Bridge.watchUnavailable(app.context);
+        Bridge.watchHandConnects(app.context);
         // Broadcom's manager: DiPO registers its listener once the service is connected; the bridge's follows
         mod.hook(cl, "dipo.btcm.register_listener", new MethodHook() {
             @Override

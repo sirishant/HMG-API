@@ -17,16 +17,16 @@ Every point and map lives here, in HMG-API, including the ones only a mod in its
 uses (the wireless mod's, for one): a mod gets new points through an HMG-API release and its
 mod SDK ([mod-repos.md](mod-repos.md), section 4).
 
-467 hook points. **Cars** (`maps/`):
+476 hook points. **Cars** (`maps/`):
 
 | Car | Map | Points |
 |---|---|---|
-| Hyundai Creta Electric IND 260430 | mapped from stock files | 467 of 467 |
-| Hyundai Ioniq 5 CAN 260206 | mapped from stock files | 351 of 467 |
-| Hyundai Ioniq 5 USA 260507 | mapped from stock files | 351 of 467 |
-| Hyundai Ioniq 5 USA 260903 | mapped on cars by HMG-API's own mapper | 325 of 467 |
-| Kia EV6 CAN 260206 | mapped from stock files | 351 of 467 |
-| Kia EV6 USA 260507 | checked on a car | 351 of 467 |
+| Hyundai Creta Electric IND 260430 | mapped from stock files | 476 of 476 |
+| Hyundai Ioniq 5 CAN 260206 | mapped from stock files | 351 of 476 |
+| Hyundai Ioniq 5 USA 260507 | mapped from stock files | 351 of 476 |
+| Hyundai Ioniq 5 USA 260903 | mapped on cars by HMG-API's own mapper | 325 of 476 |
+| Kia EV6 CAN 260206 | mapped from stock files | 351 of 476 |
+| Kia EV6 USA 260507 | checked on a car | 351 of 476 |
 
 In the tables, **Cars** is "all" when every car above has the point, otherwise the cars without it.
 
@@ -282,6 +282,15 @@ App `com.android.btsettings`.
 | `btsettings.projection_helper.device_connections_available` | method | `static ?()` → boolean |  | all |
 | `btsettings.projection_helper.open_device_connections` | method | `static ?(android.content.Context, int)` → void |  | all |
 | `btsettings.projection_helper.open_other_page` | method | `static ?(android.content.Context)` → void |  | all |
+| `btsettings.btcm` | class | `com.broadcom.bt.hfdevice.hfbtcm.HfDeviceBTCMManager` | Broadcom's Bluetooth connection manager (library com.broadcom.bt): BtSettings' connects and disconnects go through it when the driver uses the car's Bluetooth screens | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
+| `btsettings.btcm.connect` | method | `IbtcmConnect(String)` → boolean | connects a phone (handsfree and audio), by its Bluetooth address | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
+| `btsettings.btcm.only_hfp_connect` | method | `IbtcmOnlyHfpConnect(String)` → boolean | connects only a phone's handsfree | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
+| `btsettings.btcm.only_a2dp_connect` | method | `IbtcmOnlyA2dpConnect(String)` → boolean | connects only a phone's audio streaming | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
+| `btsettings.btcm.disconnect` | method | `IbtcmDisconnect(String)` → boolean | disconnects a phone | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
+| `btsettings.btcm.only_hfp_disconnect` | method | `IbtcmOnlyHfpDisconnect(String)` → boolean | disconnects only a phone's handsfree | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
+| `btsettings.btcm.only_a2dp_disconnect` | method | `IbtcmOnlyA2dpDisconnect(String)` → boolean | disconnects only a phone's audio streaming | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
+| `btsettings.btcm.remove_device` | method | `IbtcmRemoveDevice(android.bluetooth.BluetoothDevice)` → boolean | deletes a paired phone | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
+| `btsettings.btcm.cancel_connection` | method | `IbtcmCancelConnection()` → boolean | cancels the connection the car is making | not on Hyundai Ioniq 5 CAN 260206, Hyundai Ioniq 5 USA 260507, Hyundai Ioniq 5 USA 260903, Kia EV6 CAN 260206, Kia EV6 USA 260507 |
 
 ## buttonsettings
 

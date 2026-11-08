@@ -36,7 +36,7 @@ can't join a phone's Wi-Fi hotspot while it runs wireless projection.
 
 ## 2. Install HMG-API and the mods
 
-1. Unzip `hmgapi-1.0.10-nemesis.zip` to the top level of the drive.
+1. Unzip `hmgapi-1.0.11-nemesis.zip` to the top level of the drive.
 2. Plug it in. NEMESIS's Package Store opens with the drive's packages. Install them in this order:
    1. **HMG-API**
    2. **Wireless CarPlay + Android Auto**
@@ -47,6 +47,11 @@ can't join a phone's Wi-Fi hotspot while it runs wireless projection.
 the front passenger buckles up; then it's back to Sync. When the passenger's knob drops Sync, the
 driver's side follows it and Sync comes back on. Sync turned off by hand stays off. The first
 time, HMG-API asks on screen whether the mod may press the climate's buttons: tap **Allow**.
+
+**Projection extras** brings back a phone that drops off Bluetooth during a drive, with the car's own
+auto-connect (15 s apart at first, then less often). A phone you disconnect on the car's Bluetooth
+screen stays off. An iPhone you connect there for phone only or audio only doesn't start CarPlay by
+itself for 25 s (with Wireless CarPlay + Android Auto 2.5.3).
 3. **Remove the drive.**
 4. Open the app: NEMESIS Manager > My Packages > HMG-API > **Launch**. Tap **Restart unit**.
 5. Open the app the same way. Settings > Hook map > **Check the map on this car**. It takes about a
